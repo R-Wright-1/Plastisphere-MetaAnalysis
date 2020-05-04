@@ -102,11 +102,11 @@ Giving a lower value for est (estimators; default is 10000) will reduce running 
 #af.get_random_forests(ft_df, tax_dict, meta_df, basedir, est=10000, n_jobs=n_jobs) #get all random forest models for metadata categories across all samples
 #af.get_random_forest_plots(ft_df, tax_dict, ASV_dict, meta_dict, basedir) #make the summary heatmaps for each of these
 #af.get_random_forests_leave_one_dataset_out(ft_df, tax_dict, meta_df, basedir, meta_dict, est=10000, n_jobs=n_jobs) #get all random forest models for metadata categories across all samples
-af.leave_one_out_plots(basedir, meta_df)
+#af.leave_one_out_plots(basedir, meta_df)
 
 #af.get_environment_random_forest(ft_df, tax_dict, meta_df, meta_dict, basedir, est=10000, n_jobs=10) #get the separate random forests for only the general plastic type
 #af.get_environment_random_forest_plots(ft_df, meta_df, tax_dict, ASV_dict, meta_dict, basedir) #and make the basic heatmaps
-#af.make_env_rf_plot(ft_df, tax_dict, basedir, ASV_dict, meta_dict) #and now the plots with phylogeny and heatmap
+#af.make_env_rf_plot(ft_df, tax_dict, basedir, ASV_dict, meta_dict, mx=0.01)
 
 #af.get_overall_random_forest_plot(ft_df, meta_df, tax_dict, ASV_dict, meta_dict, basedir)
 

@@ -180,10 +180,18 @@ def format_R(ft, basedir):
     return ft, tax_dict
 
 def open_and_sort(fn):
-    df = pd.read_csv(fn, header=0, index_col=0)
-    df.sort_index(inplace=True)
-    if 'unifrac' in fn:
-        df.sort_index(axis=1, inplace=True)
+    '''
+    This is a function to sort the columns of a .csv file and return the resulting sorted dataframe
+    Takes as input:
+        - fn (the name of the .csv file)
+    If 'unifrac' is in the name then it will sort the rows as well as the columns. Otherwise only the columns will be sorted
+    Returns:
+        - df (a pandas dataframe of the sorted .csv file)
+    '''
+    df = pd.read_csv(fn, header=0, index_col=0) #open the file
+    df.sort_index(inplace=True) #sort the column names
+    if 'unifrac' in fn: #if it is a unifrac file
+        df.sort_index(axis=1, inplace=True) #also sort the rows
     return df
 
 def get_meta(meta): #get the information contained in the meta file as a dictionary
@@ -220,13 +228,13 @@ def get_meta_df(meta, meta_names, ft_samples):
     Returns:
         - meta_df (a dataframe containing only the samples that are in the feature table)
     '''
-    meta_df = pd.DataFrame(meta, columns=meta_names)
-    meta_df.index = meta_df['#SampleID']
-    meta_df.drop('#SampleID', axis=1, inplace=True)
-    sn_meta = list(meta_df.index.values)
-    for a in sn_meta:
-        if a not in ft_samples:
-            meta_df.drop(a, axis=0, inplace=True)
+    meta_df = pd.DataFrame(meta, columns=meta_names) #open the meta file
+    meta_df.index = meta_df['#SampleID'] #change the index to be the sample ID column
+    meta_df.drop('#SampleID', axis=1, inplace=True) #remove this column
+    sn_meta = list(meta_df.index.values) #get a list of all sample names
+    for a in sn_meta: #for each of the samples
+        if a not in ft_samples: #if it's not also in the samples list
+            meta_df.drop(a, axis=0, inplace=True) #remove it from the meta dataframe
     return meta_df
 
 def get_ASV_dict(ft, seqs):
@@ -1812,7 +1820,7 @@ def get_random_forests_leave_one_dataset_out(ft, tax_dict, meta_df, basedir, met
         fig = plt.figure(figsize=(15, 10))
         ax1 = plt.subplot(111)
         annotate_heatmap(ax1, dfs, cmap='inferno', yticks=True, xticks=True, rnd=0, annotate=True)
-        plt.savefig(basedir+'/figures/random_forest/leave_one_dataset_out/'+phylo_level_names[a]+'_'+str(est)+ext, dpi=dpi, bbox_inches='tight')
+        plt.savefig(basedir+'/figures/random_forest/leave_one_dataset_out/'+phylo_level_names[a]+ext, dpi=dpi, bbox_inches='tight')
         plt.close()
     return
 
@@ -2478,7 +2486,7 @@ def get_ancom(ft_abun):
                 not_sig.append(tax_names[d])
     return significant
 
-def make_env_rf_plot(ft, tax_dict, basedir, ASV_dict, meta_dict):
+def make_env_rf_plot(ft, tax_dict, basedir, ASV_dict, meta_dict, mx=0.005):
     '''
     Function to make heatmaps (of abundance and including whether they were significantly differentially abundant according to ANCOM) of all taxa at all phylogenetic levels with a feature importance value of above 0.01 in the random forest models constructed for separate environments
     Takes as input:
@@ -2494,8 +2502,8 @@ def make_env_rf_plot(ft, tax_dict, basedir, ASV_dict, meta_dict):
     ft = ft*100
     envs_rf_imp = []
     for a in range(len(envs)):
-        if os.path.exists(basedir+'/random_forest/single_environment/'+envs[a]+'.csv'):
-            envs_rf_imp.append(pd.read_csv(basedir+'/random_forest/single_environment/'+envs[a]+'.csv', header=0, index_col=0))
+        if os.path.exists(basedir+'/random_forest/single_environment/'+envs[a]+'_'+str(mx)+'.csv'):
+            envs_rf_imp.append(pd.read_csv(basedir+'/random_forest/single_environment/'+envs[a]+'_'+str(mx)+'.csv', header=0, index_col=0))
             continue
         samples = list(ft.columns)
         keeping, count, rename = [], 0, {}
@@ -2517,7 +2525,7 @@ def make_env_rf_plot(ft, tax_dict, basedir, ASV_dict, meta_dict):
             score = rf.loc[['Score']].values
             scores.append(score[0][0])
             rf.drop(['Score', 'OOB_score'], axis=0, inplace=True)
-            rf = rf[rf.max(axis=1) > 0.005]
+            rf = rf[rf.max(axis=1) > mx]
             lvl_rename, other_levels = {}, {}
             for c in range(len(asv)):
                 tax = tax_dict[asv[c]]
@@ -2585,7 +2593,7 @@ def make_env_rf_plot(ft, tax_dict, basedir, ASV_dict, meta_dict):
         all_rows.to_csv('Test_rf_plots.csv')
         all_rows = all_rows.set_index('Taxa')
         envs_rf_imp.append(all_rows)
-        all_rows.to_csv(basedir+'/random_forest/single_environment/'+envs[a]+'.csv')
+        all_rows.to_csv(basedir+'/random_forest/single_environment/'+envs[a]+'_'+str(mx)+'.csv')
     length, width = [], []
     [(length.append(i.shape[0]), width.append(i.shape[1]-9)) for i in envs_rf_imp]
     ma = max(length)
@@ -2618,13 +2626,17 @@ def make_env_rf_plot(ft, tax_dict, basedir, ASV_dict, meta_dict):
             color = 'k'
             if list(sig.loc[tax[b], :])[0][0] == 'S':
                 color = '#900C3F'
+            if 'Allorhizobium' in tax[b]:
+                    tax[b] = 'Allorhizobium'
+            tax[b] = tax[b].replace('Incertae Sedis', '')
             ax_imp.text(1.5, nums[b], tax[b], fontsize=fs_main, color=color, va='center')
             empty.append('')
         plt.sca(ax_imp)
         plt.yticks(nums, empty)
         ax_imp.yaxis.tick_right()
         ax.set_title(envs[a].capitalize(), fontsize=fs_title, fontweight='bold')
-    plt.savefig(basedir+'/figures/environment_random_forest'+ext, dpi=dpi, bbox_inches='tight')
+    plt.savefig(basedir+'/figures/environment_random_forest_'+str(mx)+'.pdf', dpi=dpi, bbox_inches='tight')
+    plt.savefig(basedir+'/figures/environment_random_forest_'+str(mx)+ext, dpi=dpi, bbox_inches='tight')
     plt.close()
     return
 
