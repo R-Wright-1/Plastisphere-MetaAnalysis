@@ -1,8 +1,0 @@
-Incorrect number of command line arguments.
-Usage: nhmmer [options] <query hmmfile|alignfile> <target seqfile>
-
-where basic options are:
-  -h : show brief help on version and usage
-
-To see more help on available options, do nhmmer -h
-

@@ -1,0 +1,429 @@
+# nhmmer :: search a DNA model or alignment against a DNA database
+# HMMER 3.1b2 (February 2015); http://hmmer.org/
+# Copyright (C) 2015 Howard Hughes Medical Institute.
+# Freely distributed under the GNU General Public License (GPLv3).
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# query file:                      hmms/tphA3.hmm
+# target sequence database:        picrust_genomes_test.fasta
+# number of worker threads:        8
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Query:       tphA3  [M=468]
+Scores for complete hits:
+    E-value  score  bias  Sequence     start     end  Description
+    ------- ------ -----  --------     -----   -----  -----------
+      1e-78  269.7  59.9  2263082000 5914482 5914927  
+  ------ inclusion threshold ------
+       0.14   15.9   0.8  646311933  6531553 6531461  
+       0.25   15.1   3.0  649633053  1444988 1445076  
+       0.45   14.3   3.4  649633053   752167  752296  
+       0.54   14.0   2.5  646311961   549228  549155  
+       0.77   13.5  12.2  646311933  7176397 7176208  
+       0.79   13.5   7.0  2263082000 3719662 3719532  
+       0.83   13.4   0.8  649633083  4314707 4314815  
+       0.85   13.4   0.9  649633083  2968790 2968880  
+        1.1   13.0   4.9  646311933  4891737 4891835  
+        1.2   12.8   0.3  646564550  1286109 1285969  
+        1.6   12.5   1.6  649633053  3139199 3139137  
+        3.5   11.3   6.7  644736373  1572256 1572398  
+        3.6   11.3   3.7  646311934   801129  801038  
+        4.9   10.9   3.4  646311934  3099144 3099207  
+        5.1   10.8   4.3  649633083  3153260 3153499  
+        5.7   10.6   3.4  644736372  1932261 1932111  
+          7   10.3   3.9  646311934  2546727 2546871  
+        7.2   10.3   4.2  649633053  1117314 1117394  
+        7.7   10.2   3.7  2236347002 1805573 1805442  
+          8   10.2   2.0  649633083   628499  628715  
+        9.4    9.9   4.5  2263082000  984176  984086  
+
+
+Annotation for each hit  (and alignments):
+>> 2263082000  
+    score  bias    Evalue   hmmfrom    hmm to     alifrom    ali to      envfrom    env to       sq len      acc
+   ------ ----- ---------   -------   -------    --------- ---------    --------- ---------    ---------    ----
+ !  269.7  59.9     1e-78        23       468 .]   5914482   5914927 ..   5914462   5914927 ..   6142063    0.97
+
+  Alignment:
+  score: 269.7 bits
+       tphA3      23 tcgcggccttcaatgccgcctatgcgcataccatcgacggcgacgacctggaggaatggccagacttcttcgccgacgattgcctctatcg 113    
+                     t +  gccttcaa gc gccta+gc  a accatcgac+gcgacg  ctggag   tggcc gacttcttc+ccgacga tgcc+cta+cg
+  2263082000 5914482 TGTGCGCCTTCAACGCGGCCTACGCCGAGACCATCGACAGCGACGCGCTGGAGCGGTGGCCCGACTTCTTCACCGACGACTGCCACTACCG 5914572
+                     556677899********************************************************************************** PP
+
+       tphA3     114 gatcaccactgtggacaattatgcggaaggcctggcggccggcattgtctgggccgattcccagggcatgctgaacgaccgggtttcggcg 204    
+                      atcacc + g  ga aa+ a    ga gg ctggc gccggcat gtct+ gccga tc c+ g  atgctg a gaccg +t  c gcg
+  2263082000 5914573 CATCACCCACGCCGAGAACGAGCGCGAGGGGCTGGCCGCCGGCATCGTCTACGCCGACTCGCGCGCGATGCTGGAGGACCGCATCGCCGCG 5914663
+                     ******************************************************************************************* PP
+
+       tphA3     205 ctgcgcgaggccaatatctacgagcgccaccgctaccgccatatgctgggcctgccgtggatcgagtccgacgacgccgacgaggtcaggg 295    
+                     ctgcgcgaggccaa atctacgagcgcca cgctaccg ca+ tgctgggc+t ccg +g tcg   c  a gacg c+  g  g c +gg
+  2263082000 5914664 CTGCGCGAGGCCAACATCTACGAGCGCCAGCGCTACCGGCACCTGCTGGGCATCCCGCTGCTCGGCGCGCAGGACGACACGGGCGCCGAGG 5914754
+                     ***************************************************************9999999999999999999999****** PP
+
+       tphA3     296 ccgacacatcgttcatggtggtgcgcatcatgcgcaccggcgagaccgaggtcttcgccaccggcgactacctcgaccggttcgccatgaa 386    
+                     c   caca c ttcatggtgg+gcgcatcatg  caccggc agaccgag t ttcgcca+cggc++ctacc  gaccg  tcg+     a
+  2263082000 5914755 CGCGCACACCTTTCATGGTGGCGCGCATCATGGCCACCGGCCAGACCGAGCTGTTCGCCAGCGGCATCTACCGGGACCGCGTCGTGCGCCA 5914845
+                     ******************************************************************************************* PP
+
+       tphA3     387 cgacggcgagctacggctgcaggagcgcatcgtggtttgcgacagcacgcgcatcgacacgctgctggcgttgccgctatga 468    
+                      gacggcg gct cggctgc  + gcgc t g  gt tgcgacagcacg + a  gacacgctgctggc  tgccgct tga
+  2263082000 5914846 GGACGGCGGGCTGCGGCTGCGCTCGCGCGTGGCCGTGTGCGACAGCACGGTGACGGACACGCTGCTGGCCCTGCCGCTGTGA 5914927
+                     *******************************************************************************986 PP
+
+>> 646311933  
+    score  bias    Evalue   hmmfrom    hmm to     alifrom    ali to      envfrom    env to       sq len      acc
+   ------ ----- ---------   -------   -------    --------- ---------    --------- ---------    ---------    ----
+ ?   15.9   0.8      0.14         7        99 ..   6531553   6531461 ..   6531559   6531440 ..   9446314    0.93
+
+  Alignment:
+  score: 15.9 bits
+      tphA3       7 gtcaagatcattctaatcgcggccttcaatgccgcctatgcgcataccatcgacggcgacgacctggaggaatggccagacttcttcgccga 98     
+                    gt  +ga ca+tc  atc  gg+c+ caa  cc  cta+g  +a ++c t g cg+cga+g+++t+g  ga tgg c +  t+cttc  cga
+  646311933 6531553 GTGGTGACCAATCGGATCATGGACGACAACACCATCTACGATAACTTCGTGGTCGACGATGGTATCGCCGACTGGACGACGTACTTCCGCGA 6531462
+                    56677889999***************************************************************************976666 PP
+
+      tphA3      99 c 99     
+                    +
+  646311933 6531461 G 6531461
+                    5 PP
+
+>> 649633053  
+    score  bias    Evalue   hmmfrom    hmm to     alifrom    ali to      envfrom    env to       sq len      acc
+   ------ ----- ---------   -------   -------    --------- ---------    --------- ---------    ---------    ----
+ ?   15.1   3.0      0.25       359       451 ..   1444988   1445076 ..   1444968   1445096 ..   3944467    0.85
+
+  Alignment:
+  score: 15.1 bits
+      tphA3     359 gcgactacctcgaccggttcgc.catgaacgacggcgagctacggctgcaggagcgcatcgtggtttgcgacagcacgcgcatcgacacgct 449    
+                    gcga tac tc a cg+ tcg  c + a+cgacggcga ++  + ctg   gagcg  tcgtg t+tgcga    acg g a  ga+acgct
+  649633053 1444988 GCGAGTACGTCTAACGTCTCGGgCGACATCGACGGCGACTC-TACCTGTTCGAGCGTGTCGTGATCTGCGA----ACGGGTAGAGATACGCT 1445074
+                    678889999999989888887614556799******99765.679*************************9....688999999*****999 PP
+
+      tphA3     450 gc 451    
+                    gc
+  649633053 1445075 GC 1445076
+                    86 PP
+
+>> 649633053  
+    score  bias    Evalue   hmmfrom    hmm to     alifrom    ali to      envfrom    env to       sq len      acc
+   ------ ----- ---------   -------   -------    --------- ---------    --------- ---------    ---------    ----
+ ?   14.3   3.4      0.45       275       389 ..    752167    752296 ..    752144    752318 ..   3944467    0.72
+
+  Alignment:
+  score: 14.3 bits
+      tphA3    275 acgacgccgacgaggtcagggccgacacatcgttcatggtggtgcgcatcatgcg...............caccggcgagaccgaggtcttcgc 353   
+                   +c  cg cga  + g    gg c+acaca    tc t gt  + c ca catgc+               c c+g + agac g +gtcttc +
+  649633053 752167 TCATCGTCGATCTCGCGGAGGACTACACAGTCGTCGTCGTCACCCACAACATGCAacaggcggcccgtatCTCAGATCAGACGGCTGTCTTCCT 752260
+                   34444555555666666666777888888888999999999999999999999862221111111111112345556799************** PP
+
+      tphA3    354 caccggcgactacctcgaccggttcgccatgaacga 389   
+                   caccgg+g+ctacctcg c  gt+cg c   a cga
+  649633053 752261 CACCGGTGGCTACCTCGTCGAGTACGACGACACCGA 752296
+                   *******************99999998887777665 PP
+
+>> 646311961  
+    score  bias    Evalue   hmmfrom    hmm to     alifrom    ali to      envfrom    env to       sq len      acc
+   ------ ----- ---------   -------   -------    --------- ---------    --------- ---------    ---------    ----
+ ?   14.0   2.5      0.54       278       351 ..    549228    549155 ..    549249    549135 ..   1848474    0.83
+
+  Alignment:
+  score: 14.0 bits
+      tphA3    278 acgccgacgaggtcagggccgacacatcgttcatggtggtgcgcatcatgcgcaccggcgagaccgaggtcttc 351   
+                   ac  c+ c +ggt  + gc + c c   + tc tggtgg+ cg at atg gc +cggc aga  ga+ tcttc
+  646311961 549228 ACAACATCATGGTGGACGCATTCCCGAGCCTCCTGGTGGCCCGGATGATGGGCTACGGCAAGAGGGACTTCTTC 549155
+                   4455555666677777777777888888889****************************************995 PP
+
+>> 646311933  
+    score  bias    Evalue   hmmfrom    hmm to     alifrom    ali to      envfrom    env to       sq len      acc
+   ------ ----- ---------   -------   -------    --------- ---------    --------- ---------    ---------    ----
+ ?   13.5  12.2      0.77       286       457 ..   7176397   7176208 ..   7176418   7176201 ..   9446314    0.77
+
+  Alignment:
+  score: 13.5 bits
+      tphA3     286 gaggtcagggccgacacatcgttcatggtggtgcgcatcat......gcgcaccggcgagaccgaggtcttcgccaccggcgactacctcga 371    
+                      gg c   ++c+ cac tcgt ca  g ggtgcgcatc t      gc  +ccggcgaga  g ggt ttcgc  ccg c+a  acct g 
+  646311933 7176397 TCGGACGTCATCTGCACCTCGTCCAACGCGGTGCGCATCGTcgagtcGCTGGCCGGCGAGAAGGTGGTGTTCGCGCCCGACAAGCACCTGGG 7176306
+                    456677778889999***********************876333333788899*************************************** PP
+
+      tphA3     372 ccggttcgccatga......acgac...ggcgagctacggctgcaggagcgca...tcgtggtttgcgacagcacgcgcatcgacacgctgc 451    
+                    ccg t+cg+    a       cg +   g cga ct   gctg  g ag gca    cgtggt+  cga a c+   gc    a a gctg+
+  646311933 7176305 CCGCTACGTGGCCAaacagaCCGGAcgcGACGATCTGGTGCTGTGGCAGGGCAcctGCGTGGTCCACGAGACCTTCAGCGAGAAGAAGCTGA 7176214
+                    ***9999876544322111134433111456666666666777666666665422257999********99999999999999999999999 PP
+
+      tphA3     452 tggcgt 457    
+                    t gcg 
+  646311933 7176213 TCGCGC 7176208
+                    988875 PP
+
+>> 2263082000  
+    score  bias    Evalue   hmmfrom    hmm to     alifrom    ali to      envfrom    env to       sq len      acc
+   ------ ----- ---------   -------   -------    --------- ---------    --------- ---------    ---------    ----
+ ?   13.5   7.0      0.79        53       198 ..   3719662   3719532 ..   3719681   3719512 ..   6142063    0.78
+
+  Alignment:
+  score: 13.5 bits
+       tphA3      53 ccatcgacggcgacgacctggaggaatggccagacttcttcgccgacgattgcctctatcggatcaccactgtggacaattatgcggaagg 143    
+                     +  tcgacg+ g+c+ c+t+gaggaatgg   gac t ttcg cga+ a  gc+ c a+ +  tc  ca    ggacaa+ a       gg
+  2263082000 3719662 TGCTCGACGAAGGCACCTTCGAGGAATGG---GACATGTTCGTCGAGCACCGCTGCCACGACTTCGGCATGCAGGACAACAAGAT-CCCGG 3719576
+                     56799***********************9...56666677777777777777777777777777777788889999999866544.44444 PP
+
+       tphA3     144 cctggcggccggcattgtctgggccgattcccagggcatgctgaacgaccgggtt 198    
+                            g cggc t gtc   g      +c a ggcatg t aacg ccgg t 
+  2263082000 3719575 G-----CGACGGCGTCGTCACCG------GCTACGGCATGATCAACGGCCGGCTG 3719532
+                     3.....48899999998876554......56677999**********99998775 PP
+
+>> 649633083  
+    score  bias    Evalue   hmmfrom    hmm to     alifrom    ali to      envfrom    env to       sq len      acc
+   ------ ----- ---------   -------   -------    --------- ---------    --------- ---------    ---------    ----
+ ?   13.4   0.8      0.83       353       455 ..   4314707   4314815 ..   4314687   4314822 ..   6006602    0.86
+
+  Alignment:
+  score: 13.4 bits
+      tphA3     353 ccaccggcgactacctcgaccggttcgccatgaacgacggcgagctacggctgcaggagcgcatcgtggtttgcgacagcacgcgca...tc 441    
+                    cca cgg+ ++t cc   ac+ g +cg  a g  c acg   agc   gg tg+ gga  gcat gtggt t+cgaca ca  + ca   ++
+  649633083 4314707 CCATCGGTATGTTCCCGAACATGGACGAAACGCCCTACGAACAGCACTGGATGACGGATGGCATGGTGGTGTTCGACACCATTTACAatcCG 4314798
+                    6889999*****999999************************************************************99876654311122 PP
+
+      tphA3     442 g...acacgctgctggc 455    
+                    g   acacgctgctgg+
+  649633083 4314799 GaaaACACGCTGCTGGT 4314815
+                    23338999999999986 PP
+
+>> 649633083  
+    score  bias    Evalue   hmmfrom    hmm to     alifrom    ali to      envfrom    env to       sq len      acc
+   ------ ----- ---------   -------   -------    --------- ---------    --------- ---------    ---------    ----
+ ?   13.4   0.9      0.85        11       100 ..   2968790   2968880 ..   2968782   2968900 ..   6006602    0.87
+
+  Alignment:
+  score: 13.4 bits
+      tphA3      11 agatcattctaatcgcggccttcaatgccgcctatgcgcataccatcgacggcgacgacctggaggaa.tggccagacttcttcgccgacg 100    
+                    a+atc+++c+ +tc +g c+ tcaa g c +cta+g  cat cc tcg cg++ga g  ct+g  gaa tggcca+ ct ct cg+c  + 
+  649633083 2968790 ATATCGACCACTTCAAGTCGATCAACGACAACTACGGCCATGCCGTCGGCGATGAAGTGCTCGTTGAAtTGGCCAAGCTGCTGCGACAGGA 2968880
+                    5667788999999************************************************998876527***********9998776554 PP
+
+>> 646311933  
+    score  bias    Evalue   hmmfrom    hmm to     alifrom    ali to      envfrom    env to       sq len      acc
+   ------ ----- ---------   -------   -------    --------- ---------    --------- ---------    ---------    ----
+ ?   13.0   4.9       1.1       345       449 ..   4891737   4891835 ..   4891723   4891855 ..   9446314    0.82
+
+  Alignment:
+  score: 13.0 bits
+      tphA3     345 ggtcttcgccaccggcgactacctcgaccggttcgccatgaacgacggcgagctacggctgcaggagcgcatcgtggtttgcgacagcacgc 436    
+                    ggtct cgcca +g c++c ac  cgac+   tc++c+   acgacggcgagc+ cg    +agg  cg +   tgg   +cgacagcacgc
+  646311933 4891737 GGTCTACGCCAAGGACAGCGACGGCGACA---TCATCTACGACGACGGCGAGCCGCGCACCAAGG-CCGAGC--TGGAGCTCGACAGCACGC 4891822
+                    5899**********999999999999987...5666677789999********999876555443.344443..4567789*********** PP
+
+      tphA3     437 gcatcgacacgct 449    
+                    +catcga+a+ +t
+  646311933 4891823 TCATCGATATCTT 4891835
+                    *********8765 PP
+
+>> 646564550  
+    score  bias    Evalue   hmmfrom    hmm to     alifrom    ali to      envfrom    env to       sq len      acc
+   ------ ----- ---------   -------   -------    --------- ---------    --------- ---------    ---------    ----
+ ?   12.8   0.3       1.2        16       149 ..   1286109   1285969 ..   1286120   1285956 ..   2012424    0.81
+
+  Alignment:
+  score: 12.8 bits
+      tphA3      16 attctaatcgcggccttcaatgccgcctat.gcgcataccatcgacggcgacgacctggagga...atggccagac...ttcttcgccgacg 100    
+                    ++tc  at gc  +  t +at c gc ta+ g g +t   at g c+++   g+c t+ga +a    tg cc+g c    ++ttcg c  c 
+  646564550 1286109 GATCATATTGCTCATCTTCATACTGCATACcGGGAGTGAAATTGGCAATATGGCCTTCGACCAcaaTTGTCCCGCCgctCATTTCGGCACCA 1286018
+                    5566677777777777788888888888853666666777899999999999999999987642225787776543211689********** PP
+
+      tphA3     101 attgcctctatcggatcaccactgtggacaattatgcggaaggcctggc 149    
+                    attgc   tat g+at  cc  tg  gacaat a gc    gg ctggc
+  646564550 1286017 ATTGCACGTATAGCATTTCCTTTGATGACAATGAGGCCACCGGACTGGC 1285969
+                    **********************************************987 PP
+
+>> 649633053  
+    score  bias    Evalue   hmmfrom    hmm to     alifrom    ali to      envfrom    env to       sq len      acc
+   ------ ----- ---------   -------   -------    --------- ---------    --------- ---------    ---------    ----
+ ?   12.5   1.6       1.6       312       375 ..   3139199   3139137 ..   3139220   3139116 ..   3944467    0.84
+
+  Alignment:
+  score: 12.5 bits
+      tphA3     312 ggtggtgcgcatcatgcgcaccggcgagaccgaggtcttcgccaccggcgactacctcgaccgg 375    
+                     gt g   g+atca   g ac ggc a+ac+gaggt ttcgcca+c gcg+ ta+c cgaccg 
+  649633053 3139199 TGTCGAATGGATCAATGGGACTGGCAATACTGAGGTGTTCGCCAGC-GCGGGTATCGCGACCGC 3139137
+                    56777788999999999***************************99.599**********9875 PP
+
+>> 644736373  
+    score  bias    Evalue   hmmfrom    hmm to     alifrom    ali to      envfrom    env to       sq len      acc
+   ------ ----- ---------   -------   -------    --------- ---------    --------- ---------    ---------    ----
+ ?   11.3   6.7       3.5       262       389 ..   1572256   1572398 ..   1572236   1572420 ..   3116795    0.80
+
+  Alignment:
+  score: 11.3 bits
+      tphA3     262 tggatcgagtccgacgacgccgacgaggtcagggccgacacatcgttcatggtggtgcgcatcatgcg...............caccggcga 338    
+                     +gatcgag +c +c+ cg  ga  +gg c +gg c+acac     tc tggt  + c ca catgc+               c ccg c a
+  644736373 1572256 AAGATCGAGGACCTCATCGAGGAGTTGGCCGAGGACTACACGGTCGTCGTGGTCACCCACAACATGCAgcaggcggcgcgcatCTCCGACCA 1572347
+                    5678888888888888889999999999999**********************************986222222222222222345677889 PP
+
+      tphA3     339 gaccgaggtcttcgccaccggcgactacctcgaccggttcgccatgaacga 389    
+                    gac g  gtcttc +caccgg+g+c a ctcg c ++t+cg c   a cga
+  644736373 1572348 GACGGCCGTCTTCCTCACCGGTGGCGAACTCGTCGAATACGACGACACCGA 1572398
+                    9***********************999999999999999888776666554 PP
+
+>> 646311934  
+    score  bias    Evalue   hmmfrom    hmm to     alifrom    ali to      envfrom    env to       sq len      acc
+   ------ ----- ---------   -------   -------    --------- ---------    --------- ---------    ---------    ----
+ ?   11.3   3.7       3.6       204       295 ..    801129    801038 ..    801148    801016 ..   5440782    0.83
+
+  Alignment:
+  score: 11.3 bits
+      tphA3    204 gctgcgcgaggccaatatctacgagcgccaccgctaccgccatatgctgggcctgccgtggatcgagtccgacgacgccgacgaggtcaggg 295   
+                   g tg  cgagg   a+ tctacgag  c ac gc ac  cca++t ctgg +c g cgt+  tc +g+cc  cga g cgac  g  c + +
+  646311934 801129 GGTGGTCGAGGAGGACCTCTACGAGTACGACAGCGACGTCCACTTCCTGGATCCGTCGTACGTCCTGACCACCGAGGACGACTGGTCCGAAT 801038
+                   44666789999999************999***************************************999999888877766555554444 PP
+
+>> 646311934  
+    score  bias    Evalue   hmmfrom    hmm to     alifrom    ali to      envfrom    env to       sq len      acc
+   ------ ----- ---------   -------   -------    --------- ---------    --------- ---------    ---------    ----
+ ?   10.9   3.4       4.9       329       392 ..   3099144   3099207 ..   3099124   3099228 ..   5440782    0.86
+
+  Alignment:
+  score: 10.9 bits
+      tphA3     329 gcaccggcgagaccgaggtcttcgccaccggcgactacctcgaccggttcgccatgaacgacgg 392    
+                     caccggcga a cga gtc tcgcc  cggc+a t c   gac+   +cg catgaacgacg 
+  646311934 3099144 TCACCGGCGACAACGACGTCGTCGCCGTCGGCAAGTTCACTGACACCGACGACATGAACGACGA 3099207
+                    57899***************************************************99998764 PP
+
+>> 649633083  
+    score  bias    Evalue   hmmfrom    hmm to     alifrom    ali to      envfrom    env to       sq len      acc
+   ------ ----- ---------   -------   -------    --------- ---------    --------- ---------    ---------    ----
+ ?   10.8   4.3       5.1       235       453 ..   3153260   3153499 ..   3153240   3153508 ..   6006602    0.77
+
+  Alignment:
+  score: 10.8 bits
+      tphA3     235 cgctaccgccatatgctgggcctgccgtggatcgagtccgacgacgccgacgagg.........tcagggccgacacatcgttcatggtggt 317    
+                      ctaccg+c   t+c ggg c+gc ++g  tc a +  gac ac ccg c   g         tca+ +     aca+cg    tg tg  
+  649633083 3153260 TACTACCGGCTGGTTCAGGGGCAGCGACGCTTCTACATGGACTACACCGGCTGTGggaatacgcTCAACATGCTGACACCGCATGTGCTGCA 3153351
+                    568999999999999********999999999999888888888877765544331111111114455555555667777777788889999 PP
+
+      tphA3     318 gcgcatcatg.........cgcaccggcgagaccgaggtcttcgccaccggcgactacctcgaccggttcgccatgaacgacggcgagctac 400    
+                    gc +at atg         cgc +c g g gaccga  t  ++g c  cgg+ +c  + tcgacc  t c+ c    +cg c g ga ++ c
+  649633083 3153352 GCTGATTATGgattcgctgCGCTACTGGGTGACCGAAATGCATGTCGACGGTTTCCGTTTCGACCTCTGCAGCGCTCTCGGCCGGGAATCGC 3153443
+                    999999997522222222267778889999*******************************************9999999988888888777 PP
+
+      tphA3     401 ggctgcaggagcgcatcgtgg...tttgcgacagcacgcgcatcgacacgctgctg 453    
+                    ++      ga cgc tcg  g   t+t+cgaca ca  c+    gac cg tgctg
+  649633083 3153444 ATGCTTTTGATCGCCTCGGTGcttTCTTCGACATCATCCATCAAGACCCGGTGCTG 3153499
+                    7666677899999998865543338899*******999999988988888888775 PP
+
+>> 644736372  
+    score  bias    Evalue   hmmfrom    hmm to     alifrom    ali to      envfrom    env to       sq len      acc
+   ------ ----- ---------   -------   -------    --------- ---------    --------- ---------    ---------    ----
+ ?   10.6   3.4       5.7       262       398 ..   1932261   1932111 ..   1932281   1932088 ..   3332349    0.74
+
+  Alignment:
+  score: 10.6 bits
+      tphA3     262 tggatcgagtccgacgacgccgacgaggtcagggccgacacatcgttcatggtggtgcgcatcatgcgcaccgg................cg 337    
+                     +gatcga  +  +c  cg  ga  +gg   + g  +  ac+    tcat gt  +gc ca catgc+  c+gg                c 
+  644736372 1932261 AAGATCGAAGATCTCATCGAGGAACTGGCAGAAGAGTTTACTGTCGTCATCGTCACGCACAACATGCAA-CAGGccgcccggatctcggaCA 1932171
+                    4555666655555666667777788888888888889999999999*******************9863.2232111111111111111257 PP
+
+      tphA3     338 agaccgaggtcttcgccaccggcgactacctcgaccggttcgccatgaacgacggcgagct 398    
+                    agaccg  gtcttc +caccggcg+c a ctcg c +gttcg c    acg +g cga ct
+  644736372 1932170 AGACCGCCGTCTTCCTCACCGGCGGCGAACTCGTCGAGTTCGGCGA-CACGCAGTCGATCT 1932111
+                    89**********************************9999998754.34566666665555 PP
+
+>> 646311934  
+    score  bias    Evalue   hmmfrom    hmm to     alifrom    ali to      envfrom    env to       sq len      acc
+   ------ ----- ---------   -------   -------    --------- ---------    --------- ---------    ---------    ----
+ ?   10.3   3.9         7       260       389 ..   2546727   2546871 ..   2546707   2546893 ..   5440782    0.78
+
+  Alignment:
+  score: 10.3 bits
+      tphA3     260 cgtggatcgagtccgacgacgccgacgaggtcagggccgacacatcgttcatggtggtgcgcatcatgcg...............caccggc 336    
+                    cg +gatcgag +c +   cg  gac +  +c +gg  +acac     tcat gt  + c ca catgc+               c ccg +
+  646311934 2546727 CGAAGATCGAGGACTTGATCGAGGACCTCTCCGAGGAGTACACGGTCGTCATCGTCACCCACAACATGCAgcaggccgctcggatCTCCGAT 2546818
+                    5667888888888888888888888889999999999999***************************9862222222222222223566778 PP
+
+      tphA3     337 gagaccgaggtcttcgccaccggcgactacctcgaccggttcgccatgaacga 389    
+                     agac g ggtcttc +caccggcg+  a ctcg c ++ttcg c   a  ga
+  646311934 2546819 AAGACGGCGGTCTTCCTCACCGGCGGGGAGCTCGTCGAATTCGACGACACGGA 2546871
+                    899************************99999999999999988776655544 PP
+
+>> 649633053  
+    score  bias    Evalue   hmmfrom    hmm to     alifrom    ali to      envfrom    env to       sq len      acc
+   ------ ----- ---------   -------   -------    --------- ---------    --------- ---------    ---------    ----
+ ?   10.3   4.2       7.2       341       430 ..   1117314   1117394 ..   1117294   1117410 ..   3944467    0.89
+
+  Alignment:
+  score: 10.3 bits
+      tphA3     341 ccgaggtcttcgccaccggcgactacctcgaccggttcgccatgaacgacggcgagctacggctgcaggagcgcatcgtggtttgcgaca 430    
+                    ccgagg cttcg c +cgg   ctacc cgac +gttc++   ga c a+ggcgag         ca+ga+c c tcgtg  + +cgaca
+  649633053 1117314 CCGAGGACTTCGGCGGCGGATGCTACCGCGACGAGTTCATTCGGACCAATGGCGAG---------CAAGAACACGTCGTGAGCCTCGACA 1117394
+                    56889999**********************************************97.........5778888999999998888888876 PP
+
+>> 2236347002  
+    score  bias    Evalue   hmmfrom    hmm to     alifrom    ali to      envfrom    env to       sq len      acc
+   ------ ----- ---------   -------   -------    --------- ---------    --------- ---------    ---------    ----
+ ?   10.2   3.7       7.7        49       197 ..   1805573   1805442 ..   1805594   1805422 ..   4132859    0.82
+
+  Alignment:
+  score: 10.2 bits
+       tphA3      49 cataccatcgacggcgacgacctggaggaatggccagacttcttcgccgacgattgcctctatcggatcaccactgtggacaattatgcgg 139    
+                     +at+cc tcga g +g  g  +t gagg   ggcc g +tt+ttcg   a+g     ctcta+cg   cac+ +             gc  
+  2236347002 1805573 TATTCCGTCGAGGCTGCGGCGTTTGAGGCCCGGCCTGGTTTTTTCGTTTATGGCAATCTCTACCGTCCCACAGA------------AGCAA 1805495
+                     56677788888777777788899*************************99999988999999999888887543............35567 PP
+
+       tphA3     140 aaggcctggcggccggcattgtctgggccgattcccagggcatgctgaacgaccgggt 197    
+                     aagg+c g+++ c g catt tctg+ c      c+ gg catgc +   gaccgg+ 
+  2236347002 1805494 AAGGACCGCATCCGGCCATTCTCTGTCCT-----CACGGTCATGCCCGCGGACCGGAG 1805442
+                     89999999999999999999999987654.....566899**************9874 PP
+
+>> 649633083  
+    score  bias    Evalue   hmmfrom    hmm to     alifrom    ali to      envfrom    env to       sq len      acc
+   ------ ----- ---------   -------   -------    --------- ---------    --------- ---------    ---------    ----
+ ?   10.2   2.0         8       231       435 ..    628499    628715 ..    628479    628723 ..   6006602    0.64
+
+  Alignment:
+  score: 10.2 bits
+      tphA3    231 ccaccgctaccgccatatgctgggcctgccgtgga............tcgagtccgacgacgccgacgagg....tcagggccgacacatcgtt 308   
+                   +cac  ctac gccat tg   gg+ctgccg  ga            tc++ +ccg+  acg+c +c  gg    +c gg c     cat gtt
+  649633083 628499 GCACACCTACAGCCATCTGTACGGTCTGCCGACGActggcctgcgttTCTTCACCGTTTACGGCCCCTGGGgtcgCCCGGAC-ATGGCATTGTT 628591
+                   589999***********************99877644444444444467777778887777765444444300004444333.34567888899 PP
+
+      tphA3    309 catggtggtgcgcatcatgcgcaccggc...gagaccgaggtcttcgccaccggcgactacctcgaccggttcgccatgaacgacggcgagcta 399   
+                   c tg t  +   +   at c  +++ggc    +ga cga+gtcttc  c  cggc+a+    t  a cg+ +c +ca  +a g cg cga  t 
+  649633083 628592 CCTGTTCACTAAGGCGATTCTGGAAGGCcggCCGATCGATGTCTTCAACTACGGCAAA---ATGCAGCGAGACTTCACCTATGTCGACGATAT- 628681
+                   98888877665555666666666666541116899***********999999999754...23333344444445555555555555554333. PP
+
+      tphA3    400 cggctgcaggagcgcatcgtggtttgcgacagcacg 435   
+                     g  g+agg g g  tcg+ gttt cgaca cacg
+  649633083 628682 -TGTCGAAGGGGTGATTCGC-GTTTCCGACAACACG 628715
+                   .2334666666667677765.466667777776665 PP
+
+>> 2263082000  
+    score  bias    Evalue   hmmfrom    hmm to     alifrom    ali to      envfrom    env to       sq len      acc
+   ------ ----- ---------   -------   -------    --------- ---------    --------- ---------    ---------    ----
+ ?    9.9   4.5       9.4       366       462 ..    984176    984086 ..    984197    984081 ..   6142063    0.80
+
+  Alignment:
+  score: 9.9 bits
+       tphA3    366 cctcgaccggttcgccatgaacgacggcgagctacggctgcaggagcgcatcgtggtttgcgacagcacgcgcatcgacacgctgctggcgtt 458   
+                    c  cgacc g tc++c tga+c acggcgag + ++gctgcag ag     c tg t+    a   ca gc+  tcgaca gctg  gg+g t
+  2263082000 984176 CTACGACCTGATCAACGTGATCAACGGCGAGGCCAAGCTGCAGCAGA---CCCTGATCA---AGGACAAGCTGGTCGACAAGCTGTCGGTGCT 984090
+                    5679************************************9987764...334445544...4445678999999**********99999999 PP
+
+       tphA3    459 gccg 462   
+                    gccg
+  2263082000 984089 GCCG 984086
+                    9986 PP
+
+
+
+Internal pipeline statistics summary:
+-------------------------------------
+Query model(s):                              1  (468 nodes)
+Target sequences:                           42  (200271208 residues searched)
+Residues passing SSV filter:          20217771  (0.101); expected (0.02)
+Residues passing bias filter:         13932350  (0.0696); expected (0.02)
+Residues passing Vit filter:           1559406  (0.00779); expected (0.003)
+Residues passing Fwd filter:            296284  (0.00148); expected (3e-05)
+Total number of hits:                       22  (1.5e-05)
+# CPU time: 149.08u 0.45s 00:02:29.53 Elapsed: 00:00:24.92
+# Mc/sec: 3761.11
+//
+[ok]
