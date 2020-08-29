@@ -6,7 +6,7 @@ Created on Wed Mar 11 11:58:42 2020
 @author: robynwright
 """
 from Bio import SeqIO
-import cartopy.crs as ccrs
+#import cartopy.crs as ccrs
 import csv
 from itertools import chain
 import math
@@ -853,7 +853,7 @@ def get_single_nmds(rows, filter_on, filt_ind, color_on, color_ind, ax, leg, col
     else:
         return npos, handles
 
-def nmds_plot_study_env(dist_matr_fn_w, dist_matr_fn_uw, meta_dict, basedir, n_jobs=1):
+def nmds_plot_study_env(dist_matr_fn_w, dist_matr_fn_uw, meta_dict, basedir, n_jobs=1, save_name='/figures/nmds_overall'):
     '''
     Function to make nmds plots for weighted and unweighted unifrac distances for all samples, either colored by environment or by study
     Takes as input:
@@ -915,7 +915,7 @@ def nmds_plot_study_env(dist_matr_fn_w, dist_matr_fn_uw, meta_dict, basedir, n_j
         axes[a].set_title(title_letter[a], fontsize=fs_title, loc='left')
         axes[a].set_xlabel(xlabs[a], fontsize=fs_title)
         axes[a].set_ylabel(ylabs[a], fontsize=fs_title)
-    plt.savefig(basedir+'/figures/nmds_overall'+ext, dpi=dpi, bbox_inches='tight')
+    plt.savefig(basedir+save_name+ext, dpi=dpi, bbox_inches='tight')
     plt.close()
     return
 

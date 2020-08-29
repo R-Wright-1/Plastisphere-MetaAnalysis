@@ -28,7 +28,7 @@ Input files from this point are:
 - dna-sequences.fasta
 """
 
-basedir = '/Users/robynwright/Documents/OneDrive/ACU_meta-analysis/Data_2020/paper_data_20-04-14/'
+basedir = '/Users/robynwright/Documents/OneDrive/Papers_writing/Plastisphere_Meta-analysis/test_recreate_analyses/recreate_analyses/'
 #os.chdir(basedir)
 ft_tax, meta_fn, seqs, study_locs, study_dates = basedir+'qiime_output/feature-table_w_tax.txt', 'metadata.txt', basedir+'qiime_output/dna-sequences.fasta', 'Study_location.csv', 'Study_dates.csv'
 n_jobs=10
@@ -93,6 +93,10 @@ Giving a lower value for est (estimators; default is 10000) will reduce running 
 
 #af.nmds_plot_study_env(w_uf, uw_uf, meta_dict, basedir) #get the nmds plot for weighted and unweighted unifrac distances for environment and study
 #af.similarity_heatmap_combined(w_uf, uw_uf, basedir) #and get heatmaps showing average sample similarity between studies
+af.nmds_plot_study_env('/rarefy_comp/sorted_weighted_unifrac_clr.csv', '/rarefy_comp/sorted_unweighted_unifrac_clr.csv', meta_dict, basedir, save_name='figures/nmds_clr')
+
+
+
 
 #af.bar_dendro_venn(ft_df, ft_full, meta_dict, basedir, tax_dict) #get the dendrogram, stacked bar, heatmap, diversity and venn diagrams of overlapping ASVs
 
