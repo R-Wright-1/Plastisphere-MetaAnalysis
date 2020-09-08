@@ -1,10 +1,5 @@
 ---
 title: "Food or just a free ride? A meta-analysis reveals the global diversity of the Plastisphere"
-output:
-  html_document: 
-    toc: yes
-    toc_float: yes
-    code_folding: hide
 ---
 
 This document contains all of the commands necessary for the analyses performed in:
@@ -14,7 +9,7 @@ Please contact [Robyn Wright](mailto:robyn.wright@dal.ca) with any questions.
 
 You can see the version of this file that contains example figures at [this FigShare file](https://doi.org/10.6084/m9.figshare.12923855).
 
-# 1. Studies included {.tabset}
+# 1. Studies included
 
 This provides links to all studies included in this meta-analysis, listed by the names that I have used to refer to them throughout. 
 
@@ -66,7 +61,7 @@ If you are adding a study then you should add details of this (following the exi
 <li>metadata.txt</li>
 </ul>
 
-# 2. Setup environment {.tabset}
+# 2. Setup environment   
 
 ## 
 
@@ -170,7 +165,7 @@ from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
 ```
 
-## Print session information {.tabset}
+## Print session information   
 
 ###
 
@@ -189,7 +184,7 @@ for p in x:
     print(p)
 ```
 
-# 3. Getting data {.tabset}
+# 3. Getting data   
 
 I have provided all of the data for this study in several different ways:
 <ul>
@@ -232,7 +227,7 @@ AZ2015s002_S002_L001_R1_001.fastq.gz	AZ2015s002_S002_L001_R2_001.fastq.gz
 ### (V) And I added all of the first parts of these names (e.g. AZ2015s001, AZ2015s002) as the names for these samples in my metadata file. 
 **The most current version of this is [here](https://github.com/R-Wright-1/Plastisphere-MetaAnalysis/blob/master/python_analysis_20-04-14/metadata.txt). As long as your sample names follow this format (i.e. sample name before the first underscore) then the subsequent parts of this analysis shouldn't struggle even if your naming is different.**
 
-# 4. QIIME2 analysis {.tabset}
+# 4. QIIME2 analysis   
 
 I used 12 threads on a server for most of my analyses, but you can change this in these code chunks accordingly if you have less available. I think some parts will probably struggle with so many samples if you try to do this locally. 
 This follows the Microbiome helper tutorial [here](https://github.com/LangilleLab/microbiome_helper/wiki/Amplicon-SOP-v2-(qiime2-2020.2)).
@@ -601,7 +596,7 @@ mv paper_data/qiime_output/dna-sequences.fasta paper_data/qiime_output/dna-seque
 mv paper_data/qiime_output/tree.nwk paper_data/qiime_output/tree_not_rare.nwk
 ```
 
-# 5. Data and statistical analysis {.tabset}
+# 5. Data and statistical analysis   
 
 ## 
 
@@ -4274,7 +4269,7 @@ if not os.path.exists(basedir+'/figures/FigS3_RF_env_compare'+ext):
 
 This should save Figure S3 as 'figures/FigS3_RF_env_compare.png' (if you have changed the extension then this will be different).
 
-### (XIV) Get the random forest figures: {.tabset}
+### (XIV) Get the random forest figures:   
 ```{python, get_rf_plots_overall, results='hide', fig.keep='all', message=FALSE, cache=TRUE}
 fts = [ft_df_rare, ft_df_rel_abun, ft_df_log, ft_df_clr]
 tax_dicts = [tax_dict_rare, tax_dict_nr, tax_dict_nr, tax_dict_nr]
@@ -4308,7 +4303,7 @@ os.system('cp '+basedir+'/figures/random_forest/ASVs_overall_forest_rare.png '+b
 This is a lot of figures, so I haven't plotted them all here, but they are in Supplementary Sections [2](https://doi.org/10.6084/m9.figshare.12915317) (log, relative abundance and CLR-normalised) and [3](https://doi.org/10.6084/m9.figshare.12233759) (rarefied data).
 The figure that we show in the supplementary (Figure S4) should also get copied/renamed to the main figures folder.
 
-### (XV) Get the environment random forest figures for general plastic type (including carrying out ANCOM tests for statistical significance): {.tabset}
+### (XV) Get the environment random forest figures for general plastic type (including carrying out ANCOM tests for statistical significance):   
 ```{python, get_rf_plots_env, results='hide', fig.keep='all', message=FALSE, cache=TRUE}
 get_environment_random_forest_plots(ft_df_rare, meta_df, tax_dict_rare, ASV_dict_rare, meta_dict, basedir, norm='rare', skip_individual=False)
 get_environment_random_forest_plots(ft_df_log, meta_df, tax_dict_nr, ASV_dict_nr, meta_dict, basedir, norm='log', skip_individual=False)
@@ -4361,7 +4356,7 @@ I have put these plots together outside of this script (just in Powerpoint) and 
 
 All of these plots are shown in [Supplementary Section 4](https://doi.org/10.6084/m9.figshare.12233762).
 
-### (XVII) Get Ancom trees and heatmaps for early and late incubation times: {.tabset}
+### (XVII) Get Ancom trees and heatmaps for early and late incubation times:   
 
 ```{python, ancom_tree_heatmap, results='hide', fig.keep='all', message=FALSE, cache=TRUE}
 [tree_heatmap(ft_df_rare, meta_dict, basedir, tax_dict_rare, level=al) for al in [1, 2, 3, 4, 5, 6]]
@@ -4383,7 +4378,7 @@ for fi in to_convert:
 
 These are all shown in [Supplementary Section 5](https://doi.org/10.6084/m9.figshare.12233765). 
 
-### (XVIII) Get the separate plots for each study: {.tabset}
+### (XVIII) Get the separate plots for each study:   
 ```{python, separate_studies, results='hide', fig.keep='all', message=FALSE, warning=FALSE, cache=TRUE}
 if fs_main == 10:
   fs_main -= 2
