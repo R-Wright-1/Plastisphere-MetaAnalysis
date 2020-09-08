@@ -14,7 +14,7 @@ This provides links to all studies included in this meta-analysis, listed by the
 
 ### Studies
 <ul>
-<li>[AmaralZettler2015](doi.org/10.1890/150017)</li>
+<li>[AmaralZettler2015](doi.org/10.1890/150017)
 <li>[AriasAndres2018](doi.org/10.1016/j.envpol.2018.02.058)</li>
 <li>[Canada2020](doi.org/10.1016/j.aquaculture.2019.734540)</li>
 <li>[Curren2019](doi.org/10.1016/j.scitotenv.2018.11.250)</li>
