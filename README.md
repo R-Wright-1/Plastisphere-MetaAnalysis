@@ -13,8 +13,7 @@ You can see the version of this file that contains example figures at [this FigS
 This provides links to all studies included in this meta-analysis, listed by the names that I have used to refer to them throughout. 
 
 ### Studies
-<ul>
-<li>[AmaralZettler2015](doi.org/10.1890/150017)
+<li>[AmaralZettler2015](doi.org/10.1890/150017)</li>
 <li>[AriasAndres2018](doi.org/10.1016/j.envpol.2018.02.058)</li>
 <li>[Canada2020](doi.org/10.1016/j.aquaculture.2019.734540)</li>
 <li>[Curren2019](doi.org/10.1016/j.scitotenv.2018.11.250)</li>
@@ -49,7 +48,6 @@ This provides links to all studies included in this meta-analysis, listed by the
 <li>[Wu2019](doi.org/10.1016/j.watres.2019.114979)</li>
 <li>[Xu2019](doi.org/10.1016/j.marpolbul.2019.05.036)</li>
 <li>[Zhang2019](doi.org/10.1016/j.scitotenv.2019.06.108)</li>
-</ul>
 <br/>
 If you are adding a study then you should add details of this (following the existing formats) to the files in the 'python_analysis_20-04-14' folder:<br/>
 <ul>
