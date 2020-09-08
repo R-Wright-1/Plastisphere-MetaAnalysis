@@ -1,6 +1,5 @@
----
-title: "Food or just a free ride? A meta-analysis reveals the global diversity of the Plastisphere"
----
+# Food or just a free ride? A meta-analysis reveals the global diversity of the Plastisphere
+
 
 This document contains all of the commands necessary for the analyses performed in:
 **Food or just a free ride? A meta-analysis reveals the global diversity of the Plastisphere**.
@@ -9,13 +8,11 @@ Please contact [Robyn Wright](mailto:robyn.wright@dal.ca) with any questions.
 
 You can see the version of this file that contains example figures at [this FigShare file](https://doi.org/10.6084/m9.figshare.12923855).
 
-# 1. Studies included
+## 1. Studies included
 
 This provides links to all studies included in this meta-analysis, listed by the names that I have used to refer to them throughout. 
 
-##   
-
-## Studies
+### Studies
 <ul>
 <li>[AmaralZettler2015](doi.org/10.1890/150017)</li>
 <li>[AriasAndres2018](doi.org/10.1016/j.envpol.2018.02.058)</li>
@@ -61,15 +58,13 @@ If you are adding a study then you should add details of this (following the exi
 <li>metadata.txt</li>
 </ul>
 
-# 2. Setup environment   
-
-## 
+## 2. Setup environment 
 
 I have made this notebook using R studio and Python and used python in a conda environment named r-reticulate. You can see the session information below for the versions of these and of packages that I use.
 
 If you do not have any of these packages already installed then you will need to install them. 
 
-## Setup reticulate
+### Setup reticulate
 
 If you have problems with R finding Python then it might be worth explicitly telling R where to find the Python version you want to use, as described [here](https://rstudio.github.io/reticulate/reference/use_python.html) or [here](https://rstudio.github.io/reticulate/articles/versions.html). What worked for me was changing it in my Rprofile - this is supposedly in the folder given by running R.home() in the R studio console:
 ```{R, cache=TRUE}
@@ -86,7 +81,7 @@ I then opened this in a text editor and added this line to the end of the file:
 Sys.setenv(RETICULATE_PYTHON = "/Users/robynwright/opt/miniconda3/envs/r-reticulate/bin/python")
 ```
 
-## Setup R
+### Setup R
 
 ```{R, setup_r, results='hide', message=FALSE, warning=FALSE}
 load_all_R_packages <- function() {
@@ -111,7 +106,7 @@ load_all_R_packages <- function() {
 load_all_R_packages()
 ```
 
-## Setup Python
+### Setup Python
 
 I have found conda-forge to be most successful for installing the majority of these packages.
 
@@ -165,16 +160,14 @@ from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
 ```
 
-## Print session information   
+### Print session information 
 
-###
-
-### R
+#### R
 ```{R, r_session_info}
 sessionInfo()
 ```
 
-### Python
+#### Python
 Python doesn't really have a great option for session info like R does, but here I have printed first all of the packages that I use, and then all of the packages that are installed within my environment.
 ```{python, python_session_info}
 sinfo()
@@ -184,7 +177,7 @@ for p in x:
     print(p)
 ```
 
-# 3. Getting data   
+## 3. Getting data 
 
 I have provided all of the data for this study in several different ways:
 <ul>
@@ -196,38 +189,36 @@ If you want to either add a study to this or recreate the analyses used here, th
 
 Otherwise, details are given below on how to download the reads for all studies for which data is in the NCBI SRA. Data was provided directly by the authors for Curren2019, Kirstein2018, Kirstein2019 (this is available via NCBI for both Kirstein studies, but I asked for the data without primers removed) and Pollet2018. Frere2018 is available from: VAMPS portal (www.vamps. mbl.edu) under the project name LQM_MPLA_Bv4v5.
 
-## 
-
-## Downloading NCBI reads
+### Downloading NCBI reads
 
 Here I use AmaralZettler2015 with accession SRP026054 as an example.
 
-### (I) Get accession list
+#### (I) Get accession list
 e.g. download from [this link](https://www.ncbi.nlm.nih.gov/Traces/study/?acc=SRP026054&o=acc_s%3Aa)
 
-### (II) Use this to download the reads 
+#### (II) Use this to download the reads 
 For this you will need the [SRA toolkit](https://github.com/ncbi/sra-tools/wiki/02.-Installing-SRA-Toolkit):
 ```{bash, eval=FALSE}
 prefetch --option-file SRR_Acc_List.txt
 ```
 These files by default get added to an ncbi/sra/ folder in your home directory and can then be moved wherever you like.
 
-### (III) Convert this to fastq R1 and R2 files:
+#### (III) Convert this to fastq R1 and R2 files:
 ```{bash, eval=FALSE}
 for i in folder_name/* ; do fastq-dump -split-files --gzip $i ; done
 ```
 
-### (IV) I then renamed the files using a Python script. 
+#### (IV) I then renamed the files using a Python script. 
 
 If you are not adding many files then this is probably easier to just do manually, but get in touch if you want details of how I did this. I renamed all files to follow this format:
 AZ2015s001_S001_L001_R1_001.fastq.gz	AZ2015s001_S001_L001_R2_001.fastq.gz
 AZ2015s002_S002_L001_R1_001.fastq.gz	AZ2015s002_S002_L001_R2_001.fastq.gz
 *e.g.* these are the R1 and R2 files for samples 1 and 2 from AmaralZettler2015 - I don't have details of the run anything was performed on or the lane samples were run in, so I have just edited the file names to follow this format so as they are easily compatible with QIIME2. 
 
-### (V) And I added all of the first parts of these names (e.g. AZ2015s001, AZ2015s002) as the names for these samples in my metadata file. 
+#### (V) And I added all of the first parts of these names (e.g. AZ2015s001, AZ2015s002) as the names for these samples in my metadata file. 
 **The most current version of this is [here](https://github.com/R-Wright-1/Plastisphere-MetaAnalysis/blob/master/python_analysis_20-04-14/metadata.txt). As long as your sample names follow this format (i.e. sample name before the first underscore) then the subsequent parts of this analysis shouldn't struggle even if your naming is different.**
 
-# 4. QIIME2 analysis   
+## 4. QIIME2 analysis 
 
 I used 12 threads on a server for most of my analyses, but you can change this in these code chunks accordingly if you have less available. I think some parts will probably struggle with so many samples if you try to do this locally. 
 This follows the Microbiome helper tutorial [here](https://github.com/LangilleLab/microbiome_helper/wiki/Amplicon-SOP-v2-(qiime2-2020.2)).
@@ -238,13 +229,11 @@ Activate the QIIME2 environment (if you do not already have this installed then 
 conda activate qiime2-2019.10
 ```
 
-## 
-
-## A. For each individual study
+### A. For each individual study
 
 Note that this uses [Deblur](https://github.com/biocore/deblur). [DADA2](https://benjjneb.github.io/dada2/) could also be used, but given that we didn't know whether all samples from each study came from the same sequencing run, we chose the per sample denoising approach of Deblur. 
 
-### (I) Run quality checks on the data:
+#### (I) Run quality checks on the data:
 ```{bash, eval=FALSE}
 mkdir fastqc_out
 fastqc -t 12 raw_data/*.fastq.gz -o fastqc_out
@@ -252,7 +241,7 @@ multiqc fastqc_out/
 ```
 You should now look at the multiqc_report.html to ensure that everything is high enough quality to proceed.
 
-### (II) Import your data to the QIIME2 format:
+#### (II) Import your data to the QIIME2 format:
 ```{bash, eval=FALSE}
 qiime tools import \
             --type SampleData[PairedEndSequencesWithQuality] \
@@ -261,7 +250,7 @@ qiime tools import \
             --input-format CasavaOneEightSingleLanePerSampleDirFmt
 ```
 
-### (III) Trim primers (if present) with cutadapt. 
+#### (III) Trim primers (if present) with cutadapt. 
 The primer sequences shown here are for 341F and 802R - these will need changing if you have used different primers:
 ```{bash, eval=FALSE}
 qiime cutadapt trim-paired \
@@ -274,14 +263,14 @@ qiime cutadapt trim-paired \
             --o-trimmed-sequences reads_trimmed.qza
 ```
 
-### (IV) Summarize the trimmed files:
+#### (IV) Summarize the trimmed files:
 ```{bash, eval=FALSE}
 qiime demux summarize \
             --i-data reads_trimmed.qza \
             --o-visualization reads_trimmed_summary.qzv
 ```
 
-### (V) Join paired ends 
+#### (V) Join paired ends 
 If the reads were already trimmed then just use reads.qza as the input here:
 ```{bash, eval=FALSE}
 qiime vsearch join-pairs \
@@ -289,7 +278,7 @@ qiime vsearch join-pairs \
             --o-joined-sequences reads_joined.qza
 ```
 
-### (VI) Summarize the joined pairs 
+#### (VI) Summarize the joined pairs 
 If too many reads were removed then you may need to play around with some of the other options at [here](https://docs.qiime2.org/2020.2/plugins/available/vsearch/join-pairs/):
 ```{bash, eval=FALSE}
 qiime demux summarize \
@@ -297,7 +286,7 @@ qiime demux summarize \
             --o-visualization reads_joined_summary.qzv
 ```
 
-### (VII) Filter out low quality reads:
+#### (VII) Filter out low quality reads:
 ```{bash, eval=FALSE}
 qiime quality-filter q-score-joined \
             --i-demux reads_joined.qza \
@@ -305,7 +294,7 @@ qiime quality-filter q-score-joined \
             --o-filtered-sequences reads_joined_filtered.qza
 ```
 
-### (VIII) Summarize these reads (and look at where to trim) 
+#### (VIII) Summarize these reads (and look at where to trim) 
 You should look at the positions where the quality starts to drop below 30 and use these as trim lengths:
 ```{bash, eval=FALSE}
 qiime demux summarize \
@@ -313,7 +302,7 @@ qiime demux summarize \
             --o-visualization reads_joined_filtered_summary.qzv
 ```
 
-### (IX) Run deblur 
+#### (IX) Run deblur 
 You can remove the --p-left-trim-len if you don't need to remove any from this end:
 ```{bash, eval=FALSE}
 qiime deblur denoise-16S \
@@ -326,22 +315,22 @@ qiime deblur denoise-16S \
             --output-dir deblur_output_quality
 ```
 
-### (X) Summarize the feature table to see how many reads we now have:
+#### (X) Summarize the feature table to see how many reads we now have:
 ```{bash, eval=FALSE}
 qiime feature-table summarize \
             --i-table deblur_output_quality/table.qza  \
             --o-visualization deblur_table_summary.qzv
 ```
 
-## B. Merge studies
+### B. Merge studies
 
-### (I) Rename the current representative sequences and merged tables:
+#### (I) Rename the current representative sequences and merged tables:
 ```{bash, eval=FALSE}
 mv merged_representative_sequences.qza previous_merged_representative_sequences.qza
 mv merged_table.qza previous_merged_table.qza
 ```
 
-### (II) Combine feature tables. 
+#### (II) Combine feature tables. 
 You will need to replace 'your_folder_name' with the folder that contains your tables to be added (when I did this for all studies, I just added additional --i-tables table_name.qza lines):
 ```{bash, eval=FALSE}
 qiime feature-table merge \
@@ -350,7 +339,7 @@ qiime feature-table merge \
             --o-merged-table merged_table.qza
 ```
 
-### (III) Combine the sequence objects. 
+#### (III) Combine the sequence objects. 
 You will again need to replace 'your_folder_name' with the folder that contains your sequences to be added (when I did this for all studies, I just added additional --i-data representative_sequences_name.qza lines):
 ```{bash, eval=FALSE}
 qiime feature-table merge-seqs \
@@ -359,18 +348,18 @@ qiime feature-table merge-seqs \
             --o-merged-data merged_representative_sequences.qza
 ```
 
-## C. Combined processing
+### C. Combined processing
 
 Now that all of the samples that we are looking at are combined into the merged sequences and table files, we can classify and analyze them.
 
-### (I) Summarize the combined feature tables (this is to check that everything looks OK after the merges, and can be skipped if not necessary):
+#### (I) Summarize the combined feature tables (this is to check that everything looks OK after the merges, and can be skipped if not necessary):
 ```{bash, eval=FALSE}
 qiime feature-table summarize \
             --i-table merged_table.qza  \
             --o-visualization merged_table_summary.qzv
 ```
 
-### (II) Classify the features (this part will probably take the longest - it may take at least a day or so and is the part that may not be possible on a local computer):
+#### (II) Classify the features (this part will probably take the longest - it may take at least a day or so and is the part that may not be possible on a local computer):
 ```{bash, eval=FALSE}
 qiime feature-classifier classify-sklearn \
             --i-reads merged_representative_sequences.qza \
@@ -380,14 +369,14 @@ qiime feature-classifier classify-sklearn \
 ```
 As these sequences come from different 16S regions, I downloaded the full length 16S classifier from [here](https://docs.qiime2.org/2020.6/data-resources/). There is now an updated SILVA version, but I used the Silva 132 classifier (this can only improve upon classification accuracy, so I recommend using the latest one).
 
-### (III) Export this file to look at the classifications:
+#### (III) Export this file to look at the classifications:
 ```{bash, eval=FALSE}
 qiime tools export \
             --input-path taxa/classification.qza \
             --output-path taxa
 ```
 
-### (IV) Filter low abundance features:
+#### (IV) Filter low abundance features:
 ```{bash, eval=FALSE}
 qiime feature-table filter-features \
             --i-table merged_table.qza \
@@ -396,7 +385,7 @@ qiime feature-table filter-features \
             --o-filtered-table merged_table_filtered.qza
 ```
 
-### (V) Filter potential contaminants and those not classified at the kingdom level:
+#### (V) Filter potential contaminants and those not classified at the kingdom level:
 ```{bash, eval=FALSE}
 qiime taxa filter-table \
             --i-table merged_table_filtered.qza \
@@ -406,7 +395,7 @@ qiime taxa filter-table \
             --o-filtered-table merged_table_filtered_contamination.qza
 ```
 
-### (VI) Summarize the filtered table:
+#### (VI) Summarize the filtered table:
 ```{bash, eval=FALSE}
 qiime feature-table summarize \
             --i-table merged_table_filtered_contamination.qza \
@@ -414,7 +403,7 @@ qiime feature-table summarize \
 ```
 Now find out how many features you have as well as the maximum sample depth (this is the "Maximum Frequency" in the "Frequency per sample" section).
 
-### (VII) Obtain rarefaction curves for samples:
+#### (VII) Obtain rarefaction curves for samples:
 ```{bash, eval=FALSE}
 qiime diversity alpha-rarefaction \
             --i-table merged_table_filtered_contamination.qza \
@@ -424,7 +413,7 @@ qiime diversity alpha-rarefaction \
             --o-visualization merged_rarefaction_curves.qzv
 ```
 
-### (VIII) Filter samples that have below 2000 reads:
+#### (VIII) Filter samples that have below 2000 reads:
 ```{bash, eval=FALSE}
 qiime feature-table filter-samples \
             --i-table merged_table_filtered_contamination.qza \
@@ -432,7 +421,7 @@ qiime feature-table filter-samples \
             --o-filtered-table  merged_table_final.qza
 ```
 
-### (IX) Rarefy remaining samples to 2000:
+#### (IX) Rarefy remaining samples to 2000:
 ```{bash, eval=FALSE}
 qiime feature-table rarefy \
             --i-table merged_table_final.qza \
@@ -440,7 +429,7 @@ qiime feature-table rarefy \
             --o-rarefied-table merged_table_final_rarefied.qza
 ```
 
-### (X) Filter the sequences to contain only those that are in the rarefied feature table:
+#### (X) Filter the sequences to contain only those that are in the rarefied feature table:
 ```{bash, eval=FALSE}
 qiime feature-table filter-seqs \
             --i-data merged_representative_sequences.qza \
@@ -448,7 +437,7 @@ qiime feature-table filter-seqs \
             --o-filtered-data  representative_sequences_final_rarefied.qza
 ```
 
-### (XI) Export feature table and sequences for rarefied data:
+#### (XI) Export feature table and sequences for rarefied data:
 ```{bash, eval=FALSE}
 qiime tools export \
             --input-path representative_sequences_final_rarefied.qza \
@@ -469,7 +458,7 @@ biom convert \
             --header-key taxonomy
 ```
 
-### (XII) Obtain phylogenetic tree using SEPP fragment insertion and the silva reference database for rarefied data:
+#### (XII) Obtain phylogenetic tree using SEPP fragment insertion and the silva reference database for rarefied data:
 ```{bash, eval=FALSE}
 qiime fragment-insertion sepp \
             --i-representative-sequences representative_sequences_final_rarefied.qza \
@@ -480,14 +469,14 @@ qiime fragment-insertion sepp \
 ```
 You can download the reference file [here](https://docs.qiime2.org/2020.6/data-resources/). At the time of writing, this still used Silva 128, but I would recommend using an updated version if there is one.
 
-### (XIII) Export the resulting insertion tree:
+#### (XIII) Export the resulting insertion tree:
 ```{bash, eval=FALSE}
 qiime tools export \
             --input-path insertion_tree_rarefied.qza \
             --output-path exports
 ```
 
-### (XIV) The files inside the exports folder should then be copied to the folder that the subsequent analyses will be carried out in, e.g.:
+#### (XIV) The files inside the exports folder should then be copied to the folder that the subsequent analyses will be carried out in, e.g.:
 ```{bash, eval=FALSE}
 for i in exports/* ; cp $i paper_data/qiime_output/; done
 ```
@@ -499,9 +488,9 @@ mv paper_data/qiime_output/dna-sequences.fasta paper_data/qiime_output/dna-seque
 mv paper_data/qiime_output/tree.nwk paper_data/qiime_output/tree_rare.nwk
 ```
 
-### Now do the same for the non-rarefied data
+#### Now do the same for the non-rarefied data
 
-### (XV) Move the data to a new folder and summarize the number of features etc:
+#### (XV) Move the data to a new folder and summarize the number of features etc:
 ```{bash, eval=FALSE}
 mkdir not_rarefied
 cp merged_table_final.qza not_rarefied/
@@ -531,7 +520,7 @@ qiime feature-table filter-seqs \
 ```
 For the 2056 samples I include, this now gives a median of 18,962 and 24,873 features (much faster to make a tree with)
 
-### (XVI) Export feature table and sequences for not rarefied data (before and after filtering, because we still want to know how many sequences in each sample to calculate relative abundance):
+#### (XVI) Export feature table and sequences for not rarefied data (before and after filtering, because we still want to know how many sequences in each sample to calculate relative abundance):
 ```{bash, eval=FALSE}
 qiime tools export \
            --input-path representative_sequences_final_filtered.qza \
@@ -566,7 +555,7 @@ biom convert \
            --header-key taxonomy
 ```
 
-### (XVI) Now put these sequences into the tree:
+#### (XVI) Now put these sequences into the tree:
 ```{bash, eval=FALSE}
 qiime fragment-insertion sepp \
             --i-representative-sequences representative_sequences_final_filtered.qza \
@@ -576,14 +565,14 @@ qiime fragment-insertion sepp \
             --p-threads 24
 ```
 
-### (XVII) Export the tree:
+#### (XVII) Export the tree:
 ```{bash, eval=FALSE}
 qiime tools export \
            --input-path insertion_tree_not_norm.qza \
            --output-path exports
 ```
 
-### (XVIII) The files inside the exports folder should then be copied to the folder that the subsequent analyses will be carried out in, e.g.:
+#### (XVIII) The files inside the exports folder should then be copied to the folder that the subsequent analyses will be carried out in, e.g.:
 ```{bash, eval=FALSE}
 for i in exports/* ; cp $i paper_data/qiime_output/; done
 ```
@@ -596,15 +585,13 @@ mv paper_data/qiime_output/dna-sequences.fasta paper_data/qiime_output/dna-seque
 mv paper_data/qiime_output/tree.nwk paper_data/qiime_output/tree_not_rare.nwk
 ```
 
-# 5. Data and statistical analysis   
+## 5. Data and statistical analysis 
 
-## 
-
-## A. Introduction
+### A. Introduction
 
 This can be used to recreate all of the analyses found in the Plastisphere meta-analysis paper, or alternatively to re-do these analyses while also incorporating additional data.
 
-## B. Other files needed
+### B. Other files needed
 
 These can be found [here](https://github.com/R-Wright-1/Plastisphere-MetaAnalysis/tree/master/files_needed):
 <ul>
@@ -634,12 +621,12 @@ It is expected that the base directory contains, at a minimum:
 </ul>
 </li>
 
-## C. Analysis
+### C. Analysis
 
 The majority of these code chunks contain statements to ensure that they aren't run if the output already exists, but if you want to run them anyway then you should change these/move the files already created somewhere else. Many steps will rely on the output of previous steps, although I have tried to ensure that once run they will save their output so that they won't need to be re-run multiple times (they are often very time/computationally intensive). 
 The sections with an asterisk will need running each time you want to run anything (and after the initial run should only take a few seconds to run), but the others are only if you are running the analyses for that section.
 
-### (*I) Set the base directory for all inputs and outputs and the basic files and define all functions that we will call later on.
+#### (*I) Set the base directory for all inputs and outputs and the basic files and define all functions that we will call later on.
 
 Python:
 ```{python, give_input, results='hide', fig.keep='all', message=FALSE}
@@ -3747,7 +3734,7 @@ ancom_tree <- function() {
 }
 ```
 
-### (II) Make empty folders, if they don't already exist:
+#### (II) Make empty folders, if they don't already exist:
 ```{python, make_folders, results='hide', fig.keep='all', message=FALSE}
 folder_names = ["agglom", "picrust", "figures", "ancom", "separate_studies", "figures/ancom", "figures/metacoder", "random_forest", "random_forest/rare", "random_forest/log", "random_forest/clr", "random_forest/rel_abun", "random_forest/rare/single_environment", "random_forest/log/single_environment", "random_forest/clr/single_environment", "random_forest/rel_abun/single_environment", "figures/random_forest", "figures/random_forest/single_environment", "figures/random_forest/single_category"]
 for fn in folder_names:
@@ -3755,7 +3742,7 @@ for fn in folder_names:
        os.system("mkdir "+basedir+"/"+fn)
 ```
 
-### (*III) Reformat QIIME2 output files for R:
+#### (*III) Reformat QIIME2 output files for R:
 ```{python, reformat_output_Q2, results='hide', fig.keep='all', message=FALSE}
 if os.path.exists(basedir+'tax_dict_rare.dictionary'):
     tax_dict_rare = open_pickle(basedir+'tax_dict_rare.dictionary')
@@ -3768,7 +3755,7 @@ else:
     ft_nr, tax_dict_nr = format_R(ft_tax_nr_filt, basedir, 'nr')
 ```
 
-### (IV) Perform agglomeration and calculate distances:
+#### (IV) Perform agglomeration and calculate distances:
 
 Do agglomeration:
 ```{R, agglom, results='hide', fig.keep='all', cache=TRUE, message=FALSE}
@@ -4031,7 +4018,7 @@ if (!file.exists(paste(py$basedir, "agglom/philr_distance.csv", sep=""))) {
 }
 ```
 
-### (*V) Read these files into Python again and open the information that we need:
+#### (*V) Read these files into Python again and open the information that we need:
 
 ```{python, read_agglom_uf_files, results='hide', fig.keep='all', message=FALSE, warning=FALSE}
 ft_df_rare = open_and_sort(basedir+'/agglom/otu_table_rare.csv')
@@ -4080,9 +4067,9 @@ else:
 ```
 Note here that R seems to sometimes save things with a different encoding than is expected by pandas. If you get errors related to NaNs here, just try opening the .csv files in excel and resaving them as .csv files (not actually changing anything, the default for excel is to save in utf-8, which is what pandas wants) should fix this. It otherwise reads in the dataframes as all NaNs sometimes. 
 
-### Now we are ready to do all of the statistical analysis and make all of the plots.
+#### Now we are ready to do all of the statistical analysis and make all of the plots.
 
-### (VI) Get basic study map and metrics (Figure 1):
+#### (VI) Get basic study map and metrics (Figure 1):
 ```{python, map_metrics, results='hide', fig.keep='all', message=FALSE, cache=TRUE}
 if not os.path.exists(basedir+'/figures/Fig1_map_metrics'+ext):
   study_map_metrics(study_dates, study_locs, basedir, map_img, meta_df) 
@@ -4102,7 +4089,7 @@ if not os.path.exists(basedir+'figures/FigS1_richness'+ext):
 
 This should save Figure S1 as 'figures/FigS1_richness.png' (if you have changed the extension then this will be different).
 
-### (VII) Get the NMDS plots (Figure 2):
+#### (VII) Get the NMDS plots (Figure 2):
 First get the groupings:
 ```{python, stats_groups, results='hide', fig.keep='all', message=FALSE}
 def get_stats_groups(uf, meta_dict):
@@ -4202,7 +4189,7 @@ This should save Figure 2 as 'figures/Fig2_nmds_overall_rare.png' (if you have c
 
 It will also save the NMDS plots that use the other normalisation methods, but these are only shown in [Supplementary Section 2](https://doi.org/10.6084/m9.figshare.12915317).
 
-### (VIII) Get the heatmaps using weighted and unweighted unifrac distances that shows the average distance within and between studies (Figure 3):
+#### (VIII) Get the heatmaps using weighted and unweighted unifrac distances that shows the average distance within and between studies (Figure 3):
 ```{python, uf_heatmaps, results='hide', fig.keep='all', message=FALSE, cache=TRUE}
 dist_mats = [[w_uf_rare, uw_uf_rare], [w_uf_rel_abun, uw_uf_rel_abun], [w_uf_log, uw_uf_log], [eucl_clr, philr_clr]]
 count = 0
@@ -4216,7 +4203,7 @@ This should save Figure 3 as 'figures/Fig3_unifrac_heatmap_combined_rare.png' (i
 
 It will also plot the heatmaps for the other normalisation methods, but these are only shown in [Supplementary Section 2](https://doi.org/10.6084/m9.figshare.12915317). 
 
-### (IX) Get the figure that summarises sample types, groupings and the number of taxa shared within environments and sample types (Figure 4):
+#### (IX) Get the figure that summarises sample types, groupings and the number of taxa shared within environments and sample types (Figure 4):
 ```{python, dendro_heatmap, results='hide', fig.keep='all', message=FALSE, cache=TRUE}
 count = 0
 ft_full_nr = basedir+'/feature_table_nr.csv'
@@ -4234,7 +4221,7 @@ This should save Figure 4 as 'figures/Fig4_dendro_venn_rare.png' (if you have ch
 
 It will also make these plots for the other normalisation methods, but these are only shown in [Supplementary Section 2](https://doi.org/10.6084/m9.figshare.12915317).
 
-### (X) Get the overall random forests:
+#### (X) Get the overall random forests:
 This part should skip for you if you already have the files (and will tell you that it didn't do it because it already had a file with that name saved) - if you want to re-run it then delete the contents of the random_forests folder.
 *Note that if you re-run this section then you might get slightly different results than the paper due to different random selections of 20%/80% of the data for testing/training*
 ```{python, get_rf_models_overall, results='hide', fig.keep='all', message=FALSE, cache=TRUE}
@@ -4244,7 +4231,7 @@ get_random_forests(ft_df_clr, tax_dict_nr, meta_df, basedir, est=est, n_jobs=n_j
 get_random_forests(ft_df_rel_abun, tax_dict_nr, meta_df, basedir, est=est, n_jobs=n_jobs, norm='rel_abun')
 ```
 
-### (XI) Get the random forests for each environment for general plastic type:
+#### (XI) Get the random forests for each environment for general plastic type:
 ```{python, get_rf_models_env, results='hide', fig.keep='all', message=FALSE, cache=TRUE}
 #add norm name to these
 get_environment_random_forest(ft_df_rare, tax_dict_rare, meta_df, meta_dict, basedir, est=est, n_jobs=n_jobs, norm='rare') 
@@ -4253,7 +4240,7 @@ get_environment_random_forest(ft_df_clr, tax_dict_nr, meta_df, meta_dict, basedi
 get_environment_random_forest(ft_df_rel_abun, tax_dict_nr, meta_df, meta_dict, basedir, est=est, n_jobs=n_jobs, norm='rel_abun') 
 ```
 
-### (XII) Get the random forest plots comparing the different normalisation methods for the overall random forests:
+#### (XII) Get the random forest plots comparing the different normalisation methods for the overall random forests:
 ```{python, get_rf_plots_comparison, results='hide', fig.keep='all', message=FALSE, cache=TRUE}
 if not os.path.exists(basedir+'figures/FigS2_RF_compare'+ext):
   get_rf_comparison(basedir)
@@ -4261,7 +4248,7 @@ if not os.path.exists(basedir+'figures/FigS2_RF_compare'+ext):
 
 This should save Figure S2 as 'figures/FigS2_RF_comp.png' (if you have changed the extension then this will be different).
 
-### (XIII) Get the random forest plots comparing the different normalisation methods for the random forests for each environment on plastic type:
+#### (XIII) Get the random forest plots comparing the different normalisation methods for the random forests for each environment on plastic type:
 ```{python, get_rf_plots_comparison_env, results='hide', fig.keep='all', message=FALSE, cache=TRUE}
 if not os.path.exists(basedir+'/figures/FigS3_RF_env_compare'+ext):
   get_rf_comparison_env(basedir)
@@ -4269,7 +4256,7 @@ if not os.path.exists(basedir+'/figures/FigS3_RF_env_compare'+ext):
 
 This should save Figure S3 as 'figures/FigS3_RF_env_compare.png' (if you have changed the extension then this will be different).
 
-### (XIV) Get the random forest figures:   
+#### (XIV) Get the random forest figures: 
 ```{python, get_rf_plots_overall, results='hide', fig.keep='all', message=FALSE, cache=TRUE}
 fts = [ft_df_rare, ft_df_rel_abun, ft_df_log, ft_df_clr]
 tax_dicts = [tax_dict_rare, tax_dict_nr, tax_dict_nr, tax_dict_nr]
@@ -4303,7 +4290,7 @@ os.system('cp '+basedir+'/figures/random_forest/ASVs_overall_forest_rare.png '+b
 This is a lot of figures, so I haven't plotted them all here, but they are in Supplementary Sections [2](https://doi.org/10.6084/m9.figshare.12915317) (log, relative abundance and CLR-normalised) and [3](https://doi.org/10.6084/m9.figshare.12233759) (rarefied data).
 The figure that we show in the supplementary (Figure S4) should also get copied/renamed to the main figures folder.
 
-### (XV) Get the environment random forest figures for general plastic type (including carrying out ANCOM tests for statistical significance):   
+#### (XV) Get the environment random forest figures for general plastic type (including carrying out ANCOM tests for statistical significance): 
 ```{python, get_rf_plots_env, results='hide', fig.keep='all', message=FALSE, cache=TRUE}
 get_environment_random_forest_plots(ft_df_rare, meta_df, tax_dict_rare, ASV_dict_rare, meta_dict, basedir, norm='rare', skip_individual=False)
 get_environment_random_forest_plots(ft_df_log, meta_df, tax_dict_nr, ASV_dict_nr, meta_dict, basedir, norm='log', skip_individual=False)
@@ -4321,7 +4308,7 @@ These are shown in Supplementary Sections [2](https://doi.org/10.6084/m9.figshar
 
 This is shown as Figure S5 and in [Supplementary Section 3](https://doi.org/10.6084/m9.figshare.12233759).
 
-### (XVI) Get the metacoder plots for early and late incubation times:
+#### (XVI) Get the metacoder plots for early and late incubation times:
 ```{python, metacoder_plot, results='hide', fig.keep='all', message=FALSE, cache=TRUE, warning=FALSE}
 count = 0
 ft_dfs = [ft_df_rare, ft_df_rel_abun, ft_df_log, ft_df_clr]
@@ -4356,7 +4343,7 @@ I have put these plots together outside of this script (just in Powerpoint) and 
 
 All of these plots are shown in [Supplementary Section 4](https://doi.org/10.6084/m9.figshare.12233762).
 
-### (XVII) Get Ancom trees and heatmaps for early and late incubation times:   
+#### (XVII) Get Ancom trees and heatmaps for early and late incubation times: 
 
 ```{python, ancom_tree_heatmap, results='hide', fig.keep='all', message=FALSE, cache=TRUE}
 [tree_heatmap(ft_df_rare, meta_dict, basedir, tax_dict_rare, level=al) for al in [1, 2, 3, 4, 5, 6]]
@@ -4378,7 +4365,7 @@ for fi in to_convert:
 
 These are all shown in [Supplementary Section 5](https://doi.org/10.6084/m9.figshare.12233765). 
 
-### (XVIII) Get the separate plots for each study:   
+#### (XVIII) Get the separate plots for each study: 
 ```{python, separate_studies, results='hide', fig.keep='all', message=FALSE, warning=FALSE, cache=TRUE}
 if fs_main == 10:
   fs_main -= 2
