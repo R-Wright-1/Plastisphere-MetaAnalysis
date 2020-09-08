@@ -47,7 +47,7 @@ This provides links to all studies included in this meta-analysis, listed by the
 <li>[Woodall2018](doi.org/10.1371/journal.pone.0206220)</li>
 <li>[Wu2019](doi.org/10.1016/j.watres.2019.114979)</li>
 <li>[Xu2019](doi.org/10.1016/j.marpolbul.2019.05.036)</li>
-<li>[Zhang2019](doi.org/10.1016/j.scitotenv.2019.06.108)</li>
+- [Zhang2019](doi.org/10.1016/j.scitotenv.2019.06.108)
 <br/>
 If you are adding a study then you should add details of this (following the existing formats) to the files in the 'python_analysis_20-04-14' folder:<br/>
 <ul>
