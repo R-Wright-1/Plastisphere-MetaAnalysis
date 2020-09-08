@@ -2,7 +2,7 @@
 
 
 This repository contains instructions for reproducing the meta-analysis of Plastisphere studies performed in:
-**Food or just a free ride? A meta-analysis reveals the global diversity of the Plastisphere**.</br>
+**Food or just a free ride? A meta-analysis reveals the global diversity of the Plastisphere** (currently under revision in the ISME journal)</br>
 You can do this with only the studies that are included in the meta-analysis, or you can include new studies too (in order to evaluate how they fit with previous studies as well as whether they change any of the conclusions on the composition of the Plastisphere).
 
 Please contact [Robyn Wright](mailto:robyn.wright@dal.ca) with any questions.
