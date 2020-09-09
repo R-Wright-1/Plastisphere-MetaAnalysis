@@ -6,70 +6,50 @@ Created on Wed Mar 11 11:58:42 2020
 @author: robynwright
 """
 from Bio import SeqIO
-import cartopy.crs as ccrs
 import csv
 from itertools import chain
+from lifelines.utils import concordance_index
 import math
+import matplotlib.colors as colors
 import matplotlib as mpl
 import matplotlib.lines as mlines
-import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes, TransformedBbox, BboxPatch, BboxConnector
 import numpy as np
 import os
 import pandas as pd
 import pickle
 from scipy.cluster import hierarchy
-import scipy.stats as stats
-from skbio import DistanceMatrix
-from skbio.stats.distance import anosim
-from skbio.stats.distance import permanova
+from scipy.spatial import distance
+import scipy.spatial.distance as ssd
 from skbio.stats.composition import ancom
-from sklearn import manifold
+from sklearn import manifold, preprocessing
 from sklearn.decomposition import PCA
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.model_selection import train_test_split
-from sklearn import preprocessing
 
 seed = 3 #random seed
-fs_title, fs_main, fs_small = 10, 8, 6 #font sizes to use in figures
+fs_title, fs_main, fs_small = 14, 10, 8 #font sizes to use in figures
 color_env = {'marine':'#03A498', 'freshwater':'#03B1FC', 'aquatic':'#9A75FC', 'terrestrial':'#FD9A64'} #colors for plotting each environment
 label_env = ['Marine', 'Freshwater', 'Aquatic', 'Terrestrial'] #labels for each environment
 ext, dpi = '.png', 600 #extension and dots per inch to save figures  with
 color_source = {'aliphatic':'#5F9EA0', 'biofilm':'#FCA94A', 'other plastic':'#8B008B', 'unknown plastic':'#3593FC', 'planktonic':'#F9E79F', 'blank':'gray', 'early':'#FBC704', 'late':'#900C3F', 'collection':'gray'}
 phylo_level_names = {0:'kingdoms', 1:'phyla', 2:'classes', 3:'orders', 4:'families', 5:'genera', 6:'species', 7:'ASVs'}
-rename_plots = {'AmaralZettler':'Amaral Zettler $et$ $al$. 2015', 'AriasAndres':'Arias-Andres $et$ $al$. 2018', 'Canada':'Canada $et$ $al$. 2020', 'Curren':'Curren & Leong 2019', 'Delacuvellerie':'Delacuvellerie $et$ $al$. 2019', 'DeTender':'De Tender $et$ $al$. 2015', 'DeTenderB':'De Tender $et$ $al$. 2017', 'DussudHudec':'Dussud, Hudec $et$ $al$. 2018', 'DussudMeistertzheim':'Dussud, Meistertzheim $et$ $al$. 2018', 'ErniCassola':'Erni-Cassola $et$ $al$. 2019', 'Esan':'Esan $et$ $al$. 2019', 'Frere':'Frere $et$ $al$. 2018', 'Hoellein':'Hoellein $et$ $al$. 2014', 'HoelleinB':'Hoellein $et$ $al$. 2017', 'Jiang':'Jiang $et$ $al$. 2018', 'Kesy':'Kesy $et$ $al$. 2019', 'Kirstein':'Kirstein $et$ $al$. 2018', 'KirsteinB':'Kirstein $et$ $al$. 2019', 'McCormick':'McCormick $et$ $al$. 2014', 'McCormickB':'McCormick $et$ $al$. 2016', 'Oberbeckmann':'Oberbeckmann $et$ $al$. 2016', 'OberbeckmannB':'Oberbeckmann $et$ $al$. 2018', 'Ogonowski':'Ogonowski $et$ $al$. 2018', 'Parrish':'Parrish $et$ $al$. 2019', 'Pinto':'Pinto $et$ $al$. 2019', 'Pollet':'Pollet $et$ $al$. 2018', 'Rosato':'Rosato $et$ $al$. 2020', 'Syranidou':'Syranidou ', 'SyranidouPE':'Syranidou $et$ $al$. 2017a', 'SyranidouPS':'Syranidou $et$ $al$. 2017b', 'Tagg':'Tagg $et$ $al$. 2019', 'Woodall':'Woodall $et$ $al$. 2018', 'Wu':'Wu $et$ $al$. 2019', 'Xu':'Xu $et$ $al$. 2019', 'Zhang':'Zhang $et$ $al$. 2019', 'WaterOrSediment':'Water or Sediment', 'LabOrField':'Laboratory or Field', 'IncubationOrCollection':'Incubation or Collection', 'MaterialType':'Material type', 'PlasticTypeSpecific':'Plastic type (specific)', 'PlasticTypeGeneral':'Plastic type (general)', 'DEPTH':'Depth', 'IncubationTime':'Incubation time (specific)', 'IncubationGeneral':'Incubation time (general)', 'PrimerPair':'Primer pair', 'DNAExtraction':'DNA extraction method', 'lab':'Laboratory', 'not_plastic':'Not plastic', 'aged_oxope':'Aged Oxo-PE', 'freeliving':'Free living', 'particleassociated':'Particle associated', 'oxope':'Oxo-PE', 'rinse_pe':'PE rinse water', 'rinse_ps':'PS rinse water', 'rinse_wood':'Wood rinse water', 'bhet':'BHET', 'hdpe':'HDPE', 'ldpe':'LDPE', 'na':'NA', 'pa':'PA', 'pe':'PE', 'pes':'PES', 'pestur':'PESTUR', 'pet':'PET', 'phbv':'PHBV', 'pla':'PLA', 'pp':'PP', 'ps':'PS', 'pvc':'PVC', 'san':'SAN', 'w_pe':'Weathered PE', '10:14':'10:14 light:dark', '12:12':'12:12 light:dark', '16:08':'16:08 light:dark', '27F_519R':'27F-519R', '319F_806R':'319F-806R', '338F_806R':'338F-806R', '341F_785R':'341F-785R', '341F_802R':'341F-802R', '341F_806R':'341F-806R', '515F_806R':'515F-806R', '515FY_926R':'515FY-926R', '518F_926R':'518F-926R', '543F_783R':'543F-783R', '967F_1064R':'967F-1064R', 'B969F_BA1406R':'B969F-BA1406R', 'redextract_sigma':'REDExtract-$N$-AmpTM', 'gentra_puregene':'Gentra Puregene', 'purelink':'PureLink', 'powersoil':'PowerSoil', 'phenol_chloroform':'Phenol-Chloroform', 'powerbiofilm':'PowerBiofilm', 'ultraclean_soil':'UltraClean soil', 'fastdna_soil':'FastDNA soil', 'orders':'Order', 'classes':'Class', 'phyla':'Phylum', 'genera':'Genera', 'families':'Family', 'species':'Species', 'ASVs':'ASV', 'kingdoms':'Kingdom', 'PlasticOnly':'Plastic only', '534f_783r':'534F-783R', 'Phenol_chloroform':'Phenol-chloroform'}
+rename_plots = {'AmaralZettler':'Amaral Zettler $et$ $al$. 2015', 'AriasAndres':'Arias-Andres $et$ $al$. 2018', 'Canada':'Canada $et$ $al$. 2020', 'Curren':'Curren & Leong 2019', 'Delacuvellerie':'Delacuvellerie $et$ $al$. 2019', 'DeTender':'De Tender $et$ $al$. 2015', 'DeTenderB':'De Tender $et$ $al$. 2017', 'DussudHudec':'Dussud, Hudec $et$ $al$. 2018', 'DussudMeistertzheim':'Dussud, Meistertzheim $et$ $al$. 2018', 'ErniCassola':'Erni-Cassola $et$ $al$. 2019', 'Esan':'Esan $et$ $al$. 2019', 'Frere':'Frere $et$ $al$. 2018', 'Hoellein':'Hoellein $et$ $al$. 2014', 'HoelleinB':'Hoellein $et$ $al$. 2017', 'Jiang':'Jiang $et$ $al$. 2018', 'Kesy':'Kesy $et$ $al$. 2019', 'Kirstein':'Kirstein $et$ $al$. 2018', 'KirsteinB':'Kirstein $et$ $al$. 2019', 'McCormick':'McCormick $et$ $al$. 2014', 'McCormickB':'McCormick $et$ $al$. 2016', 'Oberbeckmann':'Oberbeckmann $et$ $al$. 2016', 'OberbeckmannB':'Oberbeckmann $et$ $al$. 2018', 'Ogonowski':'Ogonowski $et$ $al$. 2018', 'Parrish':'Parrish $et$ $al$. 2019', 'Pinto':'Pinto $et$ $al$. 2019', 'Pollet':'Pollet $et$ $al$. 2018', 'Rosato':'Rosato $et$ $al$. 2020', 'Syranidou':'Syranidou $et$ $al$. 2019', 'SyranidouPE':'Syranidou $et$ $al$. 2017a', 'SyranidouPS':'Syranidou $et$ $al$. 2017b', 'Tagg':'Tagg $et$ $al$. 2019', 'Woodall':'Woodall $et$ $al$. 2018', 'Wu':'Wu $et$ $al$. 2019', 'Xu':'Xu $et$ $al$. 2019', 'Zhang':'Zhang $et$ $al$. 2019', 'WaterOrSediment':'Water or Sediment', 'LabOrField':'Laboratory or Field', 'IncubationOrCollection':'Incubation or Collection', 'MaterialType':'Material type', 'PlasticTypeSpecific':'Plastic type (specific)', 'PlasticTypeGeneral':'Plastic type (general)', 'DEPTH':'Depth', 'IncubationTime':'Incubation time (specific)', 'IncubationGeneral':'Incubation time (general)', 'PrimerPair':'Primer pair', 'DNAExtraction':'DNA extraction method', 'lab':'Laboratory', 'not_plastic':'Not plastic', 'aged_oxope':'Aged Oxo-PE', 'freeliving':'Free living', 'particleassociated':'Particle associated', 'oxope':'Oxo-PE', 'rinse_pe':'PE rinse water', 'rinse_ps':'PS rinse water', 'rinse_wood':'Wood rinse water', 'bhet':'BHET', 'hdpe':'HDPE', 'ldpe':'LDPE', 'na':'NA', 'pa':'PA', 'pe':'PE', 'pes':'PES', 'pestur':'PESTUR', 'pet':'PET', 'phbv':'PHBV', 'pla':'PLA', 'pp':'PP', 'ps':'PS', 'pvc':'PVC', 'san':'SAN', 'w_pe':'Weathered PE', '10:14':'10:14 light:dark', '12:12':'12:12 light:dark', '16:08':'16:08 light:dark', '27F_519R':'27F-519R', '319F_806R':'319F-806R', '338F_806R':'338F-806R', '341F_785R':'341F-785R', '341F_802R':'341F-802R', '341F_806R':'341F-806R', '515F_806R':'515F-806R', '515FY_926R':'515FY-926R', '518F_926R':'518F-926R', '543F_783R':'543F-783R', '967F_1064R':'967F-1064R', 'B969F_BA1406R':'B969F-BA1406R', 'redextract_sigma':'REDExtract-$N$-AmpTM', 'gentra_puregene':'Gentra Puregene', 'purelink':'PureLink', 'powersoil':'PowerSoil', 'phenol_chloroform':'Phenol-Chloroform', 'powerbiofilm':'PowerBiofilm', 'ultraclean_soil':'UltraClean soil', 'fastdna_soil':'FastDNA soil', 'orders':'Order', 'classes':'Class', 'phyla':'Phylum', 'genera':'Genera', 'families':'Family', 'species':'Species', 'ASVs':'ASV', 'kingdoms':'Kingdom', 'PlasticOnly':'Plastic only', '534f_783r':'534F-783R', 'Phenol_chloroform':'Phenol-chloroform'}
 meta_name_ind = {'Study':0, 'Latitude':1, 'Longitude':2, 'Environment':3, 'WaterOrSediment':4, 'LabOrField':5, 'IncubationOrCollection':6, 'Source':7, 'MaterialType':8, 'PlasticTypeSpecific':9, 'PlasticTypeGeneral':10, 'DEPTH':11, 'IncubationTime':12, 'IncubationGeneral':13, 'Temperature':14, 'Salinity':15, 'Light':16, 'Season':17, 'PrimerPair':18, 'DNAExtraction':19, 'PlasticOnly':20}
-"""
-Automate the creation of these dictionaries for each study
-"""
 name_dict = {'La2020':'Latva\n$et$ $al$. 2020', 'AZ2015':'Amaral-Zettler\n$et$ $al$. 2015', 'AA2018':'Arias-Andres\n$et$ $al$. 2018', 'Ca2020':'Canada\n$et$ $al$. 2020', 'Cu2019':'Curren & Leong\n2019', 'De2019':'Delacuvellerie\n$et$ $al$. 2019', 'DT2015':'De Tender\n$et$ $al$. 2015', 'DT2017':'De Tender\n$et$ $al$. 2017', 'DH2018':'Dussud \n$et$ $al$. 2018a', 'DM2018':'Dussud\n$et$ $al$. 2018b', 'EC2019':'Erni-Cassola\n$et$ $al$. 2019', 'Es2019':'Esan\n$et$ $al$. 2019', 'Fr2018':'Frere\n$et$ $al$. 2018', 'Ho2014':'Hoellein\n$et$ $al$. 2014', 'Ho2017':'Hoellein\n$et$ $al$. 2017', 'Ji2018':'Jiang\n$et$ $al$. 2018', 'Ke2019':'Kesy\n$et$ $al$. 2019', 'Ki2018':'Kirstein\n$et$ $al$. 2018', 'Ki2019':'Kirstein\n$et$ $al$. 2019', 'MC2014':'McCormick\n$et$ $al$. 2014', 'MC2016':'McCormick\n$et$ $al$. 2016', 'Ob2016':'Oberbeckmann\n$et$ $al$. 2016', 'Ob2018':'Oberbeckmann\n$et$ $al$. 2018', 'Og2018':'Ogonowski\n$et$ $al$. 2018', 'Pi2019':'Pinto\n$et$ $al$. 2019', 'Po2018':'Pollet\n$et$ $al$. 2018', 'Ro2020':'Rosato\n$et$ $al$. 2020', 'Sy2019':'Syranidou\n$et$ $al$. 2019', 'SyPE20':'Syranidou\n$et$ $al$. 2017a', 'SyPS20':'Syranidou\n$et$ $al$. 2017b', 'Ta2019':'Tagg\n$et$ $al$. 2019', 'Wo2018':'Woodall\n$et$ $al$. 2018', 'Wr2019':'Wright\n$et$ $al$. 2020', 'Wu2019':'Wu\n$et$ $al$. 2019', 'Xu2019':'Xu\n$et$ $al$. 2019', 'Zh2019':'Zhang\n$et$ $al$. 2019', 'Br2016':'Bryant\n$et$ $al$. 2016', 'Pin201':'Pinnell\n$et$ $al$. 2019', 'Pa2019':'Parrish\n$et$ $al$. 2019'}
 name_dict_2 = {'La2020':'Latva $et$ $al$. 2020', 'AZ2015':'Amaral-Zettler $et$ $al$. 2015', 'AA2018':'Arias-Andres $et$ $al$. 2018', 'Ca2020':'Canada $et$ $al$. 2020', 'Cu2019':'Curren & Leong 2019', 'De2019':'Delacuvellerie $et$ $al$. 2019', 'DT2015':'De Tender $et$ $al$. 2015', 'DT2017':'De Tender $et$ $al$. 2017', 'DH2018':'Dussud $et$ $al$.  2018a', 'DM2018':'Dussud $et$ $al$. 2018b', 'EC2019':'Erni-Cassola $et$ $al$. 2019', 'Es2019':'Esan $et$ $al$. 2019', 'Fr2018':'Frere $et$ $al$. 2018', 'Ho2014':'Hoellein $et$ $al$. 2014', 'Ho2017':'Hoellein $et$ $al$. 2017', 'Ji2018':'Jiang $et$ $al$. 2018', 'Ke2019':'Kesy $et$ $al$. 2019', 'Ki2018':'Kirstein $et$ $al$. 2018', 'Ki2019':'Kirstein $et$ $al$. 2019', 'MC2014':'McCormick $et$ $al$. 2014', 'MC2016':'McCormick $et$ $al$. 2016', 'Ob2016':'Oberbeckmann $et$ $al$. 2016', 'Ob2018':'Oberbeckmann $et$ $al$. 2018', 'Og2018':'Ogonowski $et$ $al$. 2018', 'Pi2019':'Pinto $et$ $al$. 2019', 'Po2018':'Pollet $et$ $al$. 2018', 'Ro2020':'Rosato $et$ $al$. 2020', 'Sy2019':'Syranidou $et$ $al$. 2019', 'SyPE20':'Syranidou $et$ $al$. 2017a', 'SyPS20':'Syranidou $et$ $al$. 2017b', 'Ta2019':'Tagg $et$ $al$. 2019', 'Wo2018':'Woodall $et$ $al$. 2018', 'Wr2019':'Wright $et$ $al$. 2020', 'Wu2019':'Wu $et$ $al$. 2019', 'Xu2019':'Xu $et$ $al$. 2019', 'Zh2019':'Zhang $et$ $al$. 2019', 'Br2016':'Bryant $et$ $al$. 2016', 'Pin201':'Pinnell $et$ $al$. 2019', 'Pa2019':'Parrish $et$ $al$. 2019'}
 name_env = {'AZ2015':'marine', 'AA2018':'freshwater', 'Ca2020':'aquatic', 'Cu2019':'marine', 'De2019':'marine', 'DT2015':'marine', 'DT2017':'marine', 'DH2018':'marine', 'DM2018':'marine', 'EC2019':'marine', 'Es2019':'terrestrial', 'Fr2018':'marine', 'Ho2014':'freshwater', 'Ho2017':'freshwater', 'Ke2019':'aquatic', 'Ki2018':'marine', 'Ki2019':'marine', 'MC2014':'freshwater', 'MC2016':'freshwater', 'Ob2016':'marine', 'Ob2018':'aquatic', 'Og2018':'marine', 'Pi2019':'marine', 'Po2018':'marine', 'Ro2020':'marine', 'Sy2019':'marine', 'SyPE20':'marine', 'SyPS20':'marine', 'Ta2019':'aquatic', 'Wo2018':'marine', 'Wr2019':'marine', 'Wu2019':'freshwater', 'Xu2019':'marine', 'Zh2019':'terrestrial', 'Pa2019':'aquatic'}
-
-def write_csv(fn, data): #Save a csv file with file name fn and data in a list
-    '''
-    add doc string here
-    '''
-    with open(fn, 'w') as f:
-        writer = csv.writer(f)
-        for row in data:
-            writer.writerow(row)
-    return
-
-def write_txt(fn, data): #Save a csv file with file name fn and data in a list
-    '''
-    add doc string here
-    '''
-    with open(fn, 'w') as f:
-        writer = csv.writer(f, delimiter='\t', lineterminator='\n')
-        for row in data:
-            writer.writerow(row)
-    return
+norm_names = {'rare':'Rarefied', 'rel_abun':'Relative\nabundance', 'log':'Log', 'clr':'CLR'}
 
 def open_csv(fn): #open csv with file name fn, returning the data as rows
     '''
-    add doc string here
+    Opens csv file and returns the data as rows
+    Takes as input:
+        - fn (.csv file name)
+    Returns:
+        - rows of the file as a list
     '''
     with open(fn, 'rU') as f:
         rows = []
@@ -77,9 +57,13 @@ def open_csv(fn): #open csv with file name fn, returning the data as rows
             rows.append(row)
     return rows
 
-def open_txt(fn): #open text file with file name fn, returning the data as rows
+def open_txt(fn):
     '''
-    add doc string here
+    Opens text file and returns the data as rows
+    Takes as input:
+        - fn (.txt file name - assumes that data is tab delimited and lines terminated with \n)
+    Returns:
+        - rows of the file as a list
     '''
     with open(fn, 'rU') as f:
         rows = []
@@ -87,54 +71,178 @@ def open_txt(fn): #open text file with file name fn, returning the data as rows
             rows.append(row)
     return rows
 
+def open_pickle(fn):
+    '''
+    Opens python data object file and returns the data as a python object
+    Takes as input:
+        - fn (file name for python object)
+    Returns:
+        - python object
+    '''
+    with open(fn, 'rb') as pick: 
+        pick = pickle.load(pick)
+    return pick
+
+def write_csv(fn, data):
+    '''
+    Save a .csv file of the data given
+    Takes as input:
+       - fn (the name with which to save the csv file)
+       - data (a list of lists - the data to go in the csv file)
+    '''
+    with open(fn, 'w') as f:
+        writer = csv.writer(f)
+        for row in data:
+            writer.writerow(row)
+    return
+
+def write_txt(fn, data):
+    '''
+    Save a .txt file (tab delimited with \n to break lines) of the data given
+    Takes as input:
+       - fn (the name with which to save the txt file)
+       - data (a list of lists - the data to go in the txt file)
+    '''
+    with open(fn, 'w') as f:
+        writer = csv.writer(f, delimiter='\t', lineterminator='\n')
+        for row in data:
+            writer.writerow(row)
+    return
+
 def write_pickle(fn, data): #write pickle python object with name fn and the data in data
     '''
-    add doc string here
+    Write a pickle python object with the data given
+    Takes as input:
+        - fn (the name with which to save the data)
+        - data (the python object to save)
     '''
     with open(fn, 'wb') as f:
         pickle.dump(data, f)
     return
-
-def make_KO_dict(fn):
-    KO_dict = {}
-    KO_dict_full ={}
-    with open(fn, 'rU') as f:
-        for row in csv.reader(f):
-            if row[0] == 'D':
-                if len(row) > 3:
-                    if row[3] == 'Xenobiotics' or row[3] == 'Pathogen' or row[3] == 'Antimicrobial resistance':
-                        if row[3] == 'Xenobiotics':
-                            KO_dict[row[1]] = row[2:]
-                        else:
-                            KO_dict[row[1]] = row[2:]
-            KO_dict_full[row[1]] = row[2:]
-    write_pickle('KO_dict.dictionary', KO_dict)
-    return KO_dict, KO_dict_full
-
-def filter_picrust(picrust, KO_dict, KO_dict_full):
-    keeping = []
-    ko = list(picrust.index.values)
-    for k in range(len(ko)):
-        if ko[k] in KO_dict:
-            keeping.append(True)
-        elif ko[k] not in KO_dict_full:
-            if ko[k][0] != 'K':
-                keeping.append(True)
-                print(ko[k])
-                KO_dict[ko[k]] = [ko[k], 'Xenobiotics']
-            else:
-                keeping.append(False)
-        else:
-            keeping.append(False)
-    picrust = picrust.loc[keeping, :]
-    write_pickle('KO_dict.dictionary', KO_dict)
-    picrust = picrust[picrust.max(axis=1) > 0]
-    write_pickle('picrust.dataframe', picrust)
-    return picrust, KO_dict
-
-def format_R(ft): #format the raw data files for phyloseq and unifrac analyses in R
+    
+def open_and_sort(fn):
     '''
-    Function that transforms the feature table output by QIIME2 to a version that can be used by the R agglomerate script
+    This is a function to sort the columns of a .csv file and return the resulting sorted dataframe
+    Takes as input:
+        - fn (the name of the .csv file)
+    If 'unifrac' is in the name then it will sort the rows as well as the columns. Otherwise only the columns will be sorted
+    Returns:
+        - df (a pandas dataframe of the sorted .csv file)
+    '''
+    df = pd.read_csv(fn, header=0, index_col=0) #open the file
+    df.sort_index(inplace=True) #sort the column names
+    if 'unifrac' in fn or 'distance' in fn: #if it is a distance matrix
+        df.sort_index(axis=1, inplace=True) #also sort the rows
+    return df
+
+def get_meta(meta): #get the information contained in the meta file as a dictionary
+    '''
+    Function to get the information contained in the metadata file as a dataframe and a dictionary
+    Takes as input:
+        - meta (.txt tab delimited file with sample names as rows and metadata categories as columns)
+    Returns:
+        - meta (the metadata file as a list)
+        - meta_names (the names of the metadata categories)
+        - meta_dict (a dictionary containing sample names as keys and all metadata stored)
+    '''
+    meta = open_txt(meta) #open the file
+    meta_names = meta[0] #save the column names
+    del meta[0] #delete the column names
+    meta_dict = {} #create a dictionary of all information contained, with sample names as dictionary keys
+    for a in range(len(meta)):
+        meta_dict[meta[a][0]] = meta[a][1:]
+        for b in range(len(meta[a])):
+            if meta[a][b] not in rename_plots:
+                try:
+                    float(meta[a][b])
+                except:
+                    rename_plots[meta[a][b]] = meta[a][b].capitalize()
+    return meta, meta_names, meta_dict
+
+def get_meta_df(meta, meta_names, ft_samples):
+    '''
+    Function to check that only the samples that were included in the QIIME analysis (after filtering, rarefaction, etc) remain in the metadata dataframe
+    Takes as input:
+        - meta (the metadata file as a list (one of the outputs of the get_meta function)
+        - meta_names (list of metadata categories (also output from the get_meta function))
+        - ft_samples (the sample names from the feature table)
+    Returns:
+        - meta_df (a dataframe containing only the samples that are in the feature table)
+    '''
+    meta_df = pd.DataFrame(meta, columns=meta_names) #open the meta file
+    meta_df.index = meta_df['#SampleID'] #change the index to be the sample ID column
+    meta_df.drop('#SampleID', axis=1, inplace=True) #remove this column
+    sn_meta = list(meta_df.index.values) #get a list of all sample names
+    for a in sn_meta: #for each of the samples
+        if a not in ft_samples: #if it's not also in the samples list
+            meta_df.drop(a, axis=0, inplace=True) #remove it from the meta dataframe
+    return meta_df
+    
+def get_eucl_dist(ft, dist_met='euclidean'):
+  X = ft.iloc[0:].values
+  y = ft.iloc[:,0].values
+  X_true = X
+  similarities = distance.cdist(X_true, X_true, dist_met)
+  return similarities
+    
+def get_ASV_dict(ft, seqs, basedir):
+    '''
+    Function to rename the ASVs with a number (rather than the random sequence of letters/numbers that is standard for QIIME2 output)
+    Takes as input:
+        - ft (feature table pandas dataframe with sample names as columns and ASVs as rows)
+        - seqs (name of the sequences fasta file that contains sequences for all of the ASVs)
+    Returns:
+        - ASV_dict (a dictionary containing the previous ASV names as keys and the new ASV names as data)
+    '''
+    asvs = list(ft.index.values)
+    ASV_dict = {}
+    for a in range(len(asvs)):
+        ASV_dict[asvs[a]] = 'ASV'+str(a).zfill(4)
+    seqs_rename = [] #create a list to add the sequence records to
+    for record in SeqIO.parse(seqs, "fasta"): #open the sequences file and loop through it
+        if record.id in asvs: #if the record id matches one found in the asv list
+            record.id = ASV_dict[record.id]
+            seqs_rename.append(record) #add the record to the list
+    SeqIO.write(seqs_rename, basedir+"sequences_agglom_renamed.fasta", "fasta") #save the new list of sequence records
+    return ASV_dict
+    
+def mark_inset(parent_axes, inset_axes, loc1a=1, loc1b=1, loc2a=2, loc2b=2, **kwargs):
+    rect = TransformedBbox(inset_axes.viewLim, parent_axes.transData)
+
+    pp = BboxPatch(rect, fill=False, **kwargs)
+    parent_axes.add_patch(pp)
+
+    p1 = BboxConnector(inset_axes.bbox, rect, loc1=loc1a, loc2=loc1b, **kwargs)
+    inset_axes.add_patch(p1)
+    p1.set_clip_on(False)
+    p2 = BboxConnector(inset_axes.bbox, rect, loc1=loc2a, loc2=loc2b, **kwargs)
+    inset_axes.add_patch(p2)
+    p2.set_clip_on(False)
+
+    return pp, p1, p2
+    
+def transform_for_NMDS(similarities, n_jobs=1): #transform the similarity matrix to 2D space (n_components=2)
+    '''
+    For a similarity matrix, calculate the best fit of points in 2D 
+    Takes as input:
+        - similarities (a distance matrix with no row or sample names)
+        - n_jobs (number of processors to use for constraining - doesn't seem to work so we leave this as the default 1)
+    '''
+    #similarities = np.nan_to_num(similarities)
+    X_true = similarities.iloc[0:].values
+    mds = manifold.MDS(n_components=2, max_iter=3000, eps=1e-9, random_state=seed, dissimilarity="precomputed", n_jobs=n_jobs)
+    similarities = np.nan_to_num(similarities)
+    pos = mds.fit(similarities).embedding_
+    nmds = manifold.MDS(n_components=2, metric=False, max_iter=3000, eps=1e-12, dissimilarity="precomputed", random_state=seed, n_jobs=n_jobs, n_init=1)
+    npos = nmds.fit_transform(similarities, init=pos)
+    npos *= np.sqrt((X_true ** 2).sum()) / np.sqrt((npos ** 2).sum())
+    clf = PCA()
+    npos = clf.fit_transform(npos)
+    return npos, nmds.stress_
+
+def format_R(ft, basedir, name): 
+    '''
+    Function that transforms the feature table output by QIIME2 to a version that can be used by the R agglomerate script (phyloseq and unifrac)
     Takes as input:
         - feature table.txt with samples as columns and ASVs as rows
     Gives as output:
@@ -177,89 +285,41 @@ def format_R(ft): #format the raw data files for phyloseq and unifrac analyses i
             tax_file.append([ft[a][0]]+new_string) #add this asv name and taxon information
         ft[a] = ft[a][:-1] #remove the taxon information from the feature table
     ft[0][0] = 'OTUID' #Rename the first cell to match the expected input in R
-    write_csv('feature_table.csv', ft) #write the new feature table to .csv
-    ft = pd.read_csv('feature_table.csv', header=0, index_col=0)
+    write_csv(basedir+'feature_table_'+name+'.csv', ft) #write the new feature table to .csv
+    ft = pd.read_csv(basedir+'feature_table_'+name+'.csv', header=0, index_col=0)
     ft.sort_index(inplace=True)
     ft.sort_index(axis=1, inplace=True)
-    write_csv('taxonomy.csv', tax_file) #write the taxonomy to .csv
-    write_csv('taxonomy_name_only.csv', tax_name_only) #write the taxonomy to .csv
-    write_csv('random_forest/taxonomy_name_only.csv', tax_name_only) #write the taxonomy to .csv
-    write_pickle('tax_dict.dictionary', tax_dict) #write the taxon information to a python object
+    write_csv(basedir+'tax_dict_'+name+'.csv', tax_file) #write the taxonomy to .csv
+    write_csv(basedir+'tax_dict_'+name+'_name_only.csv', tax_name_only) #write the taxonomy to .csv
+    write_pickle(basedir+'tax_dict_'+name+'.dictionary', tax_dict) #write the taxon information to a python object
     return ft, tax_dict
-
-def get_meta(meta): #get the information contained in the meta file as a dictionary
+    
+def study_map_metrics(dates, locs, basedir, map_img, meta_df):
     '''
-    add doc string here
-    '''
-    meta = open_txt(meta) #open the file
-    meta_names = meta[0] #save the column names
-    del meta[0] #delete the column names
-    meta_dict = {} #create a dictionary of all information contained, with sample names as dictionary keys
-    for a in range(len(meta)):
-        meta_dict[meta[a][0]] = meta[a][1:]
-        for b in range(len(meta[a])):
-            if meta[a][b] not in rename_plots:
-                try:
-                    float(meta[a][b])
-                except:
-                    rename_plots[meta[a][b]] = meta[a][b].capitalize()
-    return meta, meta_names, meta_dict
-
-def get_meta_df(meta, meta_names, ft_samples):
-    '''
-    add doc string here
-    '''
-    meta_df = pd.DataFrame(meta, columns=meta_names)
-    meta_df.index = meta_df['#SampleID']
-    meta_df.drop('#SampleID', axis=1, inplace=True)
-    sn_meta = list(meta_df.index.values)
-    for a in sn_meta:
-        if a not in ft_samples:
-            meta_df.drop(a, axis=0, inplace=True)
-    return meta_df
-
-def get_ASV_dict(ft, seqs):
-    asvs = list(ft.index.values)
-    ASV_dict = {}
-    for a in range(len(asvs)):
-        ASV_dict[asvs[a]] = 'ASV'+str(a).zfill(4)
-    seqs_rename = [] #create a list to add the sequence records to
-    for record in SeqIO.parse(seqs, "fasta"): #open the sequences file and loop through it
-        if record.id in asvs: #if the record id matches one found in the asv list
-            record.id = ASV_dict[record.id]
-            seqs_rename.append(record) #add the record to the list
-    SeqIO.write(seqs_rename, "sequences_agglom_renamed.fasta", "fasta") #save the new list of sequence records
-    return ASV_dict
-
-def filter_seqs(ft, sf): #filter the sequences file to contain only the sequences in the given feature table
-    '''
-    add doc string here
-    '''
-    ft = pd.read_csv(ft, header=0, index_col=0) #open the feature table using pandas
-    asvs = list(ft.index.values) #get a list of the asv names
-    seqs_agglom = [] #create a list to add the sequence records to
-    for record in SeqIO.parse(sf, "fasta"): #open the sequences file and loop through it
-        if record.id in asvs: #if the record id matches one found in the asv list
-            seqs_agglom.append(record) #add the record to the list
-    SeqIO.write(seqs_agglom, "picrust/sequences_agglom.fasta", "fasta") #save the new list of sequence records
-    ft.to_csv('picrust/feature_table_agglom.txt', sep='\t')
-    return 'picrust/sequences_agglom.fasta', 'picrust/feature_table_agglom.txt', ft
-
-def study_map(dates, locs, basedir):
-    '''
-    add doc string here
+    Function to plot and save Figure 1 map (cumulative number of studies at the beginning of 2020 and the world map showing all of these studies) and metrics (number of samples included for each environment, plastic type and whether these were from incubations or collections, i.e. Figure 1C, 1D, 1E)
+    It uses files that are not the metadata file in order to also include those studies with data that wasn't accessible
+    Takes as input:
+        - dates (file containing details of the numbers of studies published in each environment in each year, and whether the data for these studies are accessible, named Study_dates.csv in the data to be downloaded for this study)
+        - locs (file containing details of study locations for all studies published up to 2020, including whether the data was accessible for each, named Study_location.csv in the data to be downloaded for this study)
+        - basedir (location of the folder to save the figure to)
+        - map_img (path to the map figure used as the background)
+        - meta_df (dataframe containing samples as rows and metadata categories as columns)
+    Returns:
+        - nothing, but saves figure 'study_map' to the figures folder
     '''
     dates = open_csv(dates) #open csv file with study dates
     locs = open_csv(locs) #open csv file with study locations
-    plt.figure(figsize=(30,4)) #set up figure
-    ax1 = plt.subplot2grid((40,9), (4,0), rowspan=32) #add axis for number of publications
-    ax2 = plt.subplot2grid((1,9), (0,1), colspan=2, projection=ccrs.PlateCarree()) #add axis for map
-    ax1.set_title('A', loc='left', fontsize=fs_title) #add axis label
-    ax2.set_title('B', loc='left', fontsize=fs_title) #add axis label
-    axins1 = plt.subplot2grid((2,9), (0,3), projection=ccrs.PlateCarree()) #add first inset map axis
-    axins2 = plt.subplot2grid((3,13), (0,9), projection=ccrs.PlateCarree()) #add second inset map axis
+    plt.figure(figsize=(15,8)) #set up figure
+    ax1 = plt.subplot2grid((80,4), (0,0), rowspan=36) #add axis for number of publications
+    ax2 = plt.subplot2grid((2,4), (0,1), colspan=2) #add axis for map
+    ax1.set_title('A', loc='left', fontsize=fs_main, fontweight='bold') #add axis label
+    ax2.set_title('B', loc='left', fontsize=fs_main, fontweight='bold') #add axis label
+    plt.sca(ax2)
+    img = plt.imread(map_img) #get the background map picture and set the main and inset axis to show only the regions of interest
+    ax2.imshow(img, extent=[-180, 180, -90, 90], alpha=0.6)
     years, marine, freshwater, terrestrial, aquatic, marine_unav, freshwater_unav, terrestrial_unav, aquatic_unav = [], [], [], [], [], [], [], [], [] #set up lists to add data to
     mar, fw, terr, aqu, mar_unav, fw_unav, terr_unav, aqu_unav = 0, 0, 0, 0, 0, 0, 0, 0 #set all numbers to zero to start
+
     for a in range(1, len(dates)): #go through and see if there is data for each cell
         for b in range(len(dates[a])):
             if dates[a][b] == '': dates[a][b] = 0 #if there's nothing in the cell, make this equal to 0
@@ -295,59 +355,39 @@ def study_map(dates, locs, basedir):
     ax1.set_xlim([2012, 2020])
     ax1.set_ylim([0, 55])
     #add axis labels and change the font sizes to be consistent throughout
-    ax1.set_ylabel('Cumulative number of\nPlastisphere publications', fontsize=fs_main)
+    ax1.set_ylabel('Cumulative number of\nPlastisphere publications', fontsize=fs_small)
     ax1.set_xlabel('Year', fontsize=fs_main)
-    ax1.tick_params(axis='both', which='major', labelsize=fs_main)
-    ax1.tick_params(axis='both', which='minor', labelsize=fs_main)
+    ax1.set_xticks([2012, 2014, 2016, 2018, 2020])
+    ax1.tick_params(axis='both', which='major', labelsize=fs_small)
+    ax1.tick_params(axis='both', which='minor', labelsize=fs_small)
     #make a custom legend (this is so we have boxes for colors rather than lines)
     marine = mlines.Line2D([], [], color=color_env['marine'], marker='s', markersize=8, markeredgecolor='k', label=label_env[0], linestyle=' ')
     freshwater = mlines.Line2D([], [], color=color_env['freshwater'], marker='s', markersize=8, markeredgecolor='k', label=label_env[1], linestyle=' ')
     aquatic = mlines.Line2D([], [], color=color_env['aquatic'], marker='s', markersize=8, markeredgecolor='k', label=label_env[2], linestyle=' ')
     terrestrial = mlines.Line2D([], [], color=color_env['terrestrial'], marker='s', markersize=8, markeredgecolor='k', label=label_env[3], linestyle=' ')
     plt.sca(ax1)
-    plt.legend(handles=[marine,freshwater,aquatic, terrestrial], loc='upper left', fontsize=fs_main)  
+    plt.legend(handles=[marine,freshwater,aquatic, terrestrial], loc='upper left', fontsize=fs_small)  
     
-    plt.sca(ax2)
     #make all locations into floats (rather than the default strings)
     for a in range(1, len(locs)):
         for b in range(len(locs[a])):
             if b == 1 or b == 2 or b == 3:
                 locs[a][b] = float(locs[a][b])
-    img = plt.imread("world_map.jpg") #get the background map picture and set the main and inset axis to show only the regions of interest
-    ax2.imshow(img, extent=[-180, 180, 90, -90], alpha=0.6)
-    axins1.imshow(img, extent=[-180, 180, 90, -90], alpha=0.6)
-    axins2.imshow(img, extent=[-180, 180, 90, -90], alpha=0.6)
-    extent0 = [-180, 180, -90, 90]
-    ax2.set_extent(extent0, crs=ccrs.PlateCarree())
-    extent1 = [-22, 30, 25, 65]
-    lonmin1, lonmax1, latmin1, latmax1 = extent1
-    axins1.set_extent(extent1, crs=ccrs.PlateCarree())
-    extent2 = [105, 130, 15, 45]
-    lonmin2, lonmax2, latmin2, latmax2 = extent2
-    axins2.set_extent(extent2, crs=ccrs.PlateCarree())
+
+    axins1 = zoomed_inset_axes(ax2, 2.5, loc='upper left', bbox_to_anchor=(0.25, 0.5), bbox_transform=ax2.transAxes)
+    axins1.imshow(img, extent=[-180, 180, -90, 90], alpha=0.6)
+    axins1.set_xlim([-22, 30]), axins1.set_ylim([25, 65])
+    mark_inset(ax2, axins1, loc1a=1, loc1b=4, loc2a=2, loc2b=3, fc="none", ec="k")
     
-    #add the inset axis to the main axis
-    plt.draw()
-    p1 = ax2.get_position()
-    p2 = axins1.get_position()
-    axins1.set_position([p1.x1-0.12, p1.y0-0.05, p2.width, p2.height])
-    p2 = axins2.get_position()
-    axins2.set_position([p1.x1-(p2.width)*1.1, p1.y0+(p2.height*0.1), p2.width, p2.height])
+    axins2 = zoomed_inset_axes(ax2, 2.1, loc='upper right', bbox_to_anchor=(0.99, 0.45), bbox_transform=ax2.transAxes)
+    axins2.imshow(img, extent=[-180, 180, -90, 90], alpha=0.6)
+    axins2.set_xlim([105, 130]), axins2.set_ylim([15, 45])
+    mark_inset(ax2, axins2, loc1a=1, loc1b=4, loc2a=2, loc2b=3, fc="none", ec="k")
     
-    #plot the lines around the inset areas and going to the box edges
-    ax2.plot([lonmin1, lonmax1], [latmin1, latmin1], 'k', lw=0.5)
-    ax2.plot([lonmin1, lonmax1], [latmax1, latmax1], 'k', lw=0.5)
-    ax2.plot([lonmin1, lonmin1], [latmin1, latmax1], 'k', lw=0.5)
-    ax2.plot([lonmax1,lonmax1], [latmin1, latmax1], 'k', lw=0.5)
-    ax2.plot([lonmin1, -87.8], [latmin1, -2], 'k', lw=0.5)
-    ax2.plot([lonmax1, 44], [latmin1, -2], 'k', lw=0.5)
-    ax2.plot([lonmin2, lonmax2], [latmin2, latmin2], 'k', lw=0.5)
-    ax2.plot([lonmin2, lonmax2], [latmax2, latmax2], 'k', lw=0.5)
-    ax2.plot([lonmin2, lonmin2], [latmin2, latmax2], 'k', lw=0.5)
-    ax2.plot([lonmax2,lonmax2], [latmin2, latmax2], 'k', lw=0.5)
-    ax2.plot([lonmin2, 119], [latmin2, -17], 'k', lw=0.5)
-    ax2.plot([lonmax2, 175], [latmin2, -17], 'k', lw=0.5)
-    
+    for ax in [ax2, axins1, axins2]:
+      plt.sca(ax)
+      plt.yticks([]), plt.xticks([])
+
     #plot each location, checking which color and marker these need based on the values in the other columns of the file
     for i in range(1, len(locs)):
         if locs[i][5] == 'Yes': alpha, edge = 1, 'k'
@@ -365,120 +405,118 @@ def study_map(dates, locs, basedir):
     field = mlines.Line2D([], [], color='w', marker='o', markersize=8, markeredgecolor='k', label='Field', linestyle=' ')
     both = mlines.Line2D([], [], color='w', marker='*', markersize=8, markeredgecolor='k', label='Both', linestyle=' ')
     gap = mlines.Line2D([], [], color='w', marker='o', markersize=2, markeredgecolor='w', alpha=0, label='', linestyle=' ')
-    plt.legend(handles=[marine,freshwater,aquatic, terrestrial, gap, lab, field, both], loc='lower left', fontsize=fs_main)  
-    
-    #now save the figure (using the file extension and dpi specified at the top of the file) and close it
-    plt.savefig(basedir+'/figures/study_map'+ext, dpi=dpi, bbox_inches='tight')
-    plt.close()
-    return
+    plt.legend(handles=[marine,freshwater,aquatic, terrestrial, gap, lab, field, both], loc='lower left', fontsize=fs_small)  
 
-def study_metrics(meta_df, basedir):
-    plt.figure(figsize=(10,3))
-    ax1 = plt.subplot2grid((1,3), (0,0))
-    samples = list(meta_df.index.values)
-    envs = ['terrestrial', 'aquatic', 'freshwater', 'marine']
-    env_caps = ['Terrestrial', 'Aquatic', 'Freshwater', 'Marine']
-    ax2 = plt.subplot2grid((1,3), (0,1))
-    ax3 = plt.subplot2grid((1,3), (0,2))
-    for a in range(len(envs)):
-        bottom = 0
-        for b in ['lab', 'field']:
-            count = 0
-            for c in range(len(samples)):
-                if meta_df.loc[samples[c], 'Environment'] == envs[a] and meta_df.loc[samples[c], 'LabOrField'] == b:
-                    count += 1
-            if b == 'lab':
-                ax1.barh(a, count, left=bottom, color=color_env[envs[a]], hatch='//', edgecolor='k')
-            else:
-                ax1.barh(a, count, left=bottom, color=color_env[envs[a]], edgecolor='k')
-            if count > 100:
-                ax1.text((count/2)+bottom, a, str(count), color='w', ha='center', va='center', fontsize=fs_main)
-            bottom = count+bottom
-            if b == 'field':
-                ax1.text(bottom+20, a, str(bottom), color='k', ha='left', va='center', fontsize=fs_main)
-        pie, inc = [], []
-        for c in range(len(samples)):
-            if meta_df.loc[samples[c], 'Environment'] == envs[a]:
-                pie.append(meta_df.loc[samples[c], 'PlasticTypeGeneral'])
-            if meta_df.loc[samples[c], 'Environment'] == envs[a]:
-                inc.append(meta_df.loc[samples[c], 'IncubationGeneral'])
-        unique = list(set(pie))
-        pie_color = [color_source[x] for x in unique]
-        pie_count = [pie.count(x) for x in unique]
-        pie_count = [(x/sum(pie_count))*100 for x in pie_count]
-        left=0
-        for d in range(len(pie_count)):
-            ax2.barh(a, pie_count[d], left=left, color=pie_color[d], label=unique[d], edgecolor='k')
-            fc = 'w'
-            if unique[d] == 'planktonic' or unique[d] == 'biofilm':
-                fc = 'k'
-            if pie_count[d] > 5:
-                ax2.text((pie_count[d]/2)+left, a, str(int(pie_count[d])), color=fc, ha='center', va='center', fontsize=fs_main)
-            left += pie_count[d]
-        unique = list(set(inc))
-        if len(unique) == 3:
-            unique = ['early', 'late', 'collection']
-        pie_color = [color_source[x] for x in unique]
-        pie_count = [inc.count(x) for x in unique]
-        pie_count = [(x/sum(pie_count))*100 for x in pie_count]
-        left = 0
-        for d in range(len(pie_count)):
-            ax3.barh(a, pie_count[d], left=left, color=pie_color[d], label=unique[d], edgecolor='k')
-            fc = 'w'
-            if unique[d] == 'early':
-                fc = 'k'
-            if pie_count[d] > 5:
-                ax3.text((pie_count[d]/2)+left, a, str(int(pie_count[d])), color=fc, ha='center', va='center', fontsize=fs_main)
-            left += pie_count[d]
-    ax1.set_xlabel('Number of samples', fontsize=fs_main)
+    #now save the figure (using the file extension and dpi specified at the top of the file) and close it
+
+    #set up the figure and plots
+    #plt.figure(figsize=(10,3))
+    ax1 = plt.subplot2grid((2,4), (1,0))
+    ax2 = plt.subplot2grid((2,4), (1,1))
+    ax3 = plt.subplot2grid((2,4), (1,2))
+    samples = list(meta_df.index.values) #get all sample names
+    envs, env_caps = ['terrestrial', 'aquatic', 'freshwater', 'marine'], ['Terrestrial', 'Aquatic', 'Freshwater', 'Marine'] #set up lists of the environment names
+    for a in range(len(envs)): #for each of the environments
+        bottom = 0 #reset the bottom
+        for b in ['lab', 'field']: #for each of lab and field
+            count = 0 #reset the count
+            for c in range(len(samples)): #for each of the sample names
+                if meta_df.loc[samples[c], 'Environment'] == envs[a] and meta_df.loc[samples[c], 'LabOrField'] == b: #if the metadata shows the sample is in the environment and in the lab/field category we are looking at
+                    count += 1 #add it to the count
+            if b == 'lab': #if we are looking at lab samples
+                ax1.barh(a, count, left=bottom, color=color_env[envs[a]], hatch='//', edgecolor='k') #plot a bar with the correct colors and hatching
+            else: #otherwise
+                ax1.barh(a, count, left=bottom, color=color_env[envs[a]], edgecolor='k') #use the right color, but not hatched
+            if count > 100: #if the count is above 100 (i.e. the bar is large enough to show text within)
+                ax1.text((count/2)+bottom, a, str(count), color='w', ha='center', va='center', fontsize=fs_small) #add text saying the number of samples in this category
+            bottom = count+bottom #now add this count to the bottom
+            if b == 'field': #if we are looking at field samples (i.e. we have now plotted both bars for this environmet)
+                ax1.text(bottom+20, a, str(bottom), color='k', ha='left', va='center', fontsize=fs_small) #print the total number of samples in this environment next to the bar
+        pie, inc = [], [] #set up new lists
+        for c in range(len(samples)): #for each of the samples
+            if meta_df.loc[samples[c], 'Environment'] == envs[a]: #if this is the environment we are looking at
+                pie.append(meta_df.loc[samples[c], 'PlasticTypeGeneral']) #add the plastic type to the list
+                inc.append(meta_df.loc[samples[c], 'IncubationGeneral']) #add the incubation time to the other list
+        unique = list(set(pie)) #get all of the unique values for plastic type in this environment
+        pie_color = [color_source[x] for x in unique] #and get the colors that match each plastic type from the dictionary at the top
+        pie_count = [pie.count(x) for x in unique] #and count how many samples of each plastic type
+        pie_count = [(x/sum(pie_count))*100 for x in pie_count] #and get these counts as relative abundance
+        left=0 #reset the left count
+        for d in range(len(pie_count)): #for each sample type
+            ax2.barh(a, pie_count[d], left=left, color=pie_color[d], label=unique[d], edgecolor='k') #plot the stacked bar corresponding to sample type
+            fc = 'w' #set the fontcolor as white
+            if unique[d] == 'planktonic' or unique[d] == 'biofilm': #unless it's planktonic or biofilm
+                fc = 'k' #in which case, the fontcolor should be black
+            if pie_count[d] > 5: #if this category has more than 5% of samples (i.e. is big enought to add text)
+                ax2.text((pie_count[d]/2)+left, a, str(int(pie_count[d])), color=fc, ha='center', va='center', fontsize=fs_small) #add text showing the percentage of samples with this plastic type
+            left += pie_count[d] #now add this number to the left count (to make the bar stacked)
+        unique = list(set(inc)) #now we are doing the same for incubation time, so get the unique values for incubation time in this environment
+        if len(unique) == 3: #if this list is equal to 3
+            unique = ['early', 'late', 'collection'] #change the order to be this
+        pie_color = [color_source[x] for x in unique] #and get the colors that match these incubation times
+        pie_count = [inc.count(x) for x in unique] #count how many samples for each incubation time
+        pie_count = [(x/sum(pie_count))*100 for x in pie_count] #and convert these counts to relative abundance
+        left = 0 #reset the left count
+        for d in range(len(pie_count)): #for each sample type
+            ax3.barh(a, pie_count[d], left=left, color=pie_color[d], label=unique[d], edgecolor='k') #plot the stacked bar corresponding to sample type
+            fc = 'w' #set the fontcolor as white
+            if unique[d] == 'early': #unless it's an early incubation time
+                fc = 'k' #in which case the fontcolor should be black
+            if pie_count[d] > 5: #if this accounts for more than 5% of relative abundance (i.e. is big enough to add text)
+                ax3.text((pie_count[d]/2)+left, a, str(int(pie_count[d])), color=fc, ha='center', va='center', fontsize=fs_small) #add text showing the percentage of samples with this incubation time
+            left += pie_count[d] #now add the number to the left count 
+    #set x and y labels, ticks, limits, etc.  and make patches and legends for each plot
+    ax1.set_xlabel('Number of samples', fontsize=fs_small)
     plt.sca(ax1)
-    plt.yticks([0, 1, 2, 3], env_caps, fontsize=fs_main)
-    plt.xticks(fontsize=fs_main)
+    plt.yticks([0, 1, 2, 3], env_caps, fontsize=fs_small)
+    plt.xticks(fontsize=fs_small)
     plt.xlim([0, 1400])
     lab = patches.Patch(facecolor='w', edgecolor='k', hatch='//', label='Laboratory')
     field = patches.Patch(facecolor='w', edgecolor='k', label='Field')
     ax1.legend(handles=[lab, field], fontsize=fs_main, bbox_to_anchor=(0., 0, 1., -.25), loc='upper left', borderaxespad=0., mode='expand', ncol=2)
     sources = ['aliphatic', 'other plastic', 'unknown plastic', 'biofilm', 'planktonic', 'blank']
     handles = [patches.Patch(facecolor=color_source[x], edgecolor='k', label=x.capitalize()) for x in sources]
-    ax2.legend(handles=handles, fontsize=fs_main, bbox_to_anchor=(0., 0, 1., -.25), loc='upper left', borderaxespad=0., mode='expand', ncol=2)
+    ax2.legend(handles=handles, fontsize=fs_small, bbox_to_anchor=(0., 0, 1., -.25), loc='upper left', borderaxespad=0., mode='expand', ncol=2)
     plt.sca(ax2)
     plt.yticks([])
-    plt.xticks(fontsize=fs_main)
-    plt.xlabel('Relative abundance (%)', fontsize=fs_main)
+    plt.xticks(fontsize=fs_small)
+    plt.xlabel('Relative abundance (%)', fontsize=fs_small)
     plt.xlim([0, 100])
     times = ['early', 'late', 'collection']
     handles = [patches.Patch(facecolor=color_source[x], edgecolor='k', label=x.capitalize()) for x in times]
-    ax3.legend(handles=handles, fontsize=fs_main, bbox_to_anchor=(0., 0, 1., -.25), loc='upper left', borderaxespad=0., mode='expand', ncol=3)
+    ax3.legend(handles=handles, fontsize=fs_small, bbox_to_anchor=(0., 0, 1., -.25), loc='upper left', borderaxespad=0., mode='expand', ncol=3)
     plt.sca(ax3)
     plt.yticks([])
-    plt.xticks(fontsize=fs_main)
-    plt.xlabel('Relative abundance (%)', fontsize=fs_main)
+    plt.xticks(fontsize=fs_small)
+    plt.xlabel('Relative abundance (%)', fontsize=fs_small)
     plt.xlim([0, 100])
     plt.subplots_adjust(wspace=0.1)
-    ax1.set_title('C', loc='left', fontsize=fs_title)
-    ax2.set_title('D', loc='left', fontsize=fs_title)
-    ax3.set_title('E', loc='left', fontsize=fs_title)
-    plt.savefig(basedir+'/figures/'+'sample_metrics'+ext, dpi=dpi, bbox_inches='tight')
-    #plt.close()
+    ax1.set_title('C', loc='left', fontsize=fs_main, fontweight='bold')
+    ax2.set_title('D', loc='left', fontsize=fs_main, fontweight='bold')
+    ax3.set_title('E', loc='left', fontsize=fs_main, fontweight='bold')
+    plt.savefig(basedir+'/figures/'+'Fig1_map_metrics'+ext, dpi=dpi, bbox_inches='tight')
+    plt.close()
     return
 
-def transform_for_NMDS(similarities, n_jobs=1): #transform the similarity matrix to 2D space (n_components=2)
+def get_single_nmds(rows, filter_on, filt_ind, color_on, color_ind, ax, leg, colors, names, meta_dict, save_name, second_filter='', second_filter_ind='', npos='', n_jobs=1, get_stats=False):
     '''
-    add doc string here
-    '''
-    X_true = similarities.iloc[0:].values
-    mds = manifold.MDS(n_components=2, max_iter=3000, eps=1e-9, random_state=seed, dissimilarity="precomputed", n_jobs=n_jobs)
-    pos = mds.fit(similarities).embedding_
-    nmds = manifold.MDS(n_components=2, metric=False, max_iter=3000, eps=1e-12, dissimilarity="precomputed", random_state=seed, n_jobs=n_jobs, n_init=1)
-    npos = nmds.fit_transform(similarities, init=pos)
-    npos *= np.sqrt((X_true ** 2).sum()) / np.sqrt((npos ** 2).sum())
-    clf = PCA()
-    npos = clf.fit_transform(npos)
-    return npos, nmds.stress_
-
-def get_single_nmds(rows, filter_on, filt_ind, color_on, color_ind, ax, leg, colors, names, meta_dict, second_filter='', second_filter_ind='', npos='', n_jobs=1, get_stats=False):
-    '''
-    add doc string here
+    Function to get a single nmds plot on an axis
+    Takes as input:
+        - rows (a distance matrix with no row or column names, i.e. containing only numbers)
+        - filter_on (if we want to filter out samples from the matrix, then this contains what we are filtering on)
+        - filter_ind (and the index in the metadata that we are filtering on)
+        - color_on (the category that we are coloring samples on)
+        - color_ind (the index for this category in the metadata)
+        - ax (the axis we are plotting on)
+        - leg (the position of the index we are plotting)
+        - colors (the colors to use for plotting categories)
+        - names (the sample names, in the same order as the samples occur in rows, the distance matrix)
+        - meta_dict (a dictionary containing all metadata for each sample, with sample names as keys)
+        - second_filter (if we want to filter samples based on a second category, then this contains what we are filtering on. Default is '')
+        - second_filter_ind (and the index in the metadata that we are filtering on. Default is '')
+        - npos (the nmds positions - this saves calculating the nmds points for a second time if we are plotting the same data again, e.g. just with different colored points)
+        - n_jobs (the number of processors to use for calculating the nmds plot - this doesn't seem to work if we put more than 1, so isn't actually used)
+        - get_stats (this tells us whether to get stats based on our categories - e.g. permanova and anosim - default is False)
     '''
     plt.sca(ax)
     color = []
@@ -517,18 +555,19 @@ def get_single_nmds(rows, filter_on, filt_ind, color_on, color_ind, ax, leg, col
             print('Didnt find ', color_on[b], 'in the metadata file so no color for this or in the list of colors')
     #if we don't already have the values for npos, then transform the similarity matrix for this
     if npos == '':
-        s = pd.DataFrame(rows)
-        npos, stress = transform_for_NMDS(s, n_jobs=n_jobs)
+        s = pd.DataFrame(rows).fillna(value=0)
+        if os.path.exists(save_name):
+          npos = open_pickle(save_name)
+        else:
+          npos, stress = transform_for_NMDS(s, n_jobs=n_jobs)
+          write_pickle(save_name, npos)
     else:
-        s = pd.DataFrame(rows)
-    if get_stats:
-        dm = DistanceMatrix(s)
-        ans = anosim(dm, np.array(groups))
-        perm = permanova(dm, np.array(groups))
-        string = ans[0]+'\n'+ans[1]+'='+str(round(ans[4], 3))+r', $p$='+str(round(ans[5], 3))
-        string += '\n'+perm[0]+'\n'+perm[1]+'='+str(round(perm[4], 3))+r', $p$='+str(round(perm[5], 3))
-        plt.text(0.05, 0.98, string, ha='left', va='top', transform = ax.transAxes, fontsize=fs_main, fontweight='bold')
-        
+        s = pd.DataFrame(rows).fillna(value=0)
+    if get_stats != False:
+        string = 'ANOSIM: R='+str(round(get_stats[0], 3))+r', $p$='+str(round(get_stats[1], 3))
+        string += '\nPERMANOVA: F='+str(round(get_stats[2], 3))+r', $p$='+str(round(get_stats[3], 3))
+        t = plt.text(0.02, 0.98, string, ha='left', va='top', transform = ax.transAxes, fontsize=fs_main, fontweight='bold')
+        t.set_bbox(dict(facecolor='white', alpha=0.8))
     size = 20
     #plot the values for nmds 1 (npos[a,0]) and nmds 2 (npos[a,1]) for all samples, giving the color as determined by sample type
     for a in range(len(rows[0])):
@@ -547,7 +586,18 @@ def get_single_nmds(rows, filter_on, filt_ind, color_on, color_ind, ax, leg, col
     else:
         return npos, handles
 
-def nmds_plot_study_env(dist_matr_fn_w, dist_matr_fn_uw, meta_dict, basedir, n_jobs):
+def nmds_plot_study_env(dist_matr_fn_w, dist_matr_fn_uw, meta_dict, basedir, n_jobs=1, save_name='/figures/Fig2_nmds_overall_', stats=False, norm_name='rare'):
+    '''
+    Function to make nmds plots for weighted and unweighted unifrac distances for all samples, either colored by environment or by study
+    Takes as input:
+        - dist_matr_fn_w (file name of the weighted unifrac - can be .csv or .txt - assumes this is a file with sample names as rows and columns with values showing their similarity in the matrix)
+        - dist_matr_fn_uw (file name of the unweighted unifrac - as above)
+        - meta_dict (dictionary containing metadata for all samples, with sample names as keys)
+        - basedir (name of the directory to save the figures to)
+        - n_jobs (number of processors to use for calculating the best ordination - doesn't seem to work so we leave with the default of 1)
+    Returns:
+        - nothing, but saves figure 'nmds_overall' to the figures folder
+    '''
     plt.figure(figsize=(15,15))
     ax1 = plt.subplot2grid((2,2), (0,0))
     ax2 = plt.subplot2grid((2,2), (0,1))
@@ -562,11 +612,10 @@ def nmds_plot_study_env(dist_matr_fn_w, dist_matr_fn_uw, meta_dict, basedir, n_j
     colormap_40b, colormap_40c, colormap_40a = mpl.cm.get_cmap('tab20b', 256), mpl.cm.get_cmap('tab20c', 256), mpl.cm.get_cmap('tab20', 256)
     norm, norm2, norm3 = mpl.colors.Normalize(vmin=0, vmax=19), mpl.colors.Normalize(vmin=20, vmax=39), mpl.colors.Normalize(vmin=40, vmax=59)
     m, m2, m3 = mpl.cm.ScalarMappable(norm=norm, cmap=colormap_40b), mpl.cm.ScalarMappable(norm=norm2, cmap=colormap_40c), mpl.cm.ScalarMappable(norm=norm3, cmap=colormap_40a)
-    
-                 
-    for z in range(len(dist)):
-        dist_matr = pd.read_csv(dist[z], header=0, index_col=0) #read in the distance matrix
-        dist_matr = dist_matr.astype('float') #turn all values into floats
+               
+    for z in [0, 1]:
+        dist_matr = pd.read_csv(basedir+dist[z], header=0, index_col=0) #read in the distance matrix
+        dist_matr = dist_matr.astype('float').fillna(value=0) #turn all values into floats
         names = list(dist_matr.columns) #get a list of column names
         dist_matr = dist_matr.rename_axis('ID').values #and turn it into a matrix with no row or column names
         color_study = []
@@ -579,33 +628,40 @@ def nmds_plot_study_env(dist_matr_fn_w, dist_matr_fn_uw, meta_dict, basedir, n_j
                 color_study.append(m3.to_rgba(a))
         filter_on, filter_index = 'none', 'none'
         second_filter, second_filter_ind = '', ''
-        
-        npos, handles = get_single_nmds(dist_matr, filter_on, filter_index, envs, env_index, ax[z][0], 'upper left', color_env, names, meta_dict, second_filter, second_filter_ind, '', n_jobs=n_jobs, get_stats=True)
+        npos, handles = get_single_nmds(dist_matr, filter_on, filter_index, envs, env_index, ax[z][0], 'upper left', color_env, names, meta_dict, basedir+'nmds_'+norm_name+'.df'+str(z), second_filter, second_filter_ind, '', n_jobs=n_jobs, get_stats=stats[z][0])
         if z == 0:
             plt.sca(ax[z][0])
-            plt.legend(handles=handles, loc='upper right', fontsize=fs_main)
+            plt.legend(handles=handles, loc='upper right', fontsize=fs_main, edgecolor='k')
         else:
             plt.sca(ax[z][0])
-            plt.legend(handles=handles, loc='lower left', fontsize=fs_main)
-        npos, handles = get_single_nmds(dist_matr, filter_on, filter_index, study, study_index, ax[z][1], 'upper right', color_study, names, meta_dict, second_filter, second_filter_ind, npos, n_jobs=n_jobs, get_stats=True)
+            plt.legend(handles=handles, loc='upper right', fontsize=fs_main, edgecolor='k')
+        npos, handles = get_single_nmds(dist_matr, filter_on, filter_index, study, study_index, ax[z][1], 'upper right', color_study, names, meta_dict, basedir+'nmds_'+norm_name+'.df'+str(z), second_filter, second_filter_ind, npos, n_jobs=n_jobs, get_stats=stats[z][1])
         if z == 0:
             plt.sca(ax[z][1])
-            plt.legend(handles=handles, bbox_to_anchor=(1.05,1.025), fontsize=fs_main)
+            plt.legend(handles=handles, bbox_to_anchor=(1.05,1.025), fontsize=fs_main, edgecolor='k')
     titles = [r'$\bf{Environment}$', r'$\bf{Study}$', '', '']
     title_letter = ['A', 'B', 'C', 'D']
     axes = [ax1, ax2, ax3, ax4]
-    ylabs, xlabs = [r'$\bf{Weighted}$ $\bf{unifrac}$'+'\nnMDS2', '', r'$\bf{Unweighted}$ $\bf{unifrac}$'+'\nnMDS2', ''], ['', '', 'nMDS1', 'nMDS1']
+    if norm_name == 'clr':
+      ylabs, xlabs = [r'$\bf{Aitchison}$ $\bf{distance}$'+'\nnMDS2', '', r'$\bf{PHILR}$ $\bf{distance}$'+'\nnMDS2', ''], ['', '', 'nMDS1', 'nMDS1']
+    else:
+      ylabs, xlabs = [r'$\bf{Weighted unifrac}$ $\bf{distance}$'+'\nnMDS2', '', r'$\bf{Unweighted unifrac}$ $\bf{distance}$'+'\nnMDS2', ''], ['', '', 'nMDS1', 'nMDS1']
     for a in range(len(titles)):
         axes[a].set_title(titles[a], fontsize=fs_title)
         axes[a].set_title(title_letter[a], fontsize=fs_title, loc='left')
         axes[a].set_xlabel(xlabs[a], fontsize=fs_title)
         axes[a].set_ylabel(ylabs[a], fontsize=fs_title)
-    plt.savefig(basedir+'/figures/nmds_overall'+ext, dpi=dpi, bbox_inches='tight')
+    plt.savefig(basedir+save_name+norm_name+ext, dpi=dpi, bbox_inches='tight')
+    plt.close()
     return
 
 def plot_box(ax, l, r, b, t, line_col):
     '''
-    add doc string here
+    Function to plot a box on a given axes
+    Takes as input:
+        - ax (the axis to plot on)
+        - l, r, b, t (left, right, bottom and top coordinates)
+        - line_col (the color to use to plot the line)
     '''
     plt.sca(ax)
     plt.plot([l, r], [b, b], color=line_col, lw=2)
@@ -614,9 +670,15 @@ def plot_box(ax, l, r, b, t, line_col):
     plt.plot([r, r], [t, b], color=line_col, lw=2)
     return
 
-def similarity_heatmap_combined(dist_matr_fn_w, dist_matr_fn_uw, basedir):
+def similarity_heatmap_combined(dist_matr_fn_w, dist_matr_fn_uw, basedir, save_name='/figures/Fig3_unifrac_heatmap_combined_', norm_name='rare'):
     '''
-    add doc string here
+    Function to plot the heatmap showing both weighted and unweighted unifrac distances for all studies
+    Takes as input:
+        - dist_matr_fn_w (file name of the weighted unifrac - can be .csv or .txt - assumes this is a file with sample names as rows and columns with values showing their similarity in the matrix)
+        - dist_matr_fn_uw (file name of the unweighted unifrac - as above)
+        - basedir (name of the directory to save the figures to)
+    Returns:
+        - nothing, but saves figure 'unifrac_heatmap_combined' to the figures folder
     '''
     dist_matr_files = [dist_matr_fn_w, dist_matr_fn_uw]
     fig = plt.figure(figsize=(12,12))
@@ -625,11 +687,9 @@ def similarity_heatmap_combined(dist_matr_fn_w, dist_matr_fn_uw, basedir):
     ax = [ax1, ax2]
     for z in range(len(dist_matr_files)):
         plt.sca(ax[z])
-        dist_matr_fn = dist_matr_files[z]
-        if dist_matr_fn[-4:] == '.csv':
-            dist_matr = open_csv(dist_matr_fn) #get distance matrix of csv file
-        else:
-            dist_matr = open_txt(dist_matr_fn) #get distance matrix of txt file
+        dist_matr = dist_matr_files[z]
+        dist_matr = dist_matr.reset_index().drop('index', axis=1)
+        dist_matr = [list(dist_matr.columns)]+dist_matr.values.tolist()
         studies, first = [], [] #set up lists to store the names of all studies as well as the index for when these start within the distance matrices
         for a in range(len(dist_matr[0])): #loop through the study names
             if dist_matr[0][a] == '': #if the cell is empty, continue
@@ -718,23 +778,38 @@ def similarity_heatmap_combined(dist_matr_fn_w, dist_matr_fn_uw, basedir):
         #set up figure and axes
         ally = []
         #now go through and get the equivalent color for each mean distance and plot these as a bar plot
+        means = []
         for a in range(len(each_study)):
             colors = []
             x, y, bottom = [], [], []
+            mean = []
             for b in range(len(each_study[a])):
+                if b != a:
+                    mean.append(each_study[a][b])
                 color = m.to_rgba(each_study[a][b])
                 colors.append(color)
                 x.append(b+1)
                 y.append(1)
                 bottom.append(a)
                 plt.bar(b+1, 1, bottom=a, color=color, edgecolor='k', width=1)
+            means.append(np.mean(mean))
             ally.append(a+0.5)
         cb = plt.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=colormap),ax=ax[z], shrink=0.4, pad=0.02, orientation='vertical')
         cb.ax.tick_params(labelsize=fs_small)
         if z == 0:
-            cb.set_label('Weighted\nunifrac distance', fontsize=fs_main)
+            if norm_name == 'clr':
+              cb.set_label('Aitchison distance', fontsize=fs_main)
+              il = 'Aitchison distance'
+            else:
+              cb.set_label('Weighted unifrac distance', fontsize=fs_main)
+              il = 'Weighted unifrac distance'
         else:
-            cb.set_label('Unweighted\nunifrac distance', fontsize=fs_main)
+            if norm == 'clr':
+              cb.set_label('PHILR distance', fontsize=fs_main)
+              il = 'PHILR distance'
+            else:
+              cb.set_label('Unweighted unifrac distance', fontsize=fs_main)
+              il = 'Unweighted unifrac distance'
         #change x and y limits
         plt.xlim([0.5,ally[-1]+1])
         plt.ylim([0,ally[-1]+0.5])
@@ -752,6 +827,11 @@ def similarity_heatmap_combined(dist_matr_fn_w, dist_matr_fn_uw, basedir):
         plot_box(ax[z], l, r, b, t, line_col)
         for a in range(len(studies)): #rename the studies to a full study name rather than the short code they were given
             studies[a] = name_dict_2[studies[a]]
+        new_means = pd.DataFrame([means], columns=studies, index=[il])
+        if z == 0:
+            means_df = new_means
+        else:
+            means_df = pd.concat([means_df, new_means])
         plt.sca(ax[z])
         empty = []
         text_cols.reverse()
@@ -768,627 +848,10 @@ def similarity_heatmap_combined(dist_matr_fn_w, dist_matr_fn_uw, basedir):
         else:
             plt.xticks([])
     plt.subplots_adjust(hspace=0.05)
-    plt.savefig(basedir+'/figures/unifrac_heatmap_combined'+ext, dpi=dpi, bbox_inches='tight')
-    #plt.close()
-    return
-
-def generate_rf(X_train, y_train, X_test, y_test, rc='cls', est=10000, n_jobs=None): #generate a random forest based on the data being split to train and test
-    '''
-    add doc string here
-    '''
-    if rc == 'cls': #if we are using a classification (i.e. discrete categories)
-        rf = RandomForestClassifier(n_estimators=est, min_samples_leaf=3, n_jobs=n_jobs, random_state=seed, oob_score=True)
-    else: #if we are using a regression (i.e. continuous categories)
-        rf = RandomForestRegressor(n_estimators=est, min_samples_leaf=3, n_jobs=n_jobs, random_state=seed, oob_score=True)
-    rf.fit(X_train, y_train) #fit out data to either the regressor or classifier
-    return rf, rf.score(X_test, y_test), rf.feature_importances_, rf.oob_score_ #return the forest (i.e. features), score (how well it classifies the test data) and feature importances (ASV importances)
-
-def annotate_heatmap(ax, df, cmap='inferno', yticks=True, xticks=True, rnd=1, annotate=True, italics=False, vmax=False):
-    '''
-    add doc string here
-    '''
-    #get a heatmap plot using the dataframe df on the axis ax, with the colormap cmap, 
-    #with additional options for whether we are to annotate the boxes of the heatmap, 
-    #add x or y tick labels and how many decimal places to round each text label to
-    plt.sca(ax) #set the axis 
-    if vmax != False:
-        plt.pcolor(df, edgecolor='k', cmap=cmap, vmin=0, vmax=vmax) #make the heatmap
-    else:
-        plt.pcolor(df, edgecolor='k', cmap=cmap, vmin=0) #make the heatmap
-    rownames = list(df.index.values)
-    for a in range(len(rownames)):
-        if len(rownames[a]) > 35:
-            row = rownames[a].split(' ')
-            if len(row) == 1:
-                row = rownames[a].split('-')
-            string = ''
-            for b in range(len(row)):
-                if b > 0 and b < 2:
-                    string += '\n'+row[b]+' '
-                else:
-                    string += row[b]+' '
-            rownames[a] = string
-    if yticks == 'right':
-        plt.yticks(np.arange(0.5, len(df.index), 1), rownames, fontsize=fs_small, linespacing=0.8) #add them based in the row values of the dataframe
-        ax.yaxis.tick_right()
-    elif yticks: #if we are adding y tick labels
-        plt.yticks(np.arange(0.5, len(df.index), 1), rownames, fontsize=fs_main, linespacing=0.8) #add them based in the row values of the dataframe
-    else:
-        plt.yticks([]) #otherwise, add none
-    if xticks == 'top':
-        colnames = list(df.columns)
-        for col in range(len(colnames)):
-            ind = col
-            col = colnames[col].split(' ')
-            string = ''
-            for a in range(len(col)):
-                if a > 0:
-                    string += '\n'+col[a]
-                else:
-                    string += col[a]+' '
-            colnames[ind] = string
-        plt.xticks(np.arange(0.5, len(df.columns), 1), colnames, fontsize=fs_main)
-        ax.xaxis.tick_top()
-    elif xticks: #if we are adding x tick labels (do the same as for the y tick labels)
-        plt.xticks(np.arange(0.5, len(df.columns), 1), df.columns, rotation=90, fontsize=fs_main)
-    else:
-        plt.xticks([])
-    maxs = [] #get the maximum value of the dataframe
-    for a in  df.columns:
-        maxs.append(df[a].max())
-    ma = max(maxs)
-    if annotate: #if we are adding text labels
-        for a in range(len(list(df.columns))): #go through each column
-            for b in range(len(list(df.index.values))): #and now each row of that column
-                num = round(df.iloc[b, a], rnd) #get the value corresponding to the row and columns
-                if ma > num:
-                    if num < (0.6)*ma: col = 'w' #if the value is below 60% of the maximum value, make the text color white
-                    else: col = 'k' #otherwise, make the text color black
-                    if cmap == 'PuBu': #if we are using the colormap 'PuBu', do the opposite in terms of text color
-                        if num < (0.6)*ma: col = 'k'
-                        else: col = 'w'
-                else:
-                    col = 'k'
-                    if num == ma and cmap == 'PuBu': col = 'w'
-                plt.text(a+0.5, b+0.5, str(num), ha='center', va='center', color=col, fontsize=fs_small) #and plot this text label
-    return
-
-def sort_by_tax(df, level, other_levels, tax_dict=False, names=False):
-    '''
-    add doc string here
-    '''
-    #function to sort the dataframe df (with index values being the taxon/ASV names) by the higher phylogeny
-    current_tax = df.index.values #get the current values
-    df_tax = df
-    sort_levels, names = [], {}
-    for a in range(level): #for each phylogenetic level thaqt is higher
-        new_col = []
-        for b in range(len(current_tax)):
-            new_col.append([other_levels[current_tax[b]][a], current_tax[b]]) #append the appropriate value for the current higher level as well as the current taxon name
-            if tax_dict != False: #if tax_dict isn't False (i.e. if we are looking at the level of ASV - we use tax_dict as here we already worked out the lowest classification for each ASV)
-                names[current_tax[b]] = tax_dict[current_tax[b]][-1] #get the lowest classification for each ASV
-        new_col = pd.DataFrame(new_col, columns=[str(a), 'ASV']) #turn the classifications at the current level into a dataframe
-        new_col = new_col.set_index(['ASV']) #set the ASV (note: this does not necessarily mean this is an ASV, rather it is the taxon names that we are using for this level) column as the index column
-        df_tax = new_col.merge(right=df_tax, on='ASV') #and add it to the precious dataframe
-        sort_levels.append(str(a)) #add the name of the column that we made with the classifications
-    df_tax = df_tax.sort_values(sort_levels, ascending=False) #and now sort the dataframe based on these classifications (this will go in order, so it will keep all proteobacteria together, with all e.g. alpha-, gamma-proteobacteria)
-    df_tax.drop(sort_levels, axis=1, inplace=True) #now remove these columns from the sorted dataframe
-    return df_tax, names #return them along with the dataframe
-
-def plot_colorbar(ax, cmap, df, name, fs=fs_main, orientation='horizontal'):
-    '''
-    add doc string here
-    '''
-    #function to plot a colorbar on the axis ax using the colormap cmap
-    #it also takes the dataframe of values that it should be based on, a name and the fontsize (using fs_main as default)
-    mins, maxs = [], []
-    if isinstance(df, list):
-        mins.append(df[0])
-        maxs.append(df[1])
-    else:
-        for a in df.columns: #get the minimum and maximum values for each column
-            mins.append(df[a].min())
-            maxs.append(df[a].max())
-    mi = min(mins) #now get the minimum and maximum values overall
-    ma = max(maxs)
-    if ma < 0:
-        mi = 0
-        ma = 0.1
-    cmap = mpl.cm.get_cmap(cmap, 256) #tell it which colormap to use
-    norm = mpl.colors.Normalize(vmin=0, vmax=ma) #the minimum and maximum values to normalize to
-    cb1 = mpl.colorbar.ColorbarBase(ax, cmap=cmap, norm=norm, orientation=orientation) #get the colorbar for the heatmap
-    plot_names = []
-    for a in range(len(name)):
-        if name[a] in rename_plots:
-            plot_names.append(rename_plots[name[a]])
-        else:
-            plot_names.append(name[a])
-    cb1.set_label(name, fontsize=fs) #set the label names
-    cb1.ax.tick_params(labelsize=fs_small) #and the size of the ticks
-    return
-
-def get_heatmap_random_forest(df_rf, ft_in, colnames, basedir, level, other_levels, meta_name, predict, tax_dict, ASV_dict, other_folder=False):
-    '''
-    This function will get an individual heatmap plot for one category of one random forest
-    It takes as input:
-        - df_rf (dataframe containing list of ASVs in one column with a list of their importances in a second column)
-        - ft_in (the original feature table containing a list of ASVs as rows and samples as columns)
-        - colnames (the groupings within the metadata category)
-        - basedir (the base directory to save everything to)
-        - level (taxonomic level that we are plotting)
-        - meta_name (the metadata category that we are plotting)
-        - predict (the accuracy with which this category performed)  
-    '''
-    #ft = ft_in.transpose() #transpose the feature table
-    #df_rf = df_rf.set_index(['ASV']) #in our list of
-    ft = ft_in.reset_index() #reset the indices in our feature table
-    ft = ft.rename(columns={'index':'ASV'}) #rename the index column
-    ft = ft.set_index(['ASV']) #set the index column as ASV again
-    numeric, non_numeric = [], []
-    for a in colnames: #for each grouping name
-        try: #if it is numeric
-            colnames[a] = floa(colnames[a]) #get it as a float
-            colnames[a] = round(colnames[a]) #and then round it to the nearest whole number (the random forest regression was still based on the full values, but we do this to simplify plotting)
-            numeric.append(colnames[a])
-        except:
-            colnames[a] = colnames[a] #otherwise, just leave it as it is (but the try: function doesn' work without an except: option)
-            non_numeric.append(colnames[a])
-    new_col_order = sorted(list(set(numeric))) + sorted(list(set(non_numeric))) #add together the numeric and non-numeric lists of column names, removing duplicates and sorting them in ascending order
-    ft = ft.rename(columns=colnames) #rename the columns
-    ft = ft.groupby(by=ft.columns, axis=1).mean() #if we have the same names now, group them together (taking a mean for each abundance value)
-    ft = ft.reindex(new_col_order, axis=1) #re-index based on the order of our unique sorted columns
-    df_rf.sort_values(by=['Importance'], ascending=False, inplace=True)
-    df_rf = df_rf[df_rf.max(axis=1) > 0.00]
-    df_rf = df_rf[:50]
-    df_rf_tax, n = sort_by_tax(df_rf, level, other_levels) #sort the taxa/ASVs in the random forest data frame by their higher phylogenetic grouping
-    merge = df_rf_tax.merge(right=ft, on='ASV') #merge the importance dataframe with the feature table (this means we only keep those ASVs that are important)
-    merge.drop('Importance', axis=1, inplace=True) #now remove the importance column again
-    merge = merge.div(merge.max(axis=1), axis=0) #normalise within each ASV (to make the colors visible for all even if there are large differences in abundance)
-    """
-    if level == 7: #if at ASV level
-        #get the phylogenetic tree and heatmap
-        ft_R = merge.reset_index()
-        ft_R.to_csv(basedir+'/random_forest_R/random_forest.csv', index=False)
-        os.system("/usr/local/bin/Rscript plot_RF_tree_heatmap.R") #run the R script that plots the phylogenetic tree (of only the important ASVs) and heatmap for this meta category
-        os.rename(basedir+'/random_forest_R/tree_and_heatmap.pdf', basedir+'/figures/random_forest/'+phylo_level_names[level]+'_'+meta_name+'_tree_and_heatmap.pdf') #rename the resulting figure and move it to the figures directory
-    """
-    #set up the figure size based on the number of metadata groupings we have, but checking that it won't be too small if we only have a couple of categories
-    width = len(merge.columns)+3
-    if width < 15:
-        width = 15
-    start_col2 = int(width-(width/5))+2
-    width_col = int(width/5)
-    plt.figure(figsize=(max([width, 25])/3, 20))
-    try:
-        ax1 = plt.subplot2grid((merge.shape[0], width+3), (3,0), colspan=2, rowspan=merge.shape[0]-2)
-    except:
-        print(merge, meta_name)
-        return
-    ax2 = plt.subplot2grid((merge.shape[0], width+3), (3,2), colspan=width, rowspan=merge.shape[0]-2)
-    ax3 = plt.subplot2grid((merge.shape[0], width+3), (0,0), colspan=width_col)
-    ax4 = plt.subplot2grid((merge.shape[0], width+3), (0,start_col2), colspan=width_col)
-    #get the heatmaps for the taxon importances (df_rf_tax) and taxon abundances (merge) separately and with different color schemes
-    if level == 7:
-        asv_plot = {}
-        prev_asv = list(df_rf_tax.index.values)
-        for asv in prev_asv:
-            if asv in ASV_dict:
-                asv_plot[asv] = ASV_dict[asv]+': '+tax_dict[asv][-1]
-            else:
-                asv_plot[asv] = tax_dict[asv][-1]
-        df_rf_tax_plot = df_rf_tax.rename(columns=rename_plots, index=asv_plot)
-    else:
-        df_rf_tax_plot = df_rf_tax.rename(columns=rename_plots, index=rename_plots)
-    merge_plot = merge.rename(columns=rename_plots, index=rename_plots)
-    annotate_heatmap(ax1, df_rf_tax_plot, cmap='inferno', rnd=3)
-    annotate_heatmap(ax2, merge_plot, cmap='viridis', yticks=False, rnd=1, annotate=False)
-    #now get the appropriate color bars for each dataframe
-    plot_colorbar(ax3, 'inferno', df_rf_tax_plot, name='Taxon importance')
-    plot_colorbar(ax4, 'viridis', merge_plot, name='Normalized abundance')
-    if meta_name in rename_plots:
-        meta_name_plot = rename_plots[meta_name]
-    else:
-        meta_name_plot = meta_name
-    plt.subplots_adjust(hspace=0.5)
-    if other_folder == False:
-        ax2.set_title(meta_name_plot+'\nInformative '+phylo_level_names[level]+'\nClassification accuracy = '+str(predict)+'%')
-        plt.savefig(basedir+'/figures/random_forest/'+phylo_level_names[level]+'_'+meta_name+'_single_forest'+ext, dpi=dpi, bbox_inches='tight')
-    else: 
-        of = other_folder.split('_')
-        if of[0] in rename_plots:
-            of[0] = rename_plots[of[0]]
-        if len(of) > 1:
-            if of[1] in rename_plots:
-                of[1] = rename_plots[of[1]]
-            of = of[0]+' '+of[1]
-        else:
-            of = of[0]
-        ax2.set_title(of+'\n'+meta_name_plot+'\nInformative '+phylo_level_names[level]+'\nClassification accuracy = '+str(predict)+'%')
-        plt.savefig(basedir+'/figures/random_forest/single_environment/'+other_folder+'_'+phylo_level_names[level]+'_'+meta_name+'_single_forest'+ext, dpi=dpi, bbox_inches='tight')
+    plt.savefig(basedir+save_name+norm_name+ext, dpi=dpi, bbox_inches='tight')
     plt.close()
-    return df_rf_tax
-
-def get_single_forest(ft, meta_df, sn, level, est=10000, n_jobs=None):
-    '''
-    add doc string here
-    '''
-    cls_reg = {'Study':'cls', 'Latitude':'reg', 'Longitude':'reg', 'Environment':'cls', 'WaterOrSediment':'cls',
-       'LabOrField':'cls', 'IncubationOrCollection':'cls', 'Source':'cls', 'MaterialType':'cls',
-       'PlasticTypeSpecific':'cls', 'PlasticTypeGeneral':'cls', 'DEPTH':'reg', 'IncubationTime':'reg',
-       'IncubationGeneral':'cls', 'Temperature':'reg', 'Salinity':'reg', 'Light':'cls', 'Season':'cls',
-       'PrimerPair':'cls', 'DNAExtraction':'cls', 'CollectionDate':'cls', 'PlasticOnly':'cls'} #dictionary telling it whether each category should use a classification (cls) or regression (reg) algorithm for the random forests
-    ft_in = ft #save the original feature table
-    ft = ft.rename_axis('ID').values #rename the feature table axis (i.e. remove the indice and column names)
-    max_abs_scaler = preprocessing.MaxAbsScaler() #scale all ASVs to the maximum absolute value
-    ft_scale = max_abs_scaler.fit_transform(ft) #apply this to our feature table
-    meta_split, reg_cls, col_names = [], [], []
-    for col in meta_df.columns: #make lists of all of the sample names based on the sample type within each meta category
-        meta_split.append(meta_df[col])
-        reg_cls.append(cls_reg[col])
-        col_names.append(col)
-    scores, importances, oob_scores = [], [], []
-    count = 0
-    for a in range(len(meta_split)): #for each meta-category
-        meta = meta_split[a].rename_axis('ID').values #split the metadata dataframe to be only the category we are currently looking at
-        if len(set(meta)) == 2 and 'unknown' in meta:
-            continue
-        keeping = []
-        for z in range(len(meta)):
-            if meta[z] == 'unknown':
-                keeping.append(False)
-            else:
-                keeping.append(True)
-        meta_reduced = meta[keeping]
-        ft_scale_reduced = ft_scale[keeping]
-        X_train, X_test, y_train, y_test = train_test_split(ft_scale_reduced, meta_reduced, test_size=0.2) #split the data to training and test data (with 80% of samples being used for training and 20% for testing)
-        RF, RF_score, RF_importances, RF_oob = generate_rf(X_train, y_train, X_test, y_test, rc=reg_cls[a], est=est, n_jobs=None) #generate the random forest for this meta category
-        #print(col_names[a], RF_score) #print the category and random forest score/classification accuracy
-        scores.append(RF_score), importances.append(RF_importances), oob_scores.append(RF_oob) #add the scores and importances for this category to the overall lists
-        this_rf = {'ASV':ft_in.columns, 'Importance':RF_importances} #make a dataframe with the information on how important each ASV/taxa is
-        df_rf = pd.DataFrame(this_rf, columns = ['ASV', 'Importance'])
-        df_rf.sort_values(by=['Importance'], ascending=False, inplace=True) #sort the values by importance
-        df_rf_score = df_rf.set_index('ASV')
-        df_rf_score = df_rf_score
-        df_rf = df_rf[df_rf.max(axis=1) > 0.00]
-        df_rf = df_rf[:50] #now only keep the top 50 features
-        df_rf = df_rf.set_index('ASV') #if we didn't use get_heatmap_random_forest, then we need to uncomment this line
-        df_rf = df_rf_score.rename(columns={'Importance':col_names[a]}) #rename the column to be this meta category
-        if count == 0:
-            dfs = df_rf
-            count += 1
-        else:
-            dfs = dfs.merge(right=df_rf, on='ASV')
-    if scores == []:
-        return [], []
-    scores = pd.DataFrame([scores, oob_scores], index=['Score', 'OOB_score'], columns=list(dfs.columns))
-    dfs = pd.concat([dfs, scores])
-    dfs.to_csv(sn+'.csv')
-    return scores, dfs
-
-def get_random_forests(ft, tax_dict, meta_df, basedir, est=10000, n_jobs=None, sn=None):
-    '''
-    add doc string here
-    '''
-    this_sn = str(sn)
-    asv = list(ft.index.values)
-    for a in [1, 2, 3, 4, 5, 6, 7]:
-        this_asv = list(asv)
-        new_names, other_levels = {}, {}
-        for b in range(len(this_asv)):
-            this_tax = tax_dict[this_asv[b]]
-            prev = ''
-            for c in range(len(this_tax)):
-                if this_tax[c] != '':
-                    prev = this_tax[c]
-                else:
-                    this_tax[c] = prev
-            if a < 7:
-                new_names[this_asv[b]] = this_tax[a]
-                this_asv[b] = this_tax[a]
-            else:
-                new_names[this_asv[b]] = this_asv[b]
-            other_levels[this_asv[b]] = this_tax[:a]
-        this_ft = ft.rename(index=new_names) #now rename the feature table using the new names that we have just defined
-        this_ft = this_ft.groupby(by=this_ft.index, axis=0).sum() #group all of the names that are together, taking a sum for each phyla
-        this_ft = this_ft.transpose()
-        if sn == None:
-            sn = basedir+'/random_forest/'+phylo_level_names[a]+'_overall'
-        else:
-            sn = this_sn+phylo_level_names[a]
-        get_single_forest(this_ft, meta_df, sn, a, est=est, n_jobs=None) #get all of the individual forests for this phylogenetic level
     return
-
-def get_environment_random_forest(ft, tax_dict, meta_df, meta_dict, basedir, est=10000, n_jobs=1):
-    '''
-    Add doc string here
-    '''
-    envs, env_index = ['marine', 'freshwater', 'aquatic', 'terrestrial'], 3
-    labfield, labindex = ['lab', 'field', ['lab', 'field']], 5
     
-    all_samples = list(ft.columns)
-    all_samples_meta = list(meta_df.index.values)
-    for a in range(len(envs)):
-        for b in range(len(labfield)):
-            meta_names = list(meta_df.columns)
-            keeping = []
-            for c in range(len(all_samples)):
-                if meta_dict[all_samples[c]][env_index] == envs[a] and meta_dict[all_samples[c]][labindex] == labfield[b]:
-                    keeping.append(True)
-                elif meta_dict[all_samples[c]][env_index] == envs[a] and meta_dict[all_samples[c]][labindex] in labfield[b]:
-                    keeping.append(True)
-                else:
-                    keeping.append(False)
-            single_ft = ft.loc[:, keeping]
-            if len(single_ft.index.values) == 0:
-                continue
-            single_ft = single_ft[single_ft.max(axis=1) > 0]
-            keeping_meta = []
-            for d in range(len(all_samples_meta)):
-                if meta_dict[all_samples_meta[d]][env_index] == envs[a] and meta_dict[all_samples_meta[d]][labindex] == labfield[b]:
-                    keeping_meta.append(True)
-                elif meta_dict[all_samples_meta[d]][env_index] == envs[a] and meta_dict[all_samples_meta[d]][labindex] in labfield[b]:
-                    keeping_meta.append(True)
-                else:
-                    keeping_meta.append(False)
-            single_meta_df = meta_df.loc[keeping_meta]
-            meta_names.remove('Source')
-            meta_names.remove('PlasticTypeSpecific')
-            meta_names.remove('MaterialType')
-            meta_names.remove('PlasticTypeGeneral')
-            meta_names.remove('PlasticOnly')
-            single_meta_df.drop(meta_names, axis=1, inplace=True)
-            if len(single_meta_df.index.values) == 0:
-                continue
-            if b < 2:
-                sn = basedir+'/random_forest/single_environment/'+envs[a]+'_'+labfield[b]+'_'
-            else:
-                sn = basedir+'/random_forest/single_environment/'+envs[a]+'_'
-            get_random_forests(single_ft, tax_dict, single_meta_df, basedir, est=est, n_jobs=n_jobs, sn=sn)
-    return
-
-def get_random_forest_plots(ft, tax_dict, ASV_dict, meta_dict, basedir, other_folder=False, skip_individual=False):
-    '''
-    add doc string here
-    '''
-    asv = list(ft.index.values)
-    count = 0
-    for a in [1, 2, 3, 4, 5, 6, 7]:
-        this_asv = list(asv)
-        new_names, other_levels = {}, {}
-        for b in range(len(this_asv)):
-            this_tax = tax_dict[this_asv[b]]
-            prev = ''
-            for c in range(len(this_tax)):
-                if this_tax[c] != '':
-                    prev = this_tax[c]
-                else:
-                    this_tax[c] = prev
-            if a < 7:
-                new_names[this_asv[b]] = this_tax[a]
-                this_asv[b] = this_tax[a]
-            else:
-                new_names[this_asv[b]] = this_asv[b]
-            other_levels[this_asv[b]] = this_tax[:a]
-        this_ft = ft.rename(index=new_names) #now rename the feature table using the new names that we have just defined
-        this_ft = this_ft.groupby(by=this_ft.index, axis=0).sum() #group all of the names that are together, taking a sum for each phyla
-        if other_folder == False:
-            df_rf = pd.read_csv(basedir+'/random_forest/'+phylo_level_names[a]+'_overall.csv', header=0, index_col=0)
-        else:
-            df_rf = pd.read_csv(basedir+'/random_forest/single_environment/'+other_folder+'_'+phylo_level_names[a]+'.csv', header=0, index_col=0)
-        scores, oob_scores = df_rf.loc[['Score'], :], df_rf.loc[['OOB_score'], :]
-        meta_names = list(df_rf.columns)
-        df_rf.drop(['Score', 'OOB_score'], axis=0, inplace=True)
-        df_rf = df_rf.reset_index()
-        df_rf = df_rf.rename(columns={'index':'ASV'})
-        df_rf.index = df_rf['ASV']
-        df_rf.drop(['ASV'], axis=1, inplace=True)
-        df_rf_full = df_rf.copy()
-        if a < 7:
-            df_rf_sorted, names = sort_by_tax(df_rf, a, other_levels, tax_dict=False, names=False)
-        else:
-            df_rf_sorted, names = sort_by_tax(df_rf, a, other_levels, tax_dict=tax_dict, names=True)
-        df_rf_sorted["Mean"] = df_rf_sorted.mean(axis=1)
-        df_rf_sorted.sort_values(by=['Mean'], ascending=False, inplace=True)
-        df_rf_sorted = df_rf_sorted[df_rf_sorted.max(axis=1) > 0.00]
-        df_rf_sorted = df_rf_sorted[:50]
-        df_mean = df_rf_sorted.drop(meta_names, axis=1, inplace=False)
-        df_rf_sorted.drop(['Mean'], axis=1, inplace=True)
-        if other_folder == False:
-            fig = plt.figure(figsize=(len(df_rf_sorted.columns)/3, 0.22*df_rf_sorted.shape[0]))
-            ax1 = plt.subplot2grid((df_rf_sorted.shape[0], len(df_rf_sorted.columns)+3), (3,2), colspan=len(df_rf_sorted.columns), rowspan=2)
-            ax2 = plt.subplot2grid((df_rf_sorted.shape[0], len(df_rf_sorted.columns)+3), (5,0), colspan=2, rowspan=df_rf_sorted.shape[0]-2)
-            ax3 = plt.subplot2grid((df_rf_sorted.shape[0], len(df_rf_sorted.columns)+3), (5,2), colspan=len(df_rf_sorted.columns), rowspan=df_rf_sorted.shape[0]-2)
-            ax4 = plt.subplot2grid((df_rf_sorted.shape[0], len(df_rf_sorted.columns)+3), (0,0), colspan=int(len(df_rf_sorted.columns)/5))
-            n1 = int(len(df_rf_sorted.columns)-len(df_rf_sorted.columns)/5)+3
-            ax5 = plt.subplot2grid((df_rf_sorted.shape[0], len(df_rf_sorted.columns)+3), (0,n1), colspan=int(len(df_rf_sorted.columns)/5))
-            n2 = int(n1-len(df_rf_sorted.columns)/5)-1
-            ax6 = plt.subplot2grid((df_rf_sorted.shape[0], len(df_rf_sorted.columns)+3), (0,n2), colspan=int(len(df_rf_sorted.columns)/5))
-            
-        else:
-            fig = plt.figure(figsize=(5, 0.22*df_rf_sorted.shape[0]))
-            ax1 = plt.subplot2grid((df_rf_sorted.shape[0], 9), (7,1), colspan=5, rowspan=1)
-            ax2 = plt.subplot2grid((df_rf_sorted.shape[0], 9), (9,0), colspan=1, rowspan=df_rf_sorted.shape[0]-3)
-            ax3 = plt.subplot2grid((df_rf_sorted.shape[0], 9), (9,1), colspan=5, rowspan=df_rf_sorted.shape[0]-3)
-            ax4 = plt.subplot2grid((df_rf_sorted.shape[0], 9), (0,6), colspan=3)
-            ax5 = plt.subplot2grid((df_rf_sorted.shape[0], 9), (3,6), colspan=3)
-            ax6 = plt.subplot2grid((df_rf_sorted.shape[0], 9), (6,6), colspan=3)
-            
-        #plot colorbars for each of the three sets of values (the sums, the importances within categories and the scores, respectively)
-        scores = scores*100
-        scores = scores.astype('int32')
-        plot_colorbar(ax4, 'summer', df_mean, name='Mean taxon importance', fs=fs_small)
-        plot_colorbar(ax5, 'inferno', df_rf_sorted, name='Taxon importance', fs=fs_small)
-        plot_colorbar(ax6, 'PuBu', scores, name='Classification accuracy (%)', fs=fs_small)
-        if other_folder == False:
-            ax1.set_title('Top informative                              \n'+phylo_level_names[a]+'                              ', fontsize=fs_main)
-        else:
-            of = other_folder.split('_')
-            if of[0] in rename_plots:
-                of[0] = rename_plots[of[0]]
-            if len(of) > 1:
-                if of[1] in rename_plots:
-                    of[1] = rename_plots[of[1]]
-                of = of[0]+' '+of[1]
-            else:
-                of = of[0]
-            ax1.set_title('Top informative '+phylo_level_names[a]+'\n'+of, fontsize=fs_main) 
-        #now get the heatmaps for each dataframe (same as for the colorbars)
-        df_rf_sorted_names = df_rf_sorted.rename(columns=rename_plots, index=rename_plots)
-        df_rf_sorted_names = df_rf_sorted_names.div(df_rf_sorted_names.max(axis=1), axis=0)
-        
-        if a == 7:
-            mean_names = list(df_rf_sorted_names.index.values)
-            new_names = {}
-            for b in range(len(mean_names)):
-                if mean_names[b] in tax_dict and mean_names[b] in ASV_dict:
-                    new_names[mean_names[b]] = ASV_dict[mean_names[b]]+': '+tax_dict[mean_names[b]][-1]
-            df_rf_sorted_names.rename(index=new_names, inplace=True)   
-        annotate_heatmap(ax1, scores, cmap='PuBu', yticks=False, xticks=False, rnd=0, annotate=True)
-        annotate_heatmap(ax2, df_mean, cmap='summer', yticks=False, xticks=True, rnd=3, annotate=True)
-        annotate_heatmap(ax3, df_rf_sorted_names, cmap='inferno', yticks='right', xticks=True, rnd=3, annotate=False, italics=True)
-        if other_folder == False:
-            plt.savefig(basedir+'/figures/random_forest/'+phylo_level_names[a]+'_overall_forest'+ext, dpi=dpi, bbox_inches='tight') #save the figure
-        else:
-            plt.savefig(basedir+'/figures/random_forest/single_environment/'+other_folder+'_'+phylo_level_names[a]+ext, dpi=dpi, bbox_inches='tight')
-        plt.close()
-        for n in range(len(meta_names)):
-            if skip_individual:
-                continue
-            mn = list(meta_names)
-            mn.remove(meta_names[n])
-            new_names = {}
-            colnames = list(this_ft.columns)
-            for b in range(len(colnames)):
-                if other_folder == False:
-                    new_names[colnames[b]] = meta_dict[colnames[b]][n]
-                else:
-                    if meta_names[n] in ['Source', 'MaterialType', 'PlasticTypeSpecific', 'PlasticTypeGeneral']:
-                        new_names[colnames[b]] = meta_dict[colnames[b]][n+7]
-                    elif meta_names[n] in ['PlasticOnly']:
-                        new_names[colnames[b]] = meta_dict[colnames[b]][n+16]
-            score = scores.loc['Score', meta_names[n]]
-            this_df = df_rf_full.drop(mn, axis=1, inplace=False)
-            try:
-                this_df.drop(['Score', 'OOB_score'], axis=0, inplace=True)
-            except:
-                print('Scores already dropped for '+phylo_level_names[a]+' '+other_folder)
-            this_df = this_df.rename(columns={meta_names[n]:'Importance'})
-            get_heatmap_random_forest(this_df, this_ft, new_names, basedir, a, other_levels, meta_names[n], score, tax_dict, ASV_dict, other_folder)
-        scores = scores.rename(index={'Score':phylo_level_names[a]})
-        if count == 0:
-            all_scores = scores
-            count += 1
-        else:
-            all_scores = pd.concat([scores, all_scores])
-    fig = plt.figure(figsize=(5, len(list(all_scores.columns))/5))
-    ax1 = plt.subplot(111)
-    all_scores = all_scores.transpose()
-    all_scores = all_scores.rename(columns=rename_plots, index=rename_plots)
-    all_scores = all_scores[all_scores.columns[::-1]]
-    annotate_heatmap(ax1, all_scores, cmap='inferno', yticks=True, xticks=True, rnd=0, annotate=True)
-    if other_folder == False:
-        plt.savefig(basedir+'/figures/overall_forest_scores'+ext, dpi=dpi, bbox_inches='tight')
-    else:
-        of = other_folder.split('_')
-        if of[0] in rename_plots:
-            of[0] = rename_plots[of[0]]
-        if len(of) > 1:
-            if of[1] in rename_plots:
-                of[1] = rename_plots[of[1]]
-            if of[1] != 'Laboratory' and of[0] != 'Freshwater':
-                of = of[0]+' '+of[1]
-            else:
-                of = of[0]+'\n'+of[1]
-        else:
-            of = of[0]
-        plt.ylabel(of, fontsize=fs_main, fontweight='bold')
-        plt.savefig(basedir+'/figures/random_forest/single_environment/'+other_folder+ext, dpi=dpi, bbox_inches='tight')
-    plt.close()
-    return
-
-def get_environment_random_forest_plots(ft, meta_df, tax_dict, ASV_dict, meta_dict, basedir):
-    envs, env_index = ['marine', 'freshwater', 'aquatic', 'terrestrial'], 3
-    labfield, labindex = ['lab', 'field', ['lab', 'field']], 5
-    all_samples = list(ft.columns)
-    all_samples_meta = list(meta_df.index.values)
-    for a in range(len(envs)):
-        if envs[a] == 'marine':
-            continue
-        for b in range(len(labfield)):
-            if envs[a] == 'freshwater' and labfield[b] == 'lab':
-                continue
-            meta_names = list(meta_df.columns)
-            keeping = []
-            for c in range(len(all_samples)):
-                if meta_dict[all_samples[c]][env_index] == envs[a] and meta_dict[all_samples[c]][labindex] == labfield[b]:
-                    keeping.append(True)
-                elif meta_dict[all_samples[c]][env_index] == envs[a] and meta_dict[all_samples[c]][labindex] in labfield[b]:
-                    keeping.append(True)
-                else:
-                    keeping.append(False)
-            single_ft = ft.loc[:, keeping]
-            if len(single_ft.index.values) == 0:
-                continue
-            single_ft = single_ft[single_ft.max(axis=1) > 0]
-            keeping_meta = []
-            for d in range(len(all_samples_meta)):
-                if meta_dict[all_samples_meta[d]][env_index] == envs[a] and meta_dict[all_samples_meta[d]][labindex] == labfield[b]:
-                    keeping_meta.append(True)
-                elif meta_dict[all_samples_meta[d]][env_index] == envs[a] and meta_dict[all_samples_meta[d]][labindex] in labfield[b]:
-                    keeping_meta.append(True)
-                else:
-                    keeping_meta.append(False)
-            single_meta_df = meta_df.loc[keeping_meta]
-            #meta_names.remove('Source')
-            #meta_names.remove('MaterialType')
-            #meta_names.remove('PlasticTypeSpecific')
-            meta_names.remove('PlasticOnly')
-            single_meta_df.drop(meta_names, axis=1, inplace=True)
-            if len(single_meta_df.index.values) == 0:
-                continue
-            if b == 2:
-                name = envs[a]
-            else:
-                name = envs[a]+'_'+labfield[b]
-            get_random_forest_plots(single_ft, tax_dict, ASV_dict, meta_dict, basedir, other_folder=name)
-            """
-            try:
-                if name != 'marine_field':
-                    get_random_forest_plots(single_ft, tax_dict, ASV_dict, meta_dict, basedir, other_folder=name)
-            except:
-                print('Couldnt get '+name+' plots')
-            """
-    return
-
-def group_ft_level(ft, level, tax_dict, basedir, rename=False, saving=False): #This script was written specifically for grouping before ancom, but the rename option is there to make it compatible with other functions that might want to regroup but not rename to an ASV (this renaming is only to have a representative sequence for each group)
-    '''
-    add doc string here
-    '''
-    asv = list(ft.index.values)
-    asv_tax_dict, asv_tax = {}, []
-    for a in range(len(asv)):
-        asv_tax_dict[asv[a]] = tax_dict[asv[a]][level]
-        asv_tax.append(tax_dict[asv[a]][level])
-    unique_tax = list(set(asv_tax))
-    representative_asv, rep_asv_dict = [], {}
-    for a in range(len(unique_tax)):
-        for b in range(len(asv_tax)):
-            if unique_tax[a] == asv_tax[b]:
-                representative_asv.append([asv[b], unique_tax[a]])
-                rep_asv_dict[unique_tax[a]] = asv[b]
-                break
-    ft = ft.rename(index=asv_tax_dict)
-    ft = ft.groupby(by=ft.index, axis=0).sum()
-    if rename:
-        ft = ft.rename(index=rep_asv_dict)
-        if saving:
-            with open(basedir+'/taxonomy_name_only.csv', 'w') as f:
-                writer = csv.writer(f)
-                writer.writerow(['OTUID', 'Species name'])
-                for asv in representative_asv:
-                    writer.writerow(asv)
-    return ft
-
 def get_venn_labels(data): 
     '''
     Calculate the number of overlapping ASVs between different samples
@@ -1416,8 +879,13 @@ def get_venn_labels(data):
 
 def get_venn(labels, ax, colors, names=['A', 'B', 'C', 'D', 'E'], plotting=[True, True, True, True, True]):
     '''
-    add doc string here
-    #get a venn diagram with specified colors and names, with up to 5 ellipses (these are not plotted if that sample type is not present)
+    This is a function to get a venn diagram with up to 5 ellipses (only plotted if that sample type is present, but the layout remains the same)
+    It takes as input:
+        - labels (a list of labels as output by the get_venn_labels function)
+        - ax (axis to plot the venn diagram on)
+        - colors (list of colors to use for each ellipse, expected that this will have length 5)
+        - names (list of names to use for each ellipse, expected that this will have length 5. Default=['A', 'B', 'C', 'D', 'E'])
+        - plotting (list of True/False for whether to plot each ellipse, expected that this will have length 5. Default is plotting=[True, True, True, True, True])
     '''
     #list of locations for each point of the ellipses
     el1, el2, el3, el4, el5 = [0.428, 0.469, 0.558, 0.578, 0.489], [0.449, 0.543, 0.523, 0.432, 0.383], [0.87, 0.87, 0.87, 0.87, 0.87], [0.50, 0.50, 0.50, 0.50, 0.50], [155.0, 82.0, 10.0, 118.0, 46.0]
@@ -1438,12 +906,15 @@ def get_venn(labels, ax, colors, names=['A', 'B', 'C', 'D', 'E'], plotting=[True
             ax.text(x[a], y[a], names[a], horizontalalignment='center',verticalalignment='center',fontsize=fs_main,color="black")
     return
 
+
 def get_diversity(diversity, sample):
     '''
     function to calculate a range of different diversity metrics
     It takes as input:
         - diversity (the name of the diversity metric we want, can be 'Simpsons', 'Shannon', 'Richness', 'Evenness', 'Maximum' (Maximum is not a diversity metric, the function will just return the maximum abundance value given in sample)
         - sample (a list of abundance values that should correspond to one sample)
+    Returns:
+        - The diversity index for the individual sample
     '''
     for a in range(len(sample)):
         sample[a] = float(sample[a])
@@ -1485,7 +956,7 @@ def get_diversity(diversity, sample):
 
 def get_cols(num):
     '''
-    This is a function to get a list of either 20 or 40 colors depending on the input 'num'
+    This is a function to get a list of either 20 or 40 colors depending on the input 'num' (assumed that this is a number between 0 and 40)
     '''
     colormap_20 = mpl.cm.get_cmap('tab20', 256)
     norm = mpl.colors.Normalize(vmin=0, vmax=19)
@@ -1510,9 +981,16 @@ def get_cols(num):
     else:
         return colors_40
 
-def bar_dendro_venn(ft, meta_dict, basedir, tax_dict):
+def bar_dendro_venn(ft, ft_full, meta_dict, basedir, tax_dict, str_norm='rare'):
     '''
-    Add doc string here
+    Function to make the dendrogram, stacked bar, heatmap, simpsons diversity and venn diagrams of shared ASVs
+    Takes as input:
+        - ft (dataframe with samples as columns and ASVs as rows)
+        - meta_dict (dictionary containing metadata for all samples, with sample names as keys)
+        - basedir (name of the directory to save the figures to)
+        - tax_dict (dictionary containing taxonomy information with ASV names as keys)
+    Returns:
+        - nothing, but saves figure to the figures folder
     '''
     #set up the figure and all axes
     fig = plt.figure(figsize=(12,19))
@@ -1525,8 +1003,9 @@ def bar_dendro_venn(ft, meta_dict, basedir, tax_dict):
     ax6 = plt.subplot2grid((27,2), (16,1), rowspan=4, frameon=False)
     ax7 = plt.subplot2grid((27,2), (21,0), rowspan=4, frameon=False)
     ax8 = plt.subplot2grid((27,2), (21,1), rowspan=4, frameon=False)
-    ft = pd.read_csv(ft, header=0, index_col=0) #get the feature table
-    ft = ft*100 #convert the feature table to % relative abundance
+    ft_full = pd.read_csv(ft_full, header=0, index_col=0)
+    ft_full = ft_full.div(ft_full.sum(axis=0)).multiply(100) #convert the full feature table to % relative abundance
+    #ft = ft*100 #convert the feature table to % relative abundance
     colnames = list(ft.columns) #get the column names (sample names)
     env, source, env_source_dict, env_source = [], [], {}, []
     for a in range(len(colnames)): #use the sample names to get the metadata categories that these samples belong to (environment and source)
@@ -1578,19 +1057,31 @@ def bar_dendro_venn(ft, meta_dict, basedir, tax_dict):
     #get simpsons diversity for each sample
     indiv_div = ['Simpsons']
     for cn in colnames:
-        indiv_div.append(get_diversity('Simpsons', list(ft.loc[:, cn])))
+        indiv_div.append(get_diversity('Simpsons', list(ft_full.loc[:, cn])))
     #rename all sample names by a combination of the environment and source
-    ft.rename(columns=env_source_dict, inplace=True)
+    ft_full.rename(columns=env_source_dict, inplace=True)
     env_source = list(set(env_source)) #now get a list of all unique environments and sources
-    ft = ft.reset_index()
-    ft = ft.append(pd.Series(indiv_div, index=ft.columns), ignore_index=True) #add the simpsons diversity to the overall dataframe
-    ft.index = ft['index']
-    ft.drop('index', axis=1, inplace=True)
-    ft_dendro = ft.drop('Simpsons', axis=0) #make a new dataframe without the simpsons index of diversity
+    ft_full = ft_full.reset_index()
+    ft_full.rename(columns={'OTUID':'index'}, inplace=True)
+    ft_full = ft_full.append(pd.Series(indiv_div, index=ft_full.columns), ignore_index=True) #add the simpsons diversity to the overall dataframe
+    ft_full.index = ft_full['index']
+    ft_full.drop('index', axis=1, inplace=True)
+    ft_dendro = ft_full.drop('Simpsons', axis=0) #make a new dataframe without the simpsons index of diversity
     ft_dendro = ft_dendro.groupby(by=ft_dendro.columns, axis=1).mean() #group this by the environment/source name, taking a mean rather than a sum for each ASV
+    ft_dendro.to_csv(basedir+'/grouped_samples_for_unifrac.csv')
+    
+    r.r_unifrac('agglom/reduced_tree_nr.tree') #run the R function to perform unifrac on these groupings
+    
+    w_uf = pd.read_csv(basedir+'weighted_unifrac_grouped_samples.csv', header=0, index_col=0)
+    snames = list(w_uf.columns)
+    r_name_dict = {}
+    for s in snames:
+        r_name_dict[s] = s.replace('..', ' \n').replace('.', ' ')
+    w_uf.rename(columns=r_name_dict, index=r_name_dict, inplace=True)
     plt.sca(ax1)
-    ft_dendro_T = ft_dendro.transpose() #transpose the dataframe
-    Z = hierarchy.linkage(ft_dendro_T, 'average', metric='braycurtis') #calculate the bray-curtis distance between the means of sample groupings
+    #ft_dendro_T = ft_dendro.transpose() #transpose the dataframe
+    Z = ssd.squareform(w_uf)
+    Z = hierarchy.linkage(Z, "ward")
     mpl.rcParams['lines.linewidth'] = 2
     hierarchy.set_link_color_palette(['k'])
     dn = hierarchy.dendrogram(Z, above_threshold_color='k', orientation='left') #plot this dendrogram of sample groupings
@@ -1598,7 +1089,7 @@ def bar_dendro_venn(ft, meta_dict, basedir, tax_dict):
     for y in y_labels:
         labels.append(y.get_text())
     plot_labels, pl, colors = [], [], []
-    grouping = list(ft_dendro.columns)
+    grouping = list(w_uf.columns)
     sources.append('blank')
     #get the appropriate color and label for the order of samples
     for a in range(len(labels)):
@@ -1610,7 +1101,7 @@ def bar_dendro_venn(ft, meta_dict, basedir, tax_dict):
     #add the yticks (with color corresponding to the environment that they came from)
     plt.yticks([])
     for a in range(len(locs)):
-        ax1.text(xlocs[0]-0.75, locs[a], plot_labels[a], fontsize=fs_main, bbox=dict(facecolor=colors[a], alpha=0.4, pad=0.5, edgecolor='w'), ha='center', va='center')
+        ax1.text(xlocs[0]-1.5, locs[a], plot_labels[a], fontsize=fs_main, bbox=dict(facecolor=colors[a], alpha=0.4, pad=0.5, edgecolor='w'), ha='center', va='center')
     plt.sca(ax1)
     plt.xticks([])
     asv = list(ft_dendro.index.values)
@@ -1622,13 +1113,14 @@ def bar_dendro_venn(ft, meta_dict, basedir, tax_dict):
         clss[asv[a]] = tax[3]
         spec[asv[a]] = tax[-1]
     #make new feature tables where ASVs are named by phyla/class and then group all of these phylums/classes (summing rather than taking means now)
-    ft_phyla = ft_dendro_T.rename(columns=phyla)
+    ft_T = ft_dendro.transpose()
+    ft_phyla = ft_T.rename(columns=phyla)
     ft_phyla = ft_phyla.groupby(by=ft_phyla.columns, axis=1).sum()
-    ft_class = ft_dendro_T.rename(columns=clss)
+    ft_class = ft_T.rename(columns=clss)
     ft_class = ft_class.groupby(by=ft_class.columns, axis=1).sum()
     ft_phyla = ft_phyla[ft_phyla.columns[ft_phyla.max() > 1]] #only keep those phyla that have a maximum abundance above 1%
     yt = []
-    plot_names = [['Alteromonadales', 'Alteromonas macleodii'], 'Bacillales', 'Flavobacteriales', 'Oceanospirillales', 'Rhodobacterales', 'Rhodospirillales', 'Sphingomonadales', 'Vibrionales']
+    plot_names = ['Alteromonadales', 'Bacillales', 'Flavobacteriales', 'Oceanospirillales', 'Rhodobacterales', 'Rhodospirillales', 'Sphingomonadales', 'Vibrionales']
     colormap = mpl.cm.get_cmap('hot', 256)
     norm = mpl.colors.Normalize(vmin=0, vmax=15)
     m = mpl.cm.ScalarMappable(norm=norm, cmap=colormap)
@@ -1646,13 +1138,8 @@ def bar_dendro_venn(ft, meta_dict, basedir, tax_dict):
         left = 0
         x3 = []
         for c in range(len(plot_names)): #for each of the families that we are specifically interested in (due to them having been reported in a large number of Plastisphere studies)
-            try:
-                num = list(ft_class.loc[pl[a], plot_names[c]]) #get the abundance in the sample for this family only
-                if len(num) > 1: #this accounts for if it is Alteromonadales (where for some reason QIIME has Alteromonas macleodii separately)
-                    num = sum(num) #if this was the case, just add Alteromonas macleodii to the other Alteromonadales
-                ax3.barh(a, 1, left=left, height=1, edgecolor='k', color=m.to_rgba(num)) #now make the heatmap square, and scaled to this abundance
-            except:
-                ax3.barh(a, 1, left=left, height=1, edgecolor='k', color=m.to_rgba(ft_class.loc[pl[a], plot_names[c]])) #if it wasn't more than one value, then just make the heatmap square and scaled to this abundance
+            num = ft_class.loc[pl[a], plot_names[c]]
+            ax3.barh(a, 1, left=left, height=1, edgecolor='k', color=m.to_rgba(num)) #now make the heatmap square, and scaled to this abundance
             x3.append(left+0.5) #add the y value
             left += 1
     #make the legend for the stacked bar of phyla, with the correct colors for each phylum
@@ -1661,7 +1148,7 @@ def bar_dendro_venn(ft, meta_dict, basedir, tax_dict):
     for a in range(len(phy)):
         handles.append(mlines.Line2D([], [], color=colors[a], marker='o', markersize=8, markeredgecolor='k', label=phy[a], linestyle=' '))
     handles.append(mlines.Line2D([], [], color='k', marker='o', markersize=8, markeredgecolor='k', label='Other', linestyle=' '))
-    ax2.legend(handles=handles, bbox_to_anchor=(1.03, -0.06), ncol=round(len(lst)/4), fontsize=fs_main)
+    ax2.legend(handles=handles, bbox_to_anchor=(1.03, -0.06), ncol=round(len(lst)/4), fontsize=fs_small)
     #change the x and y limits and ticks for these plots
     ax2.set_ylim([-0.5, len(pl)-0.5])
     ax3.set_ylim([-0.5, len(pl)-0.5])
@@ -1670,14 +1157,13 @@ def bar_dendro_venn(ft, meta_dict, basedir, tax_dict):
     plt.sca(ax2)
     plt.yticks(yt, [])
     plt.sca(ax3)
-    plot_names[0] = plot_names[0][0]
     #add the ticks for each of the families of interest
     for a in range(len(plot_names)):
         plot_names[a] = r'$'+plot_names[a]+'$'
     plt.xticks(x3, plot_names, rotation=90, fontsize=fs_main)
     plt.yticks(yt, [])
     #now get only the simpsons diversity index for each (kept separately because we don't want to group it by sample as we want to be able to plot the outliers etc in the boxplot)
-    ft_simps = ft.loc[['Simpsons'], :]
+    ft_simps = ft_full.loc[['Simpsons'], :]
     for a in range(len(pl)): #for each sample type, get all samples and then make a box plot
         this_simp = ft_simps.loc[:, [pl[a]]]
         ax4.boxplot(this_simp, positions=[a], vert=False, showfliers=False)
@@ -1685,157 +1171,18 @@ def bar_dendro_venn(ft, meta_dict, basedir, tax_dict):
     plt.sca(ax4)
     plt.yticks(yt, [])
     ax2.set_xlabel('Relative abundance (%)', fontsize=fs_main)
-    ax2.set_title('Mean relative abundance of phyla', fontweight='bold', fontsize=fs_title)
-    ax3.set_title('Mean relative\nabundance of\nkey families', fontweight='bold', fontsize=fs_title)
-    ax4.set_title('Simpsons index\nof diversity', fontweight='bold', fontsize=fs_title)
+    ax2.set_title('Mean relative abundance of phyla', fontweight='bold', fontsize=fs_title-2)
+    ax3.set_title('Mean relative\nabundance of\nkey orders', fontweight='bold', fontsize=fs_title-2)
+    ax4.set_title('Simpsons\nindex\nof diversity', fontweight='bold', fontsize=fs_title-2)
     cb1 = mpl.colorbar.ColorbarBase(ax3_colbar, cmap=colormap, norm=norm, orientation='horizontal') #get the colorbar for the heatmap
     cb1.set_label('Relative abundance (%)', fontsize=fs_main)
     cb1.set_ticks([0, 5, 10, 15])
     cb1.ax.tick_params(labelsize=fs_small)
-    plt.savefig(basedir+'/figures/dendro_venn'+ext, dpi=dpi, bbox_inches='tight') #save the figure
+    plt.savefig(basedir+'/figures/Fig4_dendro_venn_'+str_norm+ext, dpi=dpi, bbox_inches='tight') #save the figure
     plt.close()
     return
-
-def make_colorbar_fig(basedir):
-    cols = ['early', 'late', 'aliphatic', 'other plastic', 'unknown plastic', 'biofilm']
-    fig = plt.figure(figsize=(4, 2))
-    ax1 = plt.subplot(311)
-    for a in range(len(cols)):
-        ax1.bar(a, 1, color=color_source[cols[a]], edgecolor='k', width=1)
-        if cols[a] in rename_plots:
-            cols[a] = rename_plots[cols[a]]
-        else:
-            cols[a] = cols[a].capitalize()
-    plt.xlim([-0.5, 5.5])
-    plt.ylim([0,1])
-    plt.xticks([0, 1, 2, 3, 4, 5], cols, fontsize=fs_main, rotation=90)
-    plt.yticks([])
-    plt.savefig(basedir+'/figures/colorbars'+ext, dpi=dpi, bbox_inches='tight')
-    plt.close()
-    return
-
-def tree_heatmap(ft, meta_dict, basedir, tax_dict, level=7):
-    '''
-    add doc string here
-    '''
-    ft = pd.read_csv(ft, header=0, index_col=0)
-    ft = ft*100
-    if level < 7:
-        ft = group_ft_level(ft, level, tax_dict, basedir+'/ancom', rename=True, saving=True)
-    samples = list(ft.columns)
-    env, source, inc_time, source_inc, source_inc_dict = [], [], [], [], {}
-    envs = ['marine', 'freshwater', 'aquatic', 'terrestrial']
-    for a in range(len(samples)):
-        env.append(meta_dict[samples[a]][3])
-        source.append(meta_dict[samples[a]][10])
-        inc_time.append(meta_dict[samples[a]][13])
-        source_inc.append(meta_dict[samples[a]][10]+' '+meta_dict[samples[a]][13])
-        source_inc_dict[samples[a]] = meta_dict[samples[a]][10]+' '+meta_dict[samples[a]][13]
-    comparisons = [['aliphatic early', 'aliphatic late'], ['other plastic early', 'other plastic late'], ['biofilm early', 'biofilm late'],
-                   ['aliphatic early', 'other plastic early'], ['aliphatic early', 'unknown plastic early'], ['aliphatic early', 'biofilm early'],
-                   ['aliphatic late', 'other plastic late'], ['aliphatic late', 'unknown plastic late'], ['aliphatic late', 'biofilm late'],
-                   ['other plastic early', 'unknown plastic early'], ['other plastic early', 'biofilm early'],
-                   ['other plastic late', 'unknown plastic late'], ['other plastic late', 'biofilm late'],
-                   ['unknown plastic early', 'biofilm early'], ['unknown plastic late', 'biofilm late']]
-    comp_names = ['Aliphatic: early vs late', 'Other plastic: early vs late', 'Biofilm: early vs late',
-                  'Early: aliphatic vs other plastic', 'Early: aliphatic vs unknown plastic', 'Early: aliphatic vs biofilm', 
-                  'Late: aliphatic vs other plastic', 'Late: aliphatic vs unknown plastic', 'Late: aliphatic vs biofilm', 
-                  'Early: other plastic vs unknown plastic', 'Early: other plastic vs biofilm', 
-                  'Late: other plastic vs unknown plastic', 'Late: other plastic vs biofilm',
-                  'Early: unknown plastic vs biofilm', 'Late: unknown plastic vs biofilm']
-    for a in range(len(envs)):
-        this_env = []
-        keeping = []
-        for b in range(len(env)):
-            if env[b] == envs[a]:
-                keeping.append(True)
-            else:
-                keeping.append(False)
-        env_ft = ft.loc[:, keeping]
-        env_ft.rename(columns=source_inc_dict, inplace=True)
-        all_comps, colors_list = [], [[], []]
-        for c in range(len(comparisons)):
-            try:
-                comp_env_ft = env_ft.loc[:, comparisons[c]]
-                if len(comp_env_ft.loc[:, comparisons[c][0]].columns) < 2 or len(comp_env_ft.loc[:, comparisons[c][1]].columns) < 2:
-                    all_comps.append(False)
-                    continue
-                else:
-                    all_comps.append(True)
-            except:
-                all_comps.append(False)
-                continue
-            comp_env_ft = comp_env_ft.transpose()
-            comp_env_ft = comp_env_ft[comp_env_ft.columns[comp_env_ft.max() > 0]]
-            comp_env_ft = comp_env_ft.replace(to_replace=0,value = 0.0001)
-            comp_env_ft = comp_env_ft.fillna(value=0.0001)
-            ancom_df, percentile_df = ancom(comp_env_ft, pd.Series(list(comp_env_ft.index.values), index=list(comp_env_ft.index.values)), multiple_comparisons_correction='holm-bonferroni')
-            ancom_results, percentile_results, tax_names = ancom_df.values.tolist(), percentile_df.values.tolist(), ancom_df.index.values#, list(percentile_df.columns.values)
-            significant, medians, not_sig, not_sig_medians = [], [], [], []
-            for d in range(len(ancom_results)):
-                if ancom_results[d][1] == True:
-                    if percentile_results[d][2] == 0.0001 and percentile_results[d][7] == 0.0001:
-                        not_sig_medians.append([percentile_results[d][2], percentile_results[d][7]])
-                        not_sig.append(tax_names[d])
-                    significant.append(tax_names[d])
-                    medians.append([percentile_results[d][2], percentile_results[d][7]])
-                else:
-                    not_sig_medians.append([percentile_results[d][2], percentile_results[d][7]])
-                    not_sig.append(tax_names[d])
-            differences = []
-            for e in range(len(medians)):
-                if medians[e][0] == 0:
-                    medians[e][0] = 0.0001
-                elif medians[e][1] == 0:
-                    medians[e][1] = 0.0001
-                if medians[e][0] == 1:
-                    medians[e][0] = 1.0001
-                elif medians[e][1] == 1:
-                    medians[e][1] = 1.0001
-                if medians[e][0] == medians[e][1]:
-                    diff = 0
-                else:
-                    diff = math.log2(medians[e][1])/math.log2(medians[e][0])
-                    diff = math.pow(2, diff)
-                    if diff < 1 and diff > 0:
-                        diff = -(1/diff)
-                differences.append(diff)
-            if len(significant) < 1:
-                all_comps[c] = False
-                continue
-            if isinstance(this_env, list):
-                this_env = pd.DataFrame(data=differences, index=significant, columns=[comp_names[c]])
-            else:
-                new_df = pd.DataFrame(data=differences, index=significant, columns=[comp_names[c]])
-                this_env = pd.concat([this_env, new_df], axis=1, sort=False)
-            str1, str2 = comparisons[c][0].split(" "), comparisons[c][1].split(" ")
-            if str1[-1] == 'early' and str2[-1] == 'late':
-                col1, col2 = '#ff0000', '#25df50'
-            else:
-                if len(str1) > 2:
-                    str1[0] = str1[0]+' '+str1[1]
-                    str1[1] = str1[2]
-                    str1 = str1[:-1]
-                if len(str2) > 2:
-                    str2[0] = str2[0]+' '+str2[1]
-                    str2[1] = str2[2]
-                    str2 = str2[:-1]
-                col1 = color_source[str1[0]]
-                col2 = color_source[str2[0]]
-            colors_list[0].append(str(col1)+", "+str(col2)), colors_list[1].append(comp_names[c])
-        if sum(all_comps) > 0:
-            cols_df = pd.DataFrame(data=[colors_list[0]], index=['Colors'], columns=colors_list[1])
-            this_env = this_env.append(cols_df)
-            this_env = this_env.fillna(value=0)
-            lvls = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species', 'specific_species']
-            this_env.to_csv(basedir+'/ancom/'+envs[a]+'_'+lvls[level]+'_ancom_significant.csv')
-            this_env.to_csv(basedir+'/ancom/ancom_significant.csv')
-            os.system("/usr/local/bin/Rscript plot_ancom_tree_heatmap.R")
-            os.rename(basedir+'/ancom/tree_and_heatmap.pdf', basedir+'/figures/ancom/'+envs[a]+'_ancom_significance_'+lvls[level]+'.pdf')
-    make_colorbar_fig(basedir)
-    return
-
-def metacoder(ft, tax_dict, meta_dict, basedir):
+    
+def metacoder_py(ft, tax_dict, meta_dict, basedir, norm='rare'):
     '''
     This will separate the feature table to environments and perform pairwise comparisons between the same plastic types at early and late incubation times
     as well as different samples at the same incubation times.
@@ -1845,7 +1192,6 @@ def metacoder(ft, tax_dict, meta_dict, basedir):
         - meta_dict (a dictionary containing all metadata, with sample names as keys)
         - basedir (the base directory to use for saving figures and files to)
     '''
-    ft = ft*100 #get the abundances in the feature table as relative abundance
     env, source, inc_time, source_inc, source_inc_dict, source_dict = [], [], [], [], {}, {} #set up some lists
     envs = ['marine', 'freshwater', 'aquatic', 'terrestrial'] #add list of the environments that we want to plot
     samples = list(ft.columns) #get a list of sample names
@@ -1876,6 +1222,7 @@ def metacoder(ft, tax_dict, meta_dict, basedir):
             continue #and continue to the next ASV
         string = '' #add an empty string
         for b in range(len(lineage_single)): #for each level in the taxonomy
+            length = 7
             if b > 0 and lineage_single[b] == lineage_single[b-1]: #if this level is the same as the previous level (i.e. it is unclassified at lower taxonomic levels)
                 length = b #then this is as many levels as we will want to add
         for b in range(length): #for each of these levels
@@ -1895,7 +1242,9 @@ def metacoder(ft, tax_dict, meta_dict, basedir):
                 treat = source #we're only renaming them based on the source
                 treat_dict = source_dict #and using the source dictionary
             for b in range(len(comparisons)): #for each of our comparisons
-                if a < 1 or b > 3:
+                if os.path.exists(basedir+'/figures/metacoder/'+norm+'/'+envs[a]+'_'+comparisons[b][0]+'_'+comparisons[b][1]+'_labels.pdf'):
+                  if os.path.exists(basedir+'/figures/metacoder/'+norm+'/'+envs[a]+'_'+comparisons[b][0]+'_'+comparisons[b][1]+'.pdf'):
+                    print('Already have '+basedir+'/figures/metacoder/'+norm+'/'+envs[a]+'_'+comparisons[b][0]+'_'+comparisons[b][1]+'.pdf')
                     continue
                 if len(comparisons[b]) < 3: #if we haven't already
                     comparisons[b].append('lineage') #add the 'lineage' to our list
@@ -1925,17 +1274,405 @@ def metacoder(ft, tax_dict, meta_dict, basedir):
                 if comparisons == comparisons1 and b < 3: #if its one of the comparisons between early and late samples in the same sample type
                     col1, col2 = color_source['early'], color_source['late'] #then get the early and late colors
                 env_comp_ft.rename(columns=names_dict, inplace=True) #rename the columns with the dictionary we have created
-                command = "/usr/local/bin/Rscript metacoder.R '"+col1+"' '"+col2+"'" #make a string of the command that will be used to run metacoder in R, with the color names
-                env_comp_ft.to_csv(basedir+'/metacoder/metacoder_'+envs[a]+'_'+comparisons[b][0]+'_'+comparisons[b][1]+'.csv') #save the .csv file with the name of this comparison, incase we need to look in the future
-                env_comp_ft.to_csv(basedir+'/metacoder/metacoder.csv') #save the .csv file with the information for running this comparison in metacoder
-                os.system(command) #run metacoder in R (through the terminal)
-                os.rename(basedir+'/metacoder/metacoder.pdf', basedir+'/figures/metacoder/'+envs[a]+'_'+comparisons[b][0]+'_'+comparisons[b][1]+'.pdf') #rename the first file, that doesn't have labels on the metacoder plot
-                os.rename(basedir+'/metacoder/metacoder_labels.pdf', basedir+'/figures/metacoder/'+envs[a]+'_'+comparisons[b][0]+'_'+comparisons[b][1]+'_labels.pdf') #and then rename the second one, that does have labels on the metacoders plot
+                env_comp_ft.to_csv(basedir+'/metacoder/'+norm+'/metacoder_'+envs[a]+'_'+comparisons[b][0]+'_'+comparisons[b][1]+'.csv') #save the .csv file with the name of this comparison, incase we need to look in the future
+                env_comp_ft.to_csv(basedir+'metacoder.csv') #save the .csv file with the information for running this comparison in metacoder
+                colors_metacoder = [col1, col2]
+                r.suppressWarnings(r.metacoder(colors_metacoder, norm))
+                os.rename(basedir+'metacoder.pdf', basedir+'/figures/metacoder/'+norm+'/'+envs[a]+'_'+comparisons[b][0]+'_'+comparisons[b][1]+'.pdf') #rename the first file, that doesn't have labels on the metacoder plot
+                os.rename(basedir+'metacoder_labels.pdf', basedir+'/figures/metacoder/'+norm+'/'+envs[a]+'_'+comparisons[b][0]+'_'+comparisons[b][1]+'_labels.pdf') #and then rename the second one, that does have labels on the metacoders plot
+    return
+    
+def annotate_heatmap(ax, df, cmap='inferno', yticks=True, xticks=True, rnd=1, annotate=True, italics=False, vmax=False, vmin=False, annotate_only=False, norm=None):
+    '''
+    Function to plot a heatmap and to optionally annotate each cell of the heatmap
+    Takes as input:
+        - ax (the axis to plot the heatmap on)
+        - df (a dataframe containing the data to plot as floats/integers in the cells. Y labels will be the index values and X labels the column headers)
+        - cmap (string of which colormap to use for plotting, default is 'inferno')
+        - yticks (optional boolean or string for whether to have ytick labels. Can be True (default), False or 'right' if you want the yticks to show on the right of the plot)
+        - xticks (optional boolean or string for whether to have xtick labels. Can be True (default), False or 'top' if you want the xticks to show on the top of the plot)
+        - rnd (number of decimal places to round the numbers to when the heatmap is annotated, default is 1)
+        - annotate (boolean that decides whether to annotate the heatmap or not. Default is True)
+        - italics (boolean of whether to make y values italic or not - i.e. if they are species names)
+        - vmax (maximum value to scale color values to in the heatmap, default is False but this should be a number to work)
+        - annotate_only (boolean as to whether to only annotate an existing heatmap)
+    '''
+    #get a heatmap plot using the dataframe df on the axis ax, with the colormap cmap, 
+    #with additional options for whether we are to annotate the boxes of the heatmap, 
+    #add x or y tick labels and how many decimal places to round each text label to
+    plt.sca(ax) #set the axis 
+    maxs = [] #get the maximum value of the dataframe
+    for a in  df.columns:
+        maxs.append(df[a].max())
+    ma = max(maxs)
+    if annotate: #if we are adding text labels
+        for a in range(len(list(df.columns))): #go through each column
+            for b in range(len(list(df.index.values))): #and now each row of that column
+                num = round(df.iloc[b, a], rnd) #get the value corresponding to the row and columns
+                if ma > num:
+                    if num < (0.6)*ma: col = 'w' #if the value is below 60% of the maximum value, make the text color white
+                    else: col = 'k' #otherwise, make the text color black
+                    if cmap == 'PuBu': #if we are using the colormap 'PuBu', do the opposite in terms of text color
+                        if num < (0.6)*ma: col = 'k'
+                        else: col = 'w'
+                else:
+                    col = 'k'
+                    if num == ma and cmap == 'PuBu': col = 'w'
+                if cmap == 'Purples' or cmap == 'Blues':
+                    if num > 0.9: col = 'w'
+                    else: col = 'k'
+                plt.text(a+0.5, b+0.5, str(num), ha='center', va='center', color=col, fontsize=fs_small) #and plot this text label
+    if annotate_only:
+        return
+    if norm == 'clr' or norm == 'log':
+      if vmax != False and vmin != False:
+          plt.pcolor(df, edgecolor='k', cmap=cmap, norm=colors.LogNorm(vmin=vmin, vmax=vmax)) #make the heatmap
+      elif vmax != False:
+          plt.pcolor(df, edgecolor='k', cmap=cmap, norm=colors.LogNorm(vmin=0, vmax=vmax)) #make the heatmap
+      elif vmin != False:
+          plt.pcolor(df, edgecolor='k', cmap=cmap, norm=colors.LogNorm(vmin=vmin)) #make the heatmap
+      elif vmin == None:
+          plt.pcolor(df, edgecolor='k', cmap=cmap, norm=colors.LogNorm())
+      else:
+          plt.pcolor(df, edgecolor='k', cmap=cmap, norm=colors.LogNorm(vmin=0)) #make the heatmap
+    else:
+      if vmax != False and vmin != False:
+          plt.pcolor(df, edgecolor='k', cmap=cmap, vmin=vmin, vmax=vmax) #make the heatmap
+      elif vmax != False:
+          plt.pcolor(df, edgecolor='k', cmap=cmap, vmin=0, vmax=vmax) #make the heatmap
+      elif vmin != False:
+          plt.pcolor(df, edgecolor='k', cmap=cmap, vmin=vmin) #make the heatmap
+      elif vmin == None:
+          plt.pcolor(df, edgecolor='k', cmap=cmap)
+      else:
+          plt.pcolor(df, edgecolor='k', cmap=cmap, vmin=0) #make the heatmap
+    rownames = list(df.index.values)
+    for a in range(len(rownames)):
+        if len(rownames[a]) > 35:
+            row = rownames[a].split(' ')
+            if len(row) == 1:
+                row = rownames[a].split('-')
+            string = ''
+            for b in range(len(row)):
+                if b > 0 and b < 2:
+                    string += '\n'+row[b]+' '
+                else:
+                    string += row[b]+' '
+            rownames[a] = string
+    if yticks == 'right':
+        plt.yticks(np.arange(0.5, len(df.index), 1), rownames, fontsize=fs_small, linespacing=0.8) #add them based in the row values of the dataframe
+        ax.yaxis.tick_right()
+    elif yticks: #if we are adding y tick labels
+        plt.yticks(np.arange(0.5, len(df.index), 1), rownames, fontsize=fs_main, linespacing=0.8) #add them based in the row values of the dataframe
+    else:
+        plt.yticks([]) #otherwise, add none
+    if xticks == 'top':
+        colnames = list(df.columns)
+        for col in range(len(colnames)):
+            ind = col
+            col = colnames[col].split(' ')
+            string = ''
+            for a in range(len(col)):
+                if a > 0:
+                    string += '\n'+col[a]
+                else:
+                    string += col[a]+' '
+            colnames[ind] = string
+        plt.xticks(np.arange(0.5, len(df.columns), 1), colnames, fontsize=fs_main)
+        ax.xaxis.tick_top()
+    elif xticks: #if we are adding x tick labels (do the same as for the y tick labels)
+        plt.xticks(np.arange(0.5, len(df.columns), 1), df.columns, rotation=90, fontsize=fs_main)
+    else:
+        plt.xticks([])
+    return
+    
+def get_rf_comparison(basedir):
+    norm = ['rare', 'rel_abun', 'log', 'clr']
+    levels = ['phyla', 'classes', 'orders', 'families', 'genera', 'species']  
+    order_cols, order_rows = [], []
+    fig = plt.figure(figsize=(13, 10)) 
+    for l in range(len(levels)):
+        level = levels[l]
+        dfs, dfs_tax = [], []
+        for n in norm:
+            df = pd.read_csv(basedir+'random_forest/'+n+'/'+level+'_overall.csv', header=0, index_col=0)
+            try:
+                df_tax = df.drop(['Score', 'OOB_score'], axis=0)
+            except:
+                df_tax = df.drop(['Score'], axis=0)
+            df_tax['Mean'] = df_tax.mean(axis=1)
+            df_tax = pd.DataFrame(df_tax.loc[:, 'Mean'])
+            df = pd.DataFrame(df.loc['Score', :])
+            df = df.transpose()
+            df.rename(index={'Score':n}, inplace=True)
+            dfs.append(df)
+            df_tax = df_tax.transpose()
+            df_tax.rename(index={'Mean':n}, inplace=True)
+            dfs_tax.append(df_tax)
+        dfs = pd.concat(dfs)*100
+        dfs_tax = pd.concat(dfs_tax).fillna(value=0)
+        dfs_tax = dfs_tax.groupby(by=dfs_tax.index.values, axis=0).sum()
+        for a in range(2):
+            dfs['Mean'] = dfs.mean(axis=1)
+            dfs = dfs.sort_values(by='Mean', axis=0, ascending=True)
+            if a == 1: 
+                dfs = dfs.sort_values(by='Mean', axis=0, ascending=False)
+            else:
+                df_mean = pd.DataFrame(dfs.loc[:, 'Mean'])
+            dfs.drop('Mean', axis=1, inplace=True)
+            dfs = dfs.transpose()
+        dfs.rename(index=norm_names, columns=rename_plots, inplace=True)
+        df_mean.rename(index=norm_names, inplace=True)
+        order_rows = ['Rarefied', 'Relative\nabundance', 'Log', 'CLR']
+        if order_cols == []:
+            order_cols = list(dfs.columns)
+        else:
+            dfs = dfs.loc[:, order_cols]
+        dfs = dfs.loc[order_rows, :]
+        df_mean = df_mean.loc[order_rows, :]
+        ax = plt.subplot2grid((6,120), (l, 5), colspan=76)
+        ax_mean = plt.subplot2grid((6, 120), (l, 0), colspan=4)
+        ax_con = plt.subplot2grid((6,6), (l, 4))
+        ax_con_tax = plt.subplot2grid((6,6), (l, 5))
+        xtcks = False
+        if l == 5: xtcks = True
+        annotate_heatmap(ax, dfs, xticks=xtcks, yticks=False)
+        
+        annotate_heatmap(ax_mean, df_mean, xticks=xtcks)
+        ax_mean.set_ylabel(level.capitalize(), fontsize=fs_main, fontweight='bold')
+        concs = []
+        order_rows = ['rare', 'rel_abun', 'log', 'clr']
+        dfs_tax = dfs_tax.loc[order_rows, :]
+        for a in range(4):
+            conc = []
+            for b in range(4):
+                l1 = dfs.iloc[a, :].values
+                l2 = dfs.iloc[b, :].values
+                conc.append(concordance_index(l1, l2))
+            concs.append(conc)
+        concs = pd.DataFrame(concs, index=dfs.index.values, columns=dfs.index.values)
+        concs = concs.loc[:, ['CLR', 'Log', 'Relative\nabundance', 'Rarefied']]
+        annotate_heatmap(ax_con, concs, cmap='Blues', rnd=2, yticks=False, xticks=xtcks, vmin=0.75)
+        concs_tax = []
+        for a in range(4):
+            conc_tax = []
+            for b in range(4):
+                l1 = dfs_tax.iloc[a, :].values
+                l2 = dfs_tax.iloc[b, :].values
+                conc_tax.append(concordance_index(l1, l2))
+            concs_tax.append(conc_tax)
+        concs_tax = pd.DataFrame(concs_tax, index=dfs_tax.index.values, columns=dfs_tax.index.values)
+        concs_tax.rename(columns=norm_names, inplace=True)
+        concs_tax = concs_tax.loc[:, ['CLR', 'Log', 'Relative\nabundance', 'Rarefied']]
+        annotate_heatmap(ax_con_tax, concs_tax, cmap='Purples', rnd=2, yticks=False, xticks=xtcks, vmin=0.75)
+        
+        if l == 0:
+            ax.set_title('Classification accuracy (%)', fontsize=fs_title, fontweight='bold')
+            ax_con.set_title('Concordance in\nclassification accuracy', fontsize=fs_main, fontweight='bold')
+            ax_con_tax.set_title('Concordance in\nfeature importance', fontsize=fs_main, fontweight='bold')
+    
+    plt.savefig(basedir+'/figures/FigS2_RF_compare'+ext, dpi=600, bbox_inches='tight')
+    plt.close()
+    return 
+    
+def generate_rf(X_train, y_train, X_test, y_test, rc='cls', est=10000, n_jobs=None): #generate a random forest based on the data being split to train and test
+    '''
+    Function to generate a random forest model for one dataset, depending on whether we want to use the classification or regression model
+    It takes as input:
+        - X_train, y_train, X_test, y_test (this should be the output from the sklearn train_test_split function)
+        - rc (a string of either 'cls' or 'reg', depending on whether we want to perform classification or regression, respectively. Default='cls' as this will work on numeric or non-numeric data, where regression requires numeric)
+        - est (the number of estimators to use. In general, the higher this number the better/more accurate the model can fit. Default=10000)
+        - n_jobs (the number of processors to use. Default=None, meaning 1 is used)
+    Returns:
+        - rf (the random forest model)
+        - rf.score (the classification accuracy of this model)
+        - rf.feature_importances_ (the importance values for each included feature/taxa)
+    '''
+    if rc == 'cls': #if we are using a classification (i.e. discrete categories)
+        rf = RandomForestClassifier(n_estimators=est, min_samples_leaf=3, n_jobs=n_jobs, random_state=seed, oob_score=False)
+    else: #if we are using a regression (i.e. continuous categories)
+        rf = RandomForestRegressor(n_estimators=est, min_samples_leaf=3, n_jobs=n_jobs, random_state=seed, oob_score=False)
+    rf.fit(X_train, y_train) #fit out data to either the regressor or classifier
+    return rf, rf.score(X_test, y_test), rf.feature_importances_ #return the forest (i.e. features), score (how well it classifies the test data) and feature importances (ASV importances)
+
+def get_single_forest(ft, meta_df, sn, level, est=10000, n_jobs=None):
+    '''
+    Function to calculate random forest models for each metadata category for a feature table at one phylogenetic level
+    Takes as input:
+        - ft (feature table/dataframe with sample names as columns and ASVs/taxa names as rows)
+        - meta_df (dataframe containing samples as rows and metadata categories as columns)
+        - sn (name/string to use to save the results of these random forests)
+        - level (phylogenetic level that these comparisons are being performed at, where 1 is phylum and 7 is ASV)
+        - est (integer, number of estimators to use to calculate the random forests. Default=10000)
+        - n_jobs (integer, number of processors to use for calculations. Default is None, meaning that 1 will be used)
+    Returns:
+        - scores (scores for how well the random forest models performed for each metadata category)
+        - dfs (dataframe containing the importance values for each taxon across all metadata categories)
+    '''
+    meta_df = meta_df.loc[list(ft.index.values), :]
+    cls_reg = {'Study':'cls', 'Latitude':'reg', 'Longitude':'reg', 'Environment':'cls', 'WaterOrSediment':'cls',
+       'LabOrField':'cls', 'IncubationOrCollection':'cls', 'Source':'cls', 'MaterialType':'cls',
+       'PlasticTypeSpecific':'cls', 'PlasticTypeGeneral':'cls', 'DEPTH':'reg', 'IncubationTime':'reg',
+       'IncubationGeneral':'cls', 'Temperature':'reg', 'Salinity':'reg', 'Light':'cls', 'Season':'cls',
+       'PrimerPair':'cls', 'DNAExtraction':'cls', 'CollectionDate':'cls', 'PlasticOnly':'cls'} #dictionary telling it whether each category should use a classification (cls) or regression (reg) algorithm for the random forests
+    ft_in = ft #save the original feature table
+    ft = ft.rename_axis('ID').values #rename the feature table axis (i.e. remove the indice and column names)
+    max_abs_scaler = preprocessing.MaxAbsScaler() #scale all ASVs to the maximum absolute value
+    ft_scale = max_abs_scaler.fit_transform(ft) #apply this to our feature table
+    meta_split, reg_cls, col_names = [], [], []
+    for col in meta_df.columns: #make lists of all of the sample names based on the sample type within each meta category
+        meta_split.append(meta_df[col])
+        reg_cls.append(cls_reg[col])
+        col_names.append(col)
+    scores, importances = [], []
+    count = 0
+    for a in range(len(meta_split)): #for each meta-category
+        meta = meta_split[a].rename_axis('ID').values #split the metadata dataframe to be only the category we are currently looking at
+        if len(set(meta)) == 2 and 'unknown' in meta:
+            continue
+        keeping = []
+        for z in range(len(meta)):
+            if meta[z] == 'unknown':
+                keeping.append(False)
+            else:
+                keeping.append(True)
+        meta_reduced = meta[keeping]
+        ft_scale_reduced = ft_scale[keeping]
+        X_train, X_test, y_train, y_test = train_test_split(ft_scale_reduced, meta_reduced, test_size=0.2) #split the data to training and test data (with 80% of samples being used for training and 20% for testing)
+        RF, RF_score, RF_importances = generate_rf(X_train, y_train, X_test, y_test, rc=reg_cls[a], est=est, n_jobs=n_jobs) #generate the random forest for this meta category
+        #print(col_names[a], RF_score) #print the category and random forest score/classification accuracy
+        scores.append(RF_score), importances.append(RF_importances) #add the scores and importances for this category to the overall lists
+        this_rf = {'ASV':ft_in.columns, 'Importance':RF_importances} #make a dataframe with the information on how important each ASV/taxa is
+        df_rf = pd.DataFrame(this_rf, columns = ['ASV', 'Importance'])
+        df_rf.sort_values(by=['Importance'], ascending=False, inplace=True) #sort the values by importance
+        df_rf_score = df_rf.set_index('ASV')
+        df_rf_score = df_rf_score
+        df_rf = df_rf[df_rf.max(axis=1) > 0.00]
+        df_rf = df_rf[:50] #now only keep the top 50 features
+        df_rf = df_rf.set_index('ASV') #if we didn't use get_heatmap_random_forest, then we need to uncomment this line
+        df_rf = df_rf_score.rename(columns={'Importance':col_names[a]}) #rename the column to be this meta category
+        if count == 0:
+            dfs = df_rf
+            count += 1
+        else:
+            dfs = dfs.merge(right=df_rf, on='ASV')
+    if scores == []:
+        return [], []
+    scores = pd.DataFrame([scores], index=['Score'], columns=list(dfs.columns))
+    dfs = pd.concat([dfs, scores], sort=True)
+    dfs.to_csv(sn+'.csv')
+    return scores, dfs
+
+def get_random_forests(ft, tax_dict, meta_df, basedir, est=10000, n_jobs=None, sn=None, norm=None):
+    '''
+    Function to call a function to get random forests for each phylogenetic level, across all metadata categories
+    Takes as input:
+        - ft (feature table/dataframe with sample names as columns and ASVs/taxa names as rows)
+        - tax_dict (dictionary containing taxonomy information with ASV names as keys)
+        - meta_df (dataframe containing samples as rows and metadata categories as columns)
+        - basedir (name of the directory to save the files to)
+        - est (integer, number of estimators to use to calculate the random forests. Default=10000)
+        - n_jobs (integer, number of processors to use for calculations. Default is None, meaning that 1 will be used)
+    Returns:
+        - nothing, but saves a .csv file for each phylogenetic level, containing information on taxon importance at that level
+    '''
+    this_sn = str(sn)
+    asv = list(ft.index.values)
+    for a in [7]:#[1, 2, 3, 4, 5, 6, 7]:
+        #if norm != None and a < 5: continue
+        this_asv = list(asv)
+        new_names, other_levels = {}, {}
+        for b in range(len(this_asv)):
+            this_tax = tax_dict[this_asv[b]]
+            prev = ''
+            for c in range(len(this_tax)):
+                if this_tax[c] != '':
+                    prev = this_tax[c]
+                else:
+                    this_tax[c] = prev
+            if a < 7:
+                new_names[this_asv[b]] = this_tax[a]
+                this_asv[b] = this_tax[a]
+            else:
+                new_names[this_asv[b]] = this_asv[b]
+            other_levels[this_asv[b]] = this_tax[:a]
+        this_ft = ft.rename(index=new_names) #now rename the feature table using the new names that we have just defined
+        this_ft = this_ft.groupby(by=this_ft.index, axis=0).sum() #group all of the names that are together, taking a sum for each phyla
+        this_ft = this_ft.transpose()
+        if sn == None:
+            if norm == None:
+              lev_sn = basedir+'/random_forest/'+phylo_level_names[a]+'_overall'
+            else:
+              lev_sn = basedir+'/random_forest/'+norm+'/'+phylo_level_names[a]+'_overall'
+        else:
+            lev_sn = this_sn+phylo_level_names[a]
+        
+        if not os.path.exists(lev_sn+'.csv'): #only do this if we don't already have this file
+          get_single_forest(this_ft, meta_df, lev_sn, a, est=est, n_jobs=n_jobs) #get all of the individual forests for this phylogenetic level
+        else:
+          print('Didnt get this forest '+lev_sn+' because we already had a file saved under the save name') 
     return
 
-def get_ancom_phylo(ft_abun):
+def get_environment_random_forest(ft, tax_dict, meta_df, meta_dict, basedir, est=10000, n_jobs=1, norm=None):
     '''
-    Get doc string
+    Function to calculate random forest models for specific metadata categories in different environments.
+    It takes as input:
+        - ft (feature table data frame containing taxa as rows and sample names as columns)
+        - tax_dict (dictionary containing the full taxonomy for each ASV)
+        - meta_df (dataframe containing all metadata information, with samples as rows and metadata categories as columns)
+        - meta_dict (dictionary containing all metadata with sample names as keys)
+        - basedir (directory to save .csv output files to)
+        - est (number of estimators to use for calculating random forests, default is 10000. Note that lower numbers will lead to lower accuracy)
+        - n_jobs (number of processors to use for calculating random forests, default is 1)
+    It uses the other general random forest function but with filtered versions of the metadata and feature tables, and could easily be edited to do this separately for lab/field studies and to do more than just 'PlasticTypeGeneral'
+    '''
+    envs, env_index = ['marine', 'freshwater', 'aquatic', 'terrestrial'], 3
+    labfield, labindex = [['lab', 'field']], 5
+    
+    all_samples = list(ft.columns)
+    all_samples_meta = list(meta_df.index.values)
+    for a in range(len(envs)):
+        for b in range(len(labfield)):
+            meta_names = list(meta_df.columns)
+            keeping = []
+            for c in range(len(all_samples)):
+                if meta_dict[all_samples[c]][env_index] == envs[a] and meta_dict[all_samples[c]][labindex] == labfield[b]:
+                    keeping.append(True)
+                elif meta_dict[all_samples[c]][env_index] == envs[a] and meta_dict[all_samples[c]][labindex] in labfield[b]:
+                    keeping.append(True)
+                else:
+                    keeping.append(False)
+            single_ft = ft.loc[:, keeping]
+            if len(single_ft.index.values) == 0:
+                continue
+            single_ft = single_ft[single_ft.max(axis=1) > 0]
+            keeping_meta = []
+            for d in range(len(all_samples_meta)):
+                if meta_dict[all_samples_meta[d]][env_index] == envs[a] and meta_dict[all_samples_meta[d]][labindex] == labfield[b]:
+                    keeping_meta.append(True)
+                elif meta_dict[all_samples_meta[d]][env_index] == envs[a] and meta_dict[all_samples_meta[d]][labindex] in labfield[b]:
+                    keeping_meta.append(True)
+                else:
+                    keeping_meta.append(False)
+            single_meta_df = meta_df.loc[keeping_meta]
+            meta_names.remove('PlasticTypeGeneral')
+            single_meta_df.drop(meta_names, axis=1, inplace=True)
+            if len(single_meta_df.index.values) == 0:
+                continue
+            if norm != None:
+                sn = basedir+'/random_forest/'+norm+'/single_environment/'+envs[a]+'_'
+            else:
+                sn = basedir+'/random_forest/single_environment/'+envs[a]+'_'
+            get_random_forests(single_ft, tax_dict, single_meta_df, basedir, est=est, n_jobs=n_jobs, sn=sn, norm=norm) 
+    return
+    
+def get_ancom(ft_abun):
+    '''
+    Function to perform ANCOM tests for statistical significance on a given feature table
+    Takes as input:
+        - ft_abun (a feature table dataframe with sample names as rows and taxon names as columns)
+    Returns:
+        - significant (a list of taxon names corresponding to all taxa that were determined as being statistically significantly differentially abundant between treatments)
     '''
     other_ft = ft_abun.copy()
     other_ft = other_ft.replace(to_replace=0,value = 0.0001)
@@ -1956,371 +1693,854 @@ def get_ancom_phylo(ft_abun):
                 not_sig.append(tax_names[d])
     return significant
 
-def group_phylo_plot(ft, tax_dict, plot_on, sn, title, scores, rfs, ASV_dict, abun_fts):
+def make_env_rf_plot(ft, tax_dict, basedir, ASV_dict, meta_dict, mx=0.005, norm='rare'):
     '''
-    This will make the phylogenetic plots with all taxa grouped into the phylogenetic level above (a bit like a stacked bar chart)
-    It takes as input:
-        - ft (a feature table - this may contain abundance, but ASV names are all that is necessary)
-        - tax_dict (a dictionary containing ASV names as keys and taxonomy as values)
-        - plot_on (a list of lists, each containing the important features at one phylogenetic level)
-        - sn (name to save the resulting figure under)
-        - title (plot title)
-        - scores (the classification accuracy of each phylogenetic level)
-        - rfs (a list of the results of each random forest containing one column with taxa and one with feature importance values - this will be used to colour the cells)
-        - ASV_dict (a dictionary containing ASV names as keys and ASV numbers are returned as values (rather than a random collection of numbers and letters))
-    Note that it is assumed that the plot will start at the kingdom level, but plot_on, scores and rfs will start at the phylum level
+    Function to make heatmaps (of abundance and including whether they were significantly differentially abundant according to ANCOM) of all taxa at all phylogenetic levels with a feature importance value of above 0.01 in the random forest models constructed for separate environments
+    Takes as input:
+        - ft (feature table dataframe containing sample names as columns and ASV names as rows)
+        - tax_dict (dictionary with taxon names as keys and full taxonomic information to be returned as a list)
+        - basedir (directory to use to open random forest information as well as to save the resulting figure to)
+        - ASV_dict (dictionary containing all ASV assigned readable name with QIIME2 ASV name as keys)
+        - meta_dict (dictionary with all metadata  for each sample, with sample names as keys)
+    Returns:
+        - nothing, but saves the figure environment_random_forest to the figures directory
     '''
-    asvs = list(ft.index.values) #get a list of the ASVs in the feature table
-    asv_tax, names = [], []
-    rng = len(plot_on) #we will only go to the level that the data in plot_on goes to
-    for a in range(len(asvs)): #for each of these ASVs
-        this_tax = tax_dict[asvs[a]] #get the full taxonomy
-        last = ''
-        new_tax = []
-        for b in range(len(this_tax)-1): #for each of the taxonomic levels, excluding the last value that is just the lowest level available
-            if this_tax[b] != '': #if there is a value
-                new_tax.append(this_tax[b]) #append it to the new list
-                last = this_tax[b] #and change the last value to be it
-            else:
-                new_tax.append(last) #otherwise, take the last value that existed (i.e. the lowest classification level for this ASV)
-        new_tax.append(asvs[a]) #and add the ASV name
-        asv_tax.append(new_tax[:rng+1]) #append down to the level that plot_on goes to
-    for a in range(rng+1): #for each of the levels that plot_on goes to
-        names.append(phylo_level_names[a]) #get the name of this taxonomic level
-    tax_df = pd.DataFrame(asv_tax, columns=names) #turn the taxa only into a dataframe
-    tax_df = tax_df.sort_values(names, ascending=True) #sort them by name - this automatically does kingdom first, followed by all of the taxonomic levels present in plot_on
-    new_cols, col_names = [], [] #set up some lists
-    already_added = [[], [], [], [], [], [], [], []]
-    for a in range(rng): #for all of the levels that plot_on goes to
-        a = rng-a-1 #reverse the direction, so we add the lowest taxonomic level first
-        this_col = []
-        col_names.append(names[a+1]+'_adding') #and make a new name, to differentiate this from the name of the taxonomic level
-        for b in range(len(asvs)): #for each of the ASVs present
-            if tax_df[names[a+1]].iloc[b] in plot_on[a]: #see if the name of this level is in the list of important features
-                if tax_df[names[a+1]].iloc[b] not in already_added[a+1]: #if it is, check if it has already been added or not (this ensure that we do not have multiple values for e.g. proteobacteria that are not important features at any lower classification level)
-                    this_col.append(1) #if it's not already been added, add a 1 to the respective new column
-                    this_row = tax_df.iloc[[b]].values[0] #get the whole row
-                    for c in range(len(this_row)): #and add the names from this row to the already added lists
-                        already_added[c].append(this_row[c])
-                else: #if it wasn't an important feature or was already added, add a 0 to this column
-                    this_col.append(0)
-            else:
-                this_col.append(0)
-        new_cols.append(this_col) #add the column to the list of new columns
-    for a in range(len(new_cols)): #now add the new columns to the dataframe
-        tax_df[col_names[a]] = new_cols[a]
-    tax_df['Max'] = tax_df[col_names].max(axis=1) #add a column with the maximum values
-    tax_df = tax_df[tax_df['Max'] > 0] #keep only the rows where we want to add one of the taxonomic levels (i.e. get rid of all that aren't important and those already added)
-    tax_df.drop('Max', axis=1, inplace=True) #and get rid of the maximum column again
-    #set up the figure, scaling the size to the number of taxa present
-    fig = plt.figure(figsize=(14, int(len(tax_df.index.values)/5)))
-    ttl = fig.suptitle(title, fontsize=fs_title, fontweight='bold')
-    ttl.set_position([.5, 0.9])
-    ax1 = plt.subplot2grid((int(len(tax_df.index.values)/1.5), 27), (0, 6), rowspan=int(len(tax_df.index.values)/1.5), colspan=10) #the main axes 
-    ax2 = plt.subplot2grid((int(len(tax_df.index.values)/1.5), 27), (0, 0), colspan=3) #an axes for the colorbar
-    ma = 0
-    cmap = 'viridis'
-    colormap = mpl.cm.get_cmap(cmap, 256)                
-    norm = mpl.colors.Normalize(vmin=0, vmax=0.05)
-    m = mpl.cm.ScalarMappable(norm=norm, cmap=colormap)
-    count_all = 1
-    names_legend = []
-    if os.path.exists(os.getcwd()+'/random_forest/env_phylo/'+title+'_plot_order.csv'):
-        order = []
-        with open(os.getcwd()+'/random_forest/env_phylo/'+title+'_plot_order.csv', 'rU') as f:
-            for row in csv.reader(f):
-                if row[0] in tax_df.ASVs.values:
-                    order.append(row[0])
-        order.reverse()
-        cols = list(tax_df.columns)
-        tax_df = tax_df.set_index('ASVs')
-        tax_df = tax_df.reindex(order)
-        tax_df = tax_df.reset_index()
-        tax_df = tax_df.reindex(cols, axis=1)
-        print(tax_df)
-    tax_df.to_csv(os.getcwd()+'/random_forest/env_phylo/'+title+'_tax_df_asv_test.csv')
-    
-    for a in range(rng+1): #for all of the levels in plot_on, and also for one extra (the kingdom level)
-        if a < 4:
-            names_legend.append(names[a].capitalize())
-        all_names = list(tax_df.loc[:, names[a]]) #get a list of all taxa names
-        unique = []
-        for b in range(len(all_names)): #and filter it for only the unique names
-            if all_names[b] not in unique:
-                unique.append(all_names[b])
-        unique.reverse() #reverse this list, as we are plotting from the bottom
-        bottom = 0
-        y = [] 
-        for b in range(len(unique)): #now for each of the unique names
-            color, edgecolor = 'w', 'k'
-            count = tax_df.groupby(names[a]).size()[unique[b]] #count how many times this value occurs in the list
-            text_col = 'k'
-            if a > 0: #if we are below the kingdom level, check whether this was an important feature
-                lis = tax_df.index[tax_df[names[a]] == unique[b]].tolist() #get a list of index values for where this value occurs in the dataframe
-                for c in range(len(lis)): #for each of these values
-                    if tax_df[names[a]+'_adding'].loc[lis[c]] > 0: #if it is important (i.e. if we added a 1 in the loop above to the corresponding column)
-                        color = 'r' #give this cell a color
-                        num = float(rfs[a-1].loc[[tax_df[names[a]].loc[lis[c]]]].iloc[0]) #and find the feature importance value from the other dataframe
-                        tax_df[names[a]+'_adding'].loc[lis[c]] = float(rfs[a-1].loc[[tax_df[names[a]].loc[lis[c]]]].iloc[0])
-                        color = m.to_rgba(num) #get the corresponding value from the above colormap
-                        tax_df[names[a]+'_adding'].loc[lis[c]] = mpl.colors.to_hex(color)
-                        if num > ma: #if the number if above the maximum already seen (defined as 0 initially)
-                            ma = num #then replace the maximum already seen with this number
-                        if num < 0.025:
-                            text_col = 'w'
-                    else: #otherwise (it wasn't an important feature)
-                        if names[a-1] in rename_plots: #if we need to rename the previous name
-                            this_name = rename_plots[names[a-1]] #rename from the dictionary
-                        else:
-                            this_name = names[a-1] #otherwise just get the previous name
-                        n = this_name.capitalize()+': ' #capitalize the first letter
-                        if ':' in tax_df[names[a-1]].loc[lis[c]]: #if this name was already from the previous taxonomic level
-                            tax_df[names[a]].loc[lis[c]] = tax_df[names[a-1]].loc[lis[c]] #then keep it as it is
-                        else: 
-                            tax_df[names[a]].loc[lis[c]] = n+tax_df[names[a-1]].loc[lis[c]] #otherwise, change the name in this cell to indicate the name of the last level that was an important feature (this is for plotting the y ticks and giving names of all important features)
-            if a < 4:
-                if count >= 10:
-                    ax1.text(a, bottom+(count/2), str(count_all)+': '+unique[b], rotation=90, ha='center', va='center', color=text_col, fontsize=fs_main)
-                    names_legend.append(str(count_all)+': '+unique[b])
-                else:
-                    names_legend.append(str(count_all)+': '+unique[b])
-                    ax1.text(a, bottom+(count/2), str(count_all), ha='center', va='center', color=text_col, fontsize=fs_main)
-                count_all += 1
-            ax1.bar(a, count, bottom=bottom, color=color, edgecolor=edgecolor, width=1) #make the plot for this taxon
-            bottom += count #change the bottom value, so we will stack on top of it next time
-            y.append(b+0.5) #and add the position for the y value
-    y.reverse() #reverse the y ticks
-    plot_colorbar(ax2, cmap, [0, 0.05], 'Taxon importance', fs=fs_main) #get the colorbar plot - if you want to use it, replace 0.05 with ma
-    plt.sca(ax1) #set plt. to be ax1
-    plt.xlim([-0.5, rng+0.5]) #change the x and y limits so we have no additional space around the plots
-    plt.ylim([0, len(tax_df.index.values)])
-    nums = [0, 1, 2, 3, 4, 5, 6, 7]
-    yplot = tax_df[names[rng]].values
-    for a in range(len(yplot)):
-        if yplot[a] in tax_dict and yplot[a] in ASV_dict:
-            yplot[a] = ASV_dict[yplot[a]]+': '+tax_dict[yplot[a]][-1]
-    plotted = list(tax_df[names[rng]].values)
-    for a in range(len(names)): #for each of the names
-        try:
-            this_score = int(scores[names[a]]*100) #try to get the classification accuracy score (and multiply by 100)
-        except:
-            this_score = -200 #otherwise, set the score as -200 (this should only be for the kingdom level, where there is no score)
-        if names[a] in rename_plots: #if we need to, rename the name
-            names[a] = rename_plots[names[a]]
-        if this_score > -200: #if we had a score
-            names[a] = names[a] +'\n'+str(this_score)+'%' #add the score to the name so it will be plotted as an x tick label
-    plt.xticks(nums[:rng+1], names, rotation=90) #plot the x ticks
-    plotted.reverse()
-    list_plotting = []
-    count = 0
-    ancom_sigs = []
-    for a in range(len(abun_fts)):
-        drop = []
-        these_taxa = list(abun_fts[a].index.values)
-        for b in range(len(these_taxa)):
-            if these_taxa[b] not in tax_df.iloc[:, a+2].values:
-                drop.append(these_taxa[b])
-        ancom_df = abun_fts[a].drop(drop, axis=0)
-        if title == 'Incubation time (specific)':
-            ancom_df.drop('unknown', axis=1, inplace=True)
-        if len(ancom_df.index.values) > 0:
-            sigs = get_ancom_phylo(ancom_df)
-            ancom_sigs.append(sigs)
-        else:
-            ancom_sigs.append([])
-        abun_fts[a] = abun_fts[a].groupby(by=abun_fts[a].columns, axis=1).mean()
-    
-    for a in range(len(plotted)):
-        for b in range(len(abun_fts)):
-            if plotted[a] in abun_fts[b].index.values:
-                list_plotting.append(abun_fts[b].loc[plotted[a], :])
-                if count == 0:
-                    df_plotting = abun_fts[b].loc[plotted[a], :].to_frame().transpose()
-                    count += 1
-                else:
-                    new_row = abun_fts[b].loc[plotted[a], :].to_frame().transpose()
-                    df_plotting = pd.concat([df_plotting, new_row])
-    df_plotting = df_plotting.rename(columns=rename_plots)
-    if 'Blank' in df_plotting.columns:
-        df_plotting.drop('Blank', axis=1, inplace=True)
-    if 'Other plastic' in df_plotting.columns:
-        if 'Unknown plastic' in df_plotting.columns:
-            df_plotting = df_plotting.reindex(['Aliphatic', 'Other plastic', 'Unknown plastic', 'Biofilm', 'Planktonic'], axis=1)
-        else:
-            df_plotting = df_plotting.reindex(['Aliphatic', 'Other plastic', 'Biofilm', 'Planktonic'], axis=1)
-    elif 'Unknown plastic' in df_plotting.columns:
-        df_plotting = df_plotting.reindex(['Unknown plastic', 'Biofilm'], axis=1)
-    mc = len(df_plotting.columns)
-    mc = mc*2
-    if mc > 5:
-        mc = 11
-    elif mc < 4:
-        mc = 4
-    ax3 = plt.subplot2grid((int(len(tax_df.index.values)/1.5), 27), (0, 16), rowspan=int(len(tax_df.index.values)/1.5), colspan=mc)
-    ax4 = plt.subplot2grid((int(len(tax_df.index.values)/1.5), 27), (0, 3), colspan=3) #an axes for the colorbar
-    df_plotting = df_plotting.div(df_plotting.max(axis=1), axis=0)
-    annotate_heatmap(ax3, df_plotting, cmap='inferno', yticks=False, xticks=True, annotate=False)
-    plot_colorbar(ax4, 'inferno', df_plotting, 'Normalized\ntaxon abundance', fs=fs_main)
-    plt.sca(ax3)
-    plotted.reverse()
-    #plt.yticks(y, plotted) #add the y ticks (using the important features for which we changed names above)
-    ax5 = plt.subplot2grid((int(len(tax_df.index.values)/1.5), 27), (3, 0), colspan=6, rowspan=int(len(names_legend))-15, frameon=False)
-    names_legend.reverse()
-    for a in range(len(names_legend)):
-        if names_legend[a][0] in ['K', 'P', 'C', 'O']:
-            ax5.text(1, a+1, names_legend[a], fontsize=fs_main, fontweight='bold')
-        else:
-            ax5.text(1, a+1, names_legend[a], fontsize=fs_main)
-    ax5.set_xlim([0.95, 3])
-    ax5.set_ylim(0, len(names_legend)+1)
-    plt.sca(ax5)
-    plt.xticks([]), plt.yticks([])
-    x = len(df_plotting.columns)+0.15
-    empty = []
-    for a in range(len(plotted)):
-        color = 'k'
-        for b in range(len(ancom_sigs)):
-            if plotted[a] in ancom_sigs[b]:
-                color = '#A70341'
-        ax3.text(x, y[a], plotted[a], color=color, fontsize=fs_main, ha='left', va='center')
-        empty.append(' ')
-    #tax_df.to_csv(os.getcwd()+'/random_forest/env_phylo/'+title+'_tax_df.csv')
-    #df_plotting.to_csv(os.getcwd()+'/random_forest/env_phylo/'+title+'_df_plotting.csv')
-    plt.sca(ax3)
-    plt.yticks(y, empty)
-    ax3.yaxis.tick_right() #change the y ticks to be on the right hand side (i.e. with the lowest taxonomic labels)
-    plt.sca(ax1)
-    plt.yticks([])
-    #plt.yticks(y, plotted) #add the y ticks (using the important features for which we changed names above)
-    
-
-    #ax1.set_title(title) #set the title
-    plt.subplots_adjust(wspace=1)
-    plt.savefig(sn+'_0.005'+ext, dpi=dpi, bbox_inches='tight') #save the figure using the savename, file extension and dpi options already defined
-    plt.close()
-    return
-
-def group_phylo_plot_level(this_ft, level, tax_dict, ASV_dict):
-    asv = list(this_ft.index.values)
-    rename = {}
-    for a in range(len(asv)):
-        tax = tax_dict[asv[a]]
-        if tax[level] == '':
-            using = tax[-1]
-        else:
-            using = tax[level]
-        if level == 7:
-            rename[asv[a]] = ASV_dict[asv[a]]+': '+using
-        else:
-            rename[asv[a]] = rename_plots[phylo_level_names[level]]+': '+using
-    new_ft = this_ft.rename(index=rename)
-    new_ft = new_ft.groupby(by=new_ft.index, axis=0).sum()
-    #sig_ancom = get_ancom_phylo(new_ft)
-    return new_ft#, sig_ancom
-
-def myround(x, base=5):
-    return base * round(x/base)
-
-def make_phylo_plot(ft, tax_dict, basedir, ASV_dict, meta_dict, env=False, def_sn=False, rf_fol = False):
-    ''' 
-    This function will make a phylogenetic plot for each metadata category for which you carried out random forest models.
-    The plots are like stacked bar plots, but show all phylogenetic levels, with each lower level at the same height as the lower levels.
-    Taxa will be coloured only if the feature was above 0.0001 (i.e. the proportion by which the accuracy of that model decreased without the feature)
-    It takes as input:
-        - ft (a feature table - this may contain abundance, but ASV names are all that is necessary)
-        - tax_dict (a dictionary containing ASV names as keys and taxonomy as values)
-        - basedir (file path to the base directory that you are working from)
-        - ASV_dict (a dictionary containing ASV names as keys and ASV numbers are returned as values (rather than a random collection of numbers and letters))
-    '''
-    levels = []
-    for a in [1, 2, 3, 4, 5, 6, 7]: #for each of the phylogenetic levels we used for random forests
-        #get the scores and feature importances for this level
-        if rf_fol == False:
-            rf_level = pd.read_csv(basedir+'/random_forest/'+phylo_level_names[a]+'_overall.csv', header=0, index_col=0)
-        else:
-            rf_level = pd.read_csv(rf_fol+phylo_level_names[a]+'.csv', header=0, index_col=0)
-        scores = rf_level.loc[['Score']]
-        scores = scores.rename(index={'Score':phylo_level_names[a]})
-        if a == 1: #if we don't have a dataframe of scores yet
-            all_scores = scores #make one with these scores
-        else:
-            all_scores = pd.concat([all_scores, scores]) #otherwise, add them to the others
-        rf_level.drop(['Score', 'OOB_score'], axis=0, inplace=True) #now get rid of the scores from the main dataframe
-        levels.append(rf_level) #and add this level to the list of dataframes
-    names = list(levels[0].columns) #get the metadata category names
-    ft = ft*100
-    for a in range(len(names)): #for each of the metadata categories
-        if rf_fol != False:
-            if names[a] != 'PlasticTypeGeneral':
-                continue
-        ft_abun = ft.copy()
-        samplenames = list(ft_abun.columns)
-        rename = {}
-        for b in range(len(samplenames)):
-            rename[samplenames[b]] = meta_dict[samplenames[b]][meta_name_ind[names[a]]]
-        ft_abun.rename(columns=rename, inplace=True)
-        colnames = list(ft_abun.columns)
-        numeric = {}
-        for b in range(len(colnames)): #for each grouping name
-            try: #if it is numeric
-                num = float(colnames[b]) #get it as a float
-                num = myround(num) #and then round it to the nearest whole number (the random forest regression was still based on the full values, but we do this to simplify plotting)
-                numeric[colnames[b]] = num
-            except:
-                do_nothing=True
-        ft_abun.rename(columns=numeric, inplace=True)
-        #abun_fts, ancom_sigs = [], []
-        abun_fts = []
-        for c in [1, 2, 3, 4, 5, 6, 7]:
-            level_ft = group_phylo_plot_level(ft_abun, c, tax_dict, ASV_dict)
-            #level_ft, sig_ancom = group_phylo_plot_level(ft_abun, c, tax_dict, ASV_dict)
-            #level_ft = level_ft.groupby(by=level_ft.columns, axis=1).mean()
-            abun_fts.append(level_ft)
-            #ancom_sigs.append(sig_ancom)
-        on = list(names) #get a list of the names
-        on.remove(names[a])  #without the current metadata category names
-        names_to_add = [] #set up a list for the important features at each phylogenetic level
-        rfs = [] #and for the individual random forests for each level
-        for b in range(len(levels)): #for all levels
-            this_set = levels[b].copy() #copy the dataframe for this level
-            this_set = this_set.drop(on, axis=1, inplace=False) #drop the other metadata categories
-            this_set = this_set[this_set.max(axis=1) > 0.005] #keep only the features that are above 0.0001 importance
-            names_to_add.append(list(this_set.index.values)) #add all of the remaining feature names to the list
-            rfs.append(this_set) #and add the dataframe to the list
-        if def_sn == False:
-            sn = basedir+'/figures/random_forest/phylo_plot_'+names[a] #set up the save names
-        else:
-            sn = def_sn+names[a]
-        
-        if names[a] in rename_plots: #change the name of the metadata category if necessary (this just removes spaces and capitalizes, etc)
-            title = rename_plots[names[a]]
-        else:
-            title = names[a]
-        if env != False:
-            title = rename_plots[env]
-        group_phylo_plot(ft, tax_dict, names_to_add, sn, title, all_scores[names[a]], rfs, ASV_dict, abun_fts) #get the plot
-        #group_phylo_plot(ft, tax_dict, names_to_add, sn, title, all_scores[names[a]], rfs, ASV_dict, abun_fts, ancom_sigs) #get the plot
-    return
-
-def make_env_phylo_plot(ft, tax_dict, basedir, ASV_dict, meta_dict):
-    envs, ei = ['marine'], 3#, 'aquatic', 'freshwater', 'terrestrial'], 3
+    envs, ei = ['marine', 'aquatic', 'freshwater', 'terrestrial'], 3
+    envs_rf_imp = []
     for a in range(len(envs)):
+        if os.path.exists(basedir+'/random_forest/'+norm+'/single_environment/'+envs[a]+'_'+str(mx)+'.csv'):
+            envs_rf_imp.append(pd.read_csv(basedir+'/random_forest/'+norm+'/single_environment/'+envs[a]+'_'+str(mx)+'.csv', header=0, index_col=0))
+            continue
+        elif os.path.exists(basedir+'/random_forest/'+norm+'/single_environment/'+envs[a]+'.csv'):
+            rf_file = pd.read_csv(basedir+'/random_forest/'+norm+'/single_environment/'+envs[a]+'.csv', header=0, index_col=0)
+            rf_file = rf_file[rf_file['Importance'] >= mx]
+            envs_rf_imp.append(rf_file)
+            continue
         samples = list(ft.columns)
-        keeping = []
-        count = 0
+        keeping, count, rename = [], 0, {}
         for b in range(len(samples)):
             if meta_dict[samples[b]][ei] == envs[a]:
                 keeping.append(True)
+                rename[samples[b]] = meta_dict[samples[b]][10]
                 count += 1 
             else:
                 keeping.append(False)
         env_ft = ft.loc[:, keeping]
         env_ft = env_ft[env_ft.max(axis=1) > 0]
-        rf_fol = basedir+'/random_forest/single_environment/'+envs[a]+'_'
-        sn = basedir+'/figures/random_forest/'+envs[a]+'_phylo_plot_'
-        make_phylo_plot(env_ft, tax_dict, basedir, ASV_dict, meta_dict, env=envs[a], def_sn=sn, rf_fol=rf_fol)
+        env_ft.rename(columns=rename, inplace=True)
+        scores = []
+        asv = list(env_ft.index.values)
+        for b in [7, 6, 5, 4, 3, 2, 1]:
+            lvl = phylo_level_names[b]
+            rf = pd.read_csv(basedir+'random_forest/'+norm+'/single_environment/'+envs[a]+'_'+lvl+'.csv', header=0, index_col=0)
+            score = rf.loc[['Score']].values
+            scores.append(score[0][0])
+            try:
+              rf.drop(['Score', 'OOB_score'], axis=0, inplace=True)
+            except:
+              rf.drop(['Score'], axis=0, inplace=True)
+            rf = rf[rf.max(axis=1) > mx]
+            lvl_rename, other_levels = {}, {}
+            for c in range(len(asv)):
+                tax = tax_dict[asv[c]]
+                for d in range(len(tax)):
+                    if tax[d] == 'Alteromonas macleodii' and d < 6:
+                        for e in range(d, len(tax)):
+                            tax[e] = 'Marinimicrobia (SAR406 clade)'
+                            break
+                    if tax[d] == '':
+                        if d < 7:
+                            if tax[-1] == tax[5]:
+                                tax[d] = tax[-1]
+                            else:
+                                tax[d] = tax[-1]
+                        else:
+                            tax[d] = tax[-1]
+                lvl_rename[asv[c]] = tax[b]
+                adding = tax[:b]
+                while len(adding) < 7:
+                    adding.append(adding[-1])
+                if b == 7:
+                    other_levels[asv[c]] = adding
+                else:
+                    other_levels[tax[b]] = adding
+            if b < 7:
+                env_ft_level = env_ft.rename(index=lvl_rename)
+                env_ft_level = env_ft_level.groupby(by=env_ft_level.index, axis=0).sum()
+            else:
+                env_ft_level = env_ft
+            if 'blank' in env_ft_level.columns:
+                env_ft_level.drop('blank', axis=1, inplace=True)
+            significant = get_ancom(env_ft_level)
+            env_ft_level = env_ft_level.groupby(by=env_ft_level.columns, axis=1).mean()
+            rows = [['Taxa', 'kingdoms', 'phyla', 'classes', 'orders', 'families', 'genera', 'species']+list(env_ft_level.columns)+['Importance', 'ANCOM']]
+            rf_id = list(rf.index.values)
+            for e in range(len(rf_id)):
+                if b == 7:
+                    this_name = ASV_dict[rf_id[e]]+': '+tax_dict[rf_id[e]][-1]
+                else:
+                    this_name = rename_plots[lvl]+': '+rf_id[e]
+                if b < 6 and rf_id[e] == 'Alteromonas macleodii':
+                    print(rf_id[e], this_name)
+                    rf_id[e] = 'Marinimicrobia (SAR406 clade)'
+                    this_name = 'Marinimicrobia (SAR406 clade)'
+                try:
+                    this_row = [this_name]+other_levels[rf_id[e]]+list(env_ft_level.loc[rf_id[e], :].values)+list(rf.loc[rf_id[e], :].values)
+                except:
+                    print(rf_id[e], this_name, envs[a], lvl)
+                if rf_id[e] in significant:
+                    this_row.append('S')
+                else:
+                    this_row.append('NS')
+                if b == 7:
+                    rows.append(this_row)
+                else:
+                    rows.append(this_row)
+            if len(this_row) < 2:
+                continue
+            new_df = pd.DataFrame(rows[1:], columns=rows[0])
+            if b == 7:
+                all_rows = new_df
+            else:
+                all_rows = all_rows.append(new_df, ignore_index=True)
+        all_rows = all_rows.sort_values(['kingdoms', 'phyla', 'classes', 'orders', 'families', 'genera', 'species'], ascending=False)
+        all_rows = all_rows.set_index('Taxa')
+        envs_rf_imp.append(all_rows)
+        all_rows.to_csv(basedir+'/random_forest/'+norm+'/single_environment/'+envs[a]+'_'+str(mx)+'.csv')
+    length, width = [], []
+    [(length.append(i.shape[0]), width.append(i.shape[1]-9)) for i in envs_rf_imp]
+    ma = max(length)
+    fig = plt.figure(figsize=(25, int(ma/5)))
+    start = 0
+    for a in range(len(envs_rf_imp)):
+        env_rf = envs_rf_imp[a]
+        env_rf = env_rf.drop(['kingdoms', 'phyla', 'classes', 'orders', 'families', 'genera', 'species'], axis=1)
+        treats1, treats2 = list(env_rf.columns)[:-2]+['ANCOM'], list(env_rf.columns)[:-2]+['Importance']
+        rf = env_rf.drop(treats1, axis=1)
+        sig = env_rf.drop(treats2, axis=1)
+        env_rf.drop(['Importance', 'ANCOM'], axis=1, inplace=True)
+        ax = plt.subplot2grid((ma, 60), (0, start), colspan=env_rf.shape[1], rowspan=env_rf.shape[0])
+        start += env_rf.shape[1]
+        ax_imp = plt.subplot2grid((ma, 60), (0, start), rowspan=env_rf.shape[0])
+        start += 10
+        env_rf.rename(columns=rename_plots, inplace=True)
+        if 'Other plastic' in env_rf.columns:
+            if 'Unknown plastic' in env_rf.columns:
+                env_rf = env_rf.reindex(['Aliphatic', 'Other plastic', 'Unknown plastic', 'Biofilm', 'Planktonic'], axis=1)
+            else:
+                env_rf = env_rf.reindex(['Aliphatic', 'Other plastic', 'Biofilm', 'Planktonic'], axis=1)
+        annotate_heatmap(ax_imp, rf, cmap='inferno', yticks=False, xticks=True, rnd=2, annotate=True)
+        env_rf = env_rf.div(env_rf.max(axis=1), axis=0)
+        annotate_heatmap(ax, env_rf, cmap='viridis', yticks=False, xticks=True, annotate=False)
+        nums = np.arange(0.5, env_rf.shape[0]+0.5, 1)
+        tax = list(env_rf.index.values)
+        empty = []
+        for b in range(len(nums)):
+            color = 'k'
+            if list(sig.loc[tax[b], :])[0][0] == 'S':
+                color = '#900C3F'
+            if 'Allorhizobium' in tax[b]:
+                    tax[b] = 'Allorhizobium'
+            tax[b] = tax[b].replace('Incertae Sedis', '')
+            ax_imp.text(1.5, nums[b], tax[b], fontsize=fs_main, color=color, va='center')
+            empty.append('')
+        plt.sca(ax_imp)
+        plt.yticks(nums, empty)
+        ax_imp.yaxis.tick_right()
+        ax.set_title(envs[a].capitalize(), fontsize=fs_title, fontweight='bold')
+    plt.savefig(basedir+'/figures/FigS5_environment_random_forest_'+str(mx)+'_'+norm+'.pdf', dpi=dpi, bbox_inches='tight')
+    plt.savefig(basedir+'/figures/FigS5_environment_random_forest_'+str(mx)+'_'+norm+ext, dpi=dpi, bbox_inches='tight')
+    plt.close()
+    return
+    
+def get_rf_comparison_env(basedir):
+  norm = ['rare', 'rel_abun', 'log', 'clr']
+  levels = ['phyla', 'classes', 'orders', 'families', 'genera', 'species']
+  envs = ['marine', 'aquatic', 'freshwater', 'terrestrial']
+  
+  fig = plt.figure(figsize=(13,10))
+  for l in range(len(levels)):
+    level = levels[l]
+    all_scores = []
+    df_norm = [[], [], [], []]
+    for n in norm:
+      scores = []
+      for e in range(len(envs)):
+        env = envs[e]
+        df = pd.read_csv(basedir+'random_forest/'+n+'/single_environment/'+env+'_'+level+'.csv', header=0, index_col=0)
+        score = df.loc['Score', :].values[0]*100
+        scores.append(score)
+        df.rename(columns={'PlasticTypeGeneral':n}, inplace=True)
+        df.drop(['Score'], axis=0, inplace=True)
+        df_norm[e].append(df)
+      all_scores.append(scores)
+    for d in range(len(df_norm)):
+      df = df_norm[d]
+      df = pd.concat(df).fillna(value=0)
+      df = df.groupby(by=df.index.values, axis=0).sum()
+      df_norm[d] = df
+    score_df = pd.DataFrame(all_scores, columns=envs, index=norm)
+    score_df.rename(index=norm_names, columns=rename_plots, inplace=True)
+    xtcks = False
+    if l == 5: xtcks = True
+    df_mean = pd.DataFrame(score_df.mean(axis=1).values, columns=['Mean'], index=norm)
+    score_df.rename(index=norm_names, columns={'marine':'Marine', 'aquatic':'Aquatic', 'freshwater':'Freshwater', 'terrestrial':'Terrestrial'}, inplace=True)
+    df_mean.rename(index=norm_names, inplace=True)
+    ax = plt.subplot2grid((6,25), (l, 1), colspan=4)
+    ax_mean = plt.subplot2grid((6, 25), (l, 0), colspan=1)
+    annotate_heatmap(ax_mean, df_mean, xticks=xtcks)
+    annotate_heatmap(ax, score_df, xticks=xtcks, yticks=False)
+    if l == 0:
+      ax.set_title('Classification\naccuracy (%)', fontsize=fs_title, fontweight='bold')
+    place = [6, 11, 16, 21]
+    ax_mean.set_ylabel(level.capitalize(), fontsize=fs_main, fontweight='bold')
+    for e in range(len(envs)):
+      env = envs[e]
+      feat_conc = plt.subplot2grid((6,25), (l,place[e]), colspan=4)
+      if l == 0:
+        feat_conc.set_title('Concordance in\nfeature importance', fontsize=fs_main, fontweight='bold')
+        feat_conc.text(0.5, 1.4, env.capitalize(), fontsize=fs_title, fontweight='bold', transform = feat_conc.transAxes, ha='center', va='center')
+      concs = []
+      for a in range(4):
+          conc = []
+          for b in range(4):
+              l1 = df_norm[e].iloc[a, :].values
+              l2 = df_norm[e].iloc[b, :].values
+              conc.append(concordance_index(l1, l2))
+          concs.append(conc)
+      concs = pd.DataFrame(concs, index=df_norm[e].columns, columns=df_norm[e].columns)
+      concs.rename(index=norm_names, columns=norm_names, inplace=True)
+      concs = concs.loc[:, ['CLR', 'Log', 'Relative\nabundance', 'Rarefied']]
+      annotate_heatmap(feat_conc, concs, cmap='Blues', rnd=2, yticks=False, xticks=xtcks, vmin=0.75)
+  plt.savefig(basedir+'/figures/FigS3_RF_env_compare'+ext, dpi=600, bbox_inches='tight')
+  return
+  
+def annotate_heatmap(ax, df, cmap='inferno', yticks=True, xticks=True, rnd=1, annotate=True, italics=False, vmax=False, vmin=False, annotate_only=False, norm=None):
+    '''
+    Function to plot a heatmap and to optionally annotate each cell of the heatmap
+    Takes as input:
+        - ax (the axis to plot the heatmap on)
+        - df (a dataframe containing the data to plot as floats/integers in the cells. Y labels will be the index values and X labels the column headers)
+        - cmap (string of which colormap to use for plotting, default is 'inferno')
+        - yticks (optional boolean or string for whether to have ytick labels. Can be True (default), False or 'right' if you want the yticks to show on the right of the plot)
+        - xticks (optional boolean or string for whether to have xtick labels. Can be True (default), False or 'top' if you want the xticks to show on the top of the plot)
+        - rnd (number of decimal places to round the numbers to when the heatmap is annotated, default is 1)
+        - annotate (boolean that decides whether to annotate the heatmap or not. Default is True)
+        - italics (boolean of whether to make y values italic or not - i.e. if they are species names)
+        - vmax (maximum value to scale color values to in the heatmap, default is False but this should be a number to work)
+        - annotate_only (boolean as to whether to only annotate an existing heatmap)
+    '''
+    #get a heatmap plot using the dataframe df on the axis ax, with the colormap cmap, 
+    #with additional options for whether we are to annotate the boxes of the heatmap, 
+    #add x or y tick labels and how many decimal places to round each text label to
+    plt.sca(ax) #set the axis 
+    maxs = [] #get the maximum value of the dataframe
+    for a in  df.columns:
+        maxs.append(df[a].max())
+    ma = max(maxs)
+    if annotate: #if we are adding text labels
+        for a in range(len(list(df.columns))): #go through each column
+            for b in range(len(list(df.index.values))): #and now each row of that column
+                num = round(df.iloc[b, a], rnd) #get the value corresponding to the row and columns
+                if ma > num:
+                    if num < (0.6)*ma: col = 'w' #if the value is below 60% of the maximum value, make the text color white
+                    else: col = 'k' #otherwise, make the text color black
+                    if cmap == 'PuBu': #if we are using the colormap 'PuBu', do the opposite in terms of text color
+                        if num < (0.6)*ma: col = 'k'
+                        else: col = 'w'
+                else:
+                    col = 'k'
+                    if num == ma and cmap == 'PuBu': col = 'w'
+                if cmap == 'Purples' or cmap == 'Blues':
+                    if num > 0.9: col = 'w'
+                    else: col = 'k'
+                plt.text(a+0.5, b+0.5, str(num), ha='center', va='center', color=col, fontsize=fs_small) #and plot this text label
+    if annotate_only:
+        return
+    if norm == 'clr' or norm == 'log':
+      if vmax != False and vmin != False:
+          plt.pcolor(df, edgecolor='k', cmap=cmap, norm=colors.SymLogNorm(vmin=vmin, vmax=vmax, linthresh=0.03)) #make the heatmap
+      elif vmax != False:
+          plt.pcolor(df, edgecolor='k', cmap=cmap, norm=colors.SymLogNorm(vmin=0, vmax=vmax, linthresh=0.03)) #make the heatmap
+      elif vmin != False:
+          plt.pcolor(df, edgecolor='k', cmap=cmap, norm=colors.SymLogNorm(vmin=vmin, linthresh=0.03)) #make the heatmap
+      elif vmin == None:
+          plt.pcolor(df, edgecolor='k', cmap=cmap, norm=colors.SymLogNorm(linthresh=0.03))
+      else:
+          plt.pcolor(df, edgecolor='k', cmap=cmap, norm=colors.SymLogNorm(vmin=0, linthresh=0.03)) #make the heatmap
+    else:
+      if vmax != False and vmin != False:
+          plt.pcolor(df, edgecolor='k', cmap=cmap, vmin=vmin, vmax=vmax) #make the heatmap
+      elif vmax != False:
+          plt.pcolor(df, edgecolor='k', cmap=cmap, vmin=0, vmax=vmax) #make the heatmap
+      elif vmin != False:
+          plt.pcolor(df, edgecolor='k', cmap=cmap, vmin=vmin) #make the heatmap
+      elif vmin == None:
+          plt.pcolor(df, edgecolor='k', cmap=cmap)
+      else:
+          plt.pcolor(df, edgecolor='k', cmap=cmap, vmin=0) #make the heatmap
+    rownames = list(df.index.values)
+    for a in range(len(rownames)):
+        if len(rownames[a]) > 35:
+            row = rownames[a].split(' ')
+            if len(row) == 1:
+                row = rownames[a].split('-')
+            string = ''
+            for b in range(len(row)):
+                if b > 0 and b < 2:
+                    string += '\n'+row[b]+' '
+                else:
+                    string += row[b]+' '
+            rownames[a] = string
+    if yticks == 'right':
+        plt.yticks(np.arange(0.5, len(df.index), 1), rownames, fontsize=fs_small, linespacing=0.8) #add them based in the row values of the dataframe
+        ax.yaxis.tick_right()
+    elif yticks: #if we are adding y tick labels
+        plt.yticks(np.arange(0.5, len(df.index), 1), rownames, fontsize=fs_main, linespacing=0.8) #add them based in the row values of the dataframe
+    else:
+        plt.yticks([]) #otherwise, add none
+    if xticks == 'top':
+        colnames = list(df.columns)
+        for col in range(len(colnames)):
+            ind = col
+            col = colnames[col].split(' ')
+            string = ''
+            for a in range(len(col)):
+                if a > 0:
+                    string += '\n'+col[a]
+                else:
+                    string += col[a]+' '
+            colnames[ind] = string
+        plt.xticks(np.arange(0.5, len(df.columns), 1), colnames, fontsize=fs_main)
+        ax.xaxis.tick_top()
+    elif xticks: #if we are adding x tick labels (do the same as for the y tick labels)
+        plt.xticks(np.arange(0.5, len(df.columns), 1), df.columns, rotation=90, fontsize=fs_main)
+    else:
+        plt.xticks([])
     return
 
+def sort_by_tax(df, level, other_levels, tax_dict=False, names=False):
+    '''
+    Function to sort a dataframe based on the higher-level taxonomy (i.e. if the dataframe contains Oceanospirillales, Alteromonadales, Vibrionales, Rhodobacterales and Rhizobiales, then these will be grouped alphabetically to Alpha (Rhizobiales & Rhodobacterales) and Gamma (Alteromonadales, Oceanospirillales & Vibrionales) proteobacteria)
+    Takes as input:
+        - df (dataframe containing taxa as rows and sample names as columns)
+        - level (numeric value of the current level, where 1 is phylum and 7 is ASV)
+        - other_levels (dictionary containing taxa at this level as the key and the other higher levels for each as a list)
+        - tax_dict (the dictionary containing all taxa - this is False as default and only useful is the level is 7)
+        - names (this is redundant but left in so as not to mess up other functions. It is False as default, but is over-written within the function)
+    Returns:
+        - df_tax (an ordered dataframe containing taxa as rows and sample names as columns)
+        - names (a dictionary containing the current taxa as keys and the lowest classification also if the level we are working at is ASV)
+    '''
+    #function to sort the dataframe df (with index values being the taxon/ASV names) by the higher phylogeny
+    current_tax = df.index.values #get the current values
+    df_tax = df
+    sort_levels, names = [], {}
+    for a in range(level): #for each phylogenetic level that is higher
+        new_col = []
+        for b in range(len(current_tax)):
+            if level < 6 and current_tax[b] == 'Alteromonas macleodii':
+                current_tax[b] = 'Marinimicrobia (SAR406 clade)'
+            if current_tax[b][0] == '_':
+                current_tax[b] = current_tax[b].replace('_', '')
+            new_col.append([other_levels[current_tax[b]][a], current_tax[b]]) #append the appropriate value for the current higher level as well as the current taxon name
+            if tax_dict != False: #if tax_dict isn't False (i.e. if we are looking at the level of ASV - we use tax_dict as here we already worked out the lowest classification for each ASV)
+                names[current_tax[b]] = tax_dict[current_tax[b]][-1] #get the lowest classification for each ASV
+        new_col = pd.DataFrame(new_col, columns=[str(a), 'ASV']) #turn the classifications at the current level into a dataframe
+        new_col = new_col.set_index(['ASV']) #set the ASV (note: this does not necessarily mean this is an ASV, rather it is the taxon names that we are using for this level) column as the index column
+        df_tax = new_col.merge(right=df_tax, on='ASV') #and add it to the precious dataframe
+        sort_levels.append(str(a)) #add the name of the column that we made with the classifications
+    df_tax = df_tax.sort_values(sort_levels, ascending=False) #and now sort the dataframe based on these classifications (this will go in order, so it will keep all proteobacteria together, with all e.g. alpha-, gamma-proteobacteria)
+    df_tax.drop(sort_levels, axis=1, inplace=True) #now remove these columns from the sorted dataframe
+    return df_tax, names #return them along with the dataframe
+
+def plot_colorbar(ax, cmap, df, name, fs=fs_main, orientation='horizontal', norm='rel_abun'):
+    '''
+    Function to add a colorbar to an axis
+    Takes as input:
+        - ax (the axis to plot the colorbar on - note that this will take up the whole axis, rather than just adding a padded version on the side)
+        - cmap (the colormap to plot on the bar, as a string not a matplotlib colormap object)
+        - df (the data that the colorbar corresponds to - this can be a list of values or a dataframe)
+        - name (a string of the name that should me added as a label)
+        - fs (the fontsize to use for the axis tick labels - default is the main size set at the top of the script)
+        - orientation (string of whether to make this a horizontal or vertical colorbar, default is 'horizontal')
+    '''
+    #function to plot a colorbar on the axis ax using the colormap cmap
+    #it also takes the dataframe of values that it should be based on, a name and the fontsize (using fs_main as default)
+    mins, maxs = [], []
+    if isinstance(df, list):
+        mins.append(df[0])
+        maxs.append(df[1])
+    else:
+        for a in df.columns: #get the minimum and maximum values for each column
+            mins.append(df[a].min())
+            maxs.append(df[a].max())
+    mi = min(mins) #now get the minimum and maximum values overall
+    ma = max(maxs)
+    """
+    if ma < 0:
+        mi = 0
+        ma = 0.1
+    """
+    cmap = mpl.cm.get_cmap(cmap, 256) #tell it which colormap to use
+    if norm == 'clr':
+      norm = mpl.colors.SymLogNorm(vmin=mi, vmax=ma, linthresh=0.03) #the minimum and maximum values to normalize to
+    else:
+      norm = mpl.colors.Normalize(vmin=mi, vmax=ma) #the minimum and maximum values to normalize to
+    cb1 = mpl.colorbar.ColorbarBase(ax, cmap=cmap, norm=norm, orientation=orientation) #get the colorbar for the heatmap
+    plot_names = []
+    for a in range(len(name)):
+        if name[a] in rename_plots:
+            plot_names.append(rename_plots[name[a]])
+        else:
+            plot_names.append(name[a])
+    cb1.set_label(name, fontsize=fs) #set the label names
+    cb1.ax.tick_params(labelsize=fs_small) #and the size of the ticks
+    return
+    
+def get_heatmap_random_forest(df_rf, ft_in, colnames, basedir, level, other_levels, meta_name, predict, tax_dict, ASV_dict, other_folder=False, norm='rare'):
+    '''
+    This function will get an individual heatmap plot for one category of one random forest, by sorting out all of the data and ordering taxa etc
+    It takes as input:
+        - df_rf (dataframe containing list of ASVs in one column with a list of their importances in a second column)
+        - ft_in (the original feature table containing a list of ASVs as rows and samples as columns)
+        - colnames (the groupings within the metadata category)
+        - basedir (the base directory to save everything to)
+        - level (taxonomic level that we are plotting)
+        - meta_name (the metadata category that we are plotting)
+        - predict (the accuracy with which this category performed)  
+    '''
+    #ft = ft_in.transpose() #transpose the feature table
+    #df_rf = df_rf.set_index(['ASV']) #in our list of
+    ft = ft_in.reset_index() #reset the indices in our feature table
+    ft = ft.rename(columns={'index':'ASV'}) #rename the index column
+    ft = ft.set_index(['ASV']) #set the index column as ASV again
+    numeric, non_numeric = [], []
+    for a in colnames: #for each grouping name
+        try: #if it is numeric
+            colnames[a] = float(colnames[a]) #get it as a float
+            colnames[a] = round(colnames[a]) #and then round it to the nearest whole number (the random forest regression was still based on the full values, but we do this to simplify plotting)
+            numeric.append(colnames[a])
+        except:
+            colnames[a] = colnames[a] #otherwise, just leave it as it is (but the try: function doesn' work without an except: option)
+            non_numeric.append(colnames[a])
+    new_col_order = sorted(list(set(numeric))) + sorted(list(set(non_numeric))) #add together the numeric and non-numeric lists of column names, removing duplicates and sorting them in ascending order
+    ft = ft.rename(columns=colnames) #rename the columns
+    ft = ft.groupby(by=ft.columns, axis=1).mean() #if we have the same names now, group them together (taking a mean for each abundance value)
+    ft = ft.reindex(new_col_order, axis=1) #re-index based on the order of our unique sorted columns
+    df_rf.sort_values(by=['Importance'], ascending=False, inplace=True)
+    df_rf = df_rf[df_rf.max(axis=1) > 0.00]
+    if df_rf.shape[0] > 50:
+      df_rf = df_rf[:50]
+    df_rf_tax, n = sort_by_tax(df_rf, level, other_levels) #sort the taxa/ASVs in the random forest data frame by their higher phylogenetic grouping
+    merge = df_rf_tax.merge(right=ft, on='ASV') #merge the importance dataframe with the feature table (this means we only keep those ASVs that are important)
+    merge.drop('Importance', axis=1, inplace=True) #now remove the importance column again
+    if norm not in ['log', 'clr']:
+      merge = merge.div(merge.max(axis=1), axis=0) #normalise within each ASV (to make the colors visible for all even if there are large differences in abundance)
+    #set up the figure size based on the number of metadata groupings we have, but checking that it won't be too small if we only have a couple of categories
+    width = len(merge.columns)+3
+    if width < 15:
+        width = 15
+    start_col2 = int(width-(width/5)*2)
+    width_col = int(width/5)
+    plt.figure(figsize=(max([width, 25])/3, 20))
+    ax1 = plt.subplot2grid((merge.shape[0], width+5), (2,0), colspan=2, rowspan=merge.shape[0]-2)
+    ax2 = plt.subplot2grid((merge.shape[0], width+5), (2,2), colspan=width, rowspan=merge.shape[0]-2)
+    ax3 = plt.subplot2grid((merge.shape[0], width+5), (2,width+3), colspan=1, rowspan=int((merge.shape[0]-2)/6))
+    ax4 = plt.subplot2grid((merge.shape[0], width+5), (int((merge.shape[0]-2)/3)+2, width+3), colspan=1, rowspan=int((merge.shape[0]-2)/3))
+    #get the heatmaps for the taxon importances (df_rf_tax) and taxon abundances (merge) separately and with different color schemes
+    if level == 7:
+        asv_plot = {}
+        prev_asv = list(df_rf_tax.index.values)
+        for asv in prev_asv:
+            if asv in ASV_dict:
+                asv_plot[asv] = ASV_dict[asv]+': '+tax_dict[asv][-1]
+            else:
+                asv_plot[asv] = tax_dict[asv][-1]
+        df_rf_tax_plot = df_rf_tax.rename(columns=rename_plots, index=asv_plot)
+    else:
+        df_rf_tax_plot = df_rf_tax.rename(columns=rename_plots, index=rename_plots)
+    merge_plot = merge.rename(columns=rename_plots, index=rename_plots)
+    annotate_heatmap(ax1, df_rf_tax_plot, cmap='inferno', rnd=3)
+    if norm in ['clr', 'log']:
+      annotate_heatmap(ax2, merge_plot, cmap='viridis', yticks=False, rnd=1, annotate=False, vmin=None, norm=norm)
+    else:
+      annotate_heatmap(ax2, merge_plot, cmap='viridis', yticks=False, rnd=1, annotate=False, norm=norm)
+    #now get the appropriate color bars for each dataframe
+    plot_colorbar(ax3, 'inferno', df_rf_tax_plot, orientation='vertical', name='Taxon importance')
+    plot_colorbar(ax4, 'viridis', merge_plot, orientation='vertical', name=norm_names[norm]+' abundance', norm=norm)
+    if meta_name in rename_plots:
+        meta_name_plot = rename_plots[meta_name]
+    else:
+        meta_name_plot = meta_name
+    plt.subplots_adjust(hspace=0.5)
+    if other_folder == False:
+        ax2.text(0.5, 1.025, meta_name_plot+'\n\n', va='center', ha='center', fontsize=fs_title, fontweight='bold', transform=ax2.transAxes)
+        ax2.text(0.5, 1.025, '\nInformative '+phylo_level_names[level]+'\nClassification accuracy = '+str(predict)+'%', va='center', ha='center', fontsize=fs_main, fontweight='bold', transform=ax2.transAxes)
+        plt.savefig(basedir+'/figures/random_forest/single_category/'+norm+'_'+phylo_level_names[level]+'_'+meta_name+'_single_forest'+ext, dpi=dpi, bbox_inches='tight')
+    else: 
+        of = other_folder.split('_')
+        if of[0] in rename_plots:
+            of[0] = rename_plots[of[0]]
+        if len(of) > 1:
+            if of[1] in rename_plots:
+                of[1] = rename_plots[of[1]]
+            of = of[0]+' '+of[1]
+        else:
+            of = of[0]
+        ax2.set_title(of+'\n'+meta_name_plot+'\nInformative '+phylo_level_names[level]+'\nClassification accuracy = '+str(predict)+'%')
+        plt.savefig(basedir+'/figures/random_forest/single_environment/'+norm+'_'+other_folder+'_'+phylo_level_names[level]+'_'+meta_name+'_single_forest'+ext, dpi=dpi, bbox_inches='tight')
+    plt.close()
+    return df_rf_tax
+
+def get_random_forest_plots(ft, tax_dict, ASV_dict, meta_dict, basedir, other_folder=False, skip_individual=False, norm='rare'):
+    '''
+    Function to get all random forest plots, i.e. at all Phylogenetic levels and including the overall heatmap showing how accurate all random forests were for all metadata categories at all phylogenetic levels
+    Takes as input:
+        - ft (feature table as a dataframe with samples as columns and taxa as rows)
+        - tax_dict (dictionary with taxon names as keys and full taxonomic information to be returned as a list)
+        - ASV_dict (dictionary containing all ASV assigned readable name with QIIME2 ASV name as keys)
+        - meta_dict (dictionary with all metadata  for each sample, with sample names as keys)
+        - basedir (directory to use to open random forest information as well as to save figures to)
+        - other_folder (optional input string (file path) to tell the function to save to a folder that is not the default directory for random forests, default is False)
+        - skip_individual (optional boolean, default is False. If True no individual heatmaps (i.e. for each metadata category and each phylogenetic level) will be made)
+    '''
+    asv = list(ft.index.values)
+    count = 0
+    for a in [1, 2, 3, 4, 5, 6, 7]:
+        this_asv = list(asv)
+        new_names, other_levels = {}, {}
+        for b in range(len(this_asv)):
+            this_tax = tax_dict[this_asv[b]]
+            prev = ''
+            for c in range(len(this_tax)):
+                if this_tax[c] != '':
+                    prev = this_tax[c]
+                else:
+                    this_tax[c] = prev
+            if a < 7:
+                new_names[this_asv[b]] = this_tax[a]
+                this_asv[b] = this_tax[a]
+            else:
+                new_names[this_asv[b]] = this_asv[b]
+            other_levels[this_asv[b]] = this_tax[:a]
+        this_ft = ft.rename(index=new_names) #now rename the feature table using the new names that we have just defined
+        this_ft = this_ft.groupby(by=this_ft.index, axis=0).sum() #group all of the names that are together, taking a sum for each phyla
+        if other_folder == False:
+            df_rf = pd.read_csv(basedir+'/random_forest/'+norm+'/'+phylo_level_names[a]+'_overall.csv', header=0, index_col=0)
+        else:
+            df_rf = pd.read_csv(basedir+'/random_forest/'+norm+'/single_environment/'+other_folder+'_'+phylo_level_names[a]+'.csv', header=0, index_col=0)
+        meta_names = list(df_rf.columns)
+        try:
+          scores, oob_scores = df_rf.loc[['Score'], :], df_rf.loc[['OOB_score'], :]
+          df_rf.drop(['Score', 'OOB_score'], axis=0, inplace=True)
+        except:
+          scores = df_rf.loc[['Score'], :]
+          df_rf.drop(['Score'], axis=0, inplace=True)
+        df_rf = df_rf.reset_index()
+        df_rf = df_rf.rename(columns={'index':'ASV'})
+        df_rf.index = df_rf['ASV']
+        df_rf.drop(['ASV'], axis=1, inplace=True)
+        df_rf_full = df_rf.copy()
+        if a < 7:
+            df_rf.rename(index={'Alteromonas macleodii':'Marinimicrobia (SAR406 clade)'}, inplace=True)
+            df_rf_sorted, names = sort_by_tax(df_rf, a, other_levels, tax_dict=False, names=False)
+        else:
+            df_rf_sorted, names = sort_by_tax(df_rf, a, other_levels, tax_dict=tax_dict, names=True)
+        df_rf_sorted = df_rf_sorted.groupby(by=df_rf_sorted.index.values, axis=0).mean()
+        df_rf_sorted["Mean"] = df_rf_sorted.mean(axis=1)
+        df_rf_sorted.sort_values(by=['Mean'], ascending=False, inplace=True)
+        df_rf_sorted = df_rf_sorted[df_rf_sorted.max(axis=1) > 0.00]
+        if df_rf_sorted.shape[0] > 50:
+          df_rf_sorted = df_rf_sorted[:50]
+        df_mean = df_rf_sorted.drop(meta_names, axis=1, inplace=False)
+        df_rf_sorted.drop(['Mean'], axis=1, inplace=True)
+        if other_folder == False:
+            fig = plt.figure(figsize=(len(df_rf_sorted.columns)/3, 0.22*(df_rf_sorted.shape[0]+5)))
+            
+            ax1 = plt.subplot2grid((df_rf_sorted.shape[0]+5, len(df_rf_sorted.columns)+3), (8,2), colspan=len(df_rf_sorted.columns), rowspan=2)
+            ax2 = plt.subplot2grid((df_rf_sorted.shape[0]+5, len(df_rf_sorted.columns)+3), (10,0), colspan=2, rowspan=df_rf_sorted.shape[0]-2)
+            ax3 = plt.subplot2grid((df_rf_sorted.shape[0]+5, len(df_rf_sorted.columns)+3), (10,2), colspan=len(df_rf_sorted.columns), rowspan=df_rf_sorted.shape[0]-2)
+            ax4 = plt.subplot2grid((df_rf_sorted.shape[0]+5, len(df_rf_sorted.columns)+3), (0,0), colspan=int(len(df_rf_sorted.columns)/5))
+            
+            n1 = int(len(df_rf_sorted.columns)-len(df_rf_sorted.columns)/5)+3
+            ax5 = plt.subplot2grid((df_rf_sorted.shape[0]+5, len(df_rf_sorted.columns)+3), (0,n1), colspan=int(len(df_rf_sorted.columns)/5))
+            
+            n2 = int(n1-len(df_rf_sorted.columns)/5)-1
+            ax6 = plt.subplot2grid((df_rf_sorted.shape[0]+5, len(df_rf_sorted.columns)+3), (0,n2), colspan=int(len(df_rf_sorted.columns)/5))
+            
+            ax_dendro = plt.subplot2grid((df_rf_sorted.shape[0]+5, len(df_rf_sorted.columns)+3), (4,2), rowspan=4, colspan=len(df_rf_sorted.columns), frameon=False)
+            plt.sca(ax_dendro)
+            plt.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+            plt.tick_params(axis='y', which='both', left=False, right=False, labelbottom=False)
+            
+            Z = hierarchy.linkage(df_rf_sorted.transpose(), 'average', metric='braycurtis')
+            mpl.rcParams['lines.linewidth'] = 2
+            hierarchy.set_link_color_palette(['k'])
+            dn = hierarchy.dendrogram(Z, above_threshold_color='k', orientation='top')
+            
+            y_labels, locs, xlocs, labels = list(ax_dendro.get_xticklabels()), list(ax_dendro.get_xticks()), list(ax2.get_yticks()), []
+            for y in y_labels:
+              labels.append(y.get_text())
+            grouping = list(df_rf_sorted.columns)
+            plot_labels = []
+            for l in range(len(labels)):
+              plot_labels.append(grouping[int(labels[l])-1])
+            plt.xticks([])
+            plt.yticks([])
+            df_rf_sorted = df_rf_sorted.reindex(columns=plot_labels)
+            scores = scores.reindex(columns=plot_labels)
+            
+        else:
+            fig = plt.figure(figsize=(5, 0.22*(df_rf_sorted.shape[0]+5)))
+            ax1 = plt.subplot2grid((df_rf_sorted.shape[0]+5, 9), (7,1), colspan=5, rowspan=1)
+            ax2 = plt.subplot2grid((df_rf_sorted.shape[0]+5, 9), (9,0), colspan=1, rowspan=df_rf_sorted.shape[0]-3)
+            ax3 = plt.subplot2grid((df_rf_sorted.shape[0], 9), (9,1), colspan=5, rowspan=df_rf_sorted.shape[0]-3)
+            ax4 = plt.subplot2grid((df_rf_sorted.shape[0], 9), (0,6), colspan=3)
+            ax5 = plt.subplot2grid((df_rf_sorted.shape[0], 9), (3,6), colspan=3)
+            ax6 = plt.subplot2grid((df_rf_sorted.shape[0], 9), (6,6), colspan=3)
+            
+        #plot colorbars for each of the three sets of values (the sums, the importances within categories and the scores, respectively)
+        scores = scores*100
+        scores = scores.astype('int32')
+        plot_colorbar(ax4, 'summer', df_mean, name='Mean taxon importance', fs=fs_small)
+        plot_colorbar(ax5, 'inferno', df_rf_sorted, name='Taxon\nimportance', fs=fs_small)
+        plot_colorbar(ax6, 'PuBu', scores, name='Classification\naccuracy (%)', fs=fs_small)
+        if other_folder == False:
+            #ax1.set_title('Top informative                              \n'+phylo_level_names[a]+'                              ', fontsize=fs_main)
+            do_nothing = True
+        else:
+            of = other_folder.split('_')
+            if of[0] in rename_plots:
+                of[0] = rename_plots[of[0]]
+            if len(of) > 1:
+                if of[1] in rename_plots:
+                    of[1] = rename_plots[of[1]]
+                of = of[0]+' '+of[1]
+            else:
+                of = of[0]
+            ax1.set_title('Top informative '+phylo_level_names[a]+'\n'+of, fontsize=fs_main) 
+        #now get the heatmaps for each dataframe (same as for the colorbars)
+        df_rf_sorted_names = df_rf_sorted.rename(columns=rename_plots, index=rename_plots)
+        df_rf_sorted_names = df_rf_sorted_names.div(df_rf_sorted_names.max(axis=1), axis=0)
+        
+        if a == 7:
+            mean_names = list(df_rf_sorted_names.index.values)
+            new_names = {}
+            for b in range(len(mean_names)):
+                if mean_names[b] in tax_dict and mean_names[b] in ASV_dict:
+                    new_names[mean_names[b]] = ASV_dict[mean_names[b]]+': '+tax_dict[mean_names[b]][-1]
+            df_rf_sorted_names.rename(index=new_names, inplace=True)   
+        annotate_heatmap(ax1, scores, cmap='PuBu', yticks=False, xticks=False, rnd=0, annotate=True)
+        annotate_heatmap(ax2, df_mean, cmap='summer', yticks=False, xticks=True, rnd=3, annotate=True)
+        annotate_heatmap(ax3, df_rf_sorted_names, cmap='inferno', yticks='right', xticks=True, rnd=3, annotate=False, italics=True)
+        if other_folder == False:
+            plt.savefig(basedir+'/figures/random_forest/'+phylo_level_names[a]+'_overall_forest_'+norm+ext, dpi=dpi, bbox_inches='tight') #save the figure
+        #else:
+        #    plt.savefig(basedir+'/figures/random_forest/single_environment/'+other_folder+'_'+phylo_level_names[a]+ext, dpi=dpi, bbox_inches='tight')
+        plt.close()
+        meta_order = open_txt(basedir+'metadata.txt')[0]
+        del meta_order[0]
+        for n in range(len(meta_names)):
+            if skip_individual:
+                continue
+            mn = list(meta_names)
+            mn.remove(meta_names[n])
+            new_names = {}
+            colnames = list(this_ft.columns)
+            for b in range(len(colnames)):
+                i = -10
+                for c in range(len(meta_order)):
+                  if meta_order[c] == meta_names[n]:
+                    i = c
+                new_names[colnames[b]] = meta_dict[colnames[b]][i]
+            score = scores.loc['Score', meta_names[n]]
+            this_df = df_rf_full.drop(mn, axis=1, inplace=False)
+            try:
+                this_df.drop(['Score', 'OOB_score'], axis=0, inplace=True)
+            except:
+                try:
+                  this_df.drop(['Score'], axis=0, inplace=True)
+                except:
+                  do_nothing = True
+            this_df = this_df.rename(columns={meta_names[n]:'Importance'})
+            get_heatmap_random_forest(this_df, this_ft, new_names, basedir, a, other_levels, meta_names[n], score, tax_dict, ASV_dict, other_folder, norm=norm)
+        scores = scores.rename(index={'Score':phylo_level_names[a]})
+        if count == 0:
+            all_scores = scores
+            count += 1
+        else:
+            all_scores = pd.concat([scores, all_scores], sort=True)
+    fig = plt.figure(figsize=(5, len(list(all_scores.columns))/5))
+    ax1 = plt.subplot(111)
+    all_scores = all_scores.transpose()
+    all_scores = all_scores.rename(columns=rename_plots, index=rename_plots)
+    all_scores = all_scores[all_scores.columns[::-1]]
+    all_scores['Mean'] = all_scores.mean(axis=1)
+    all_scores = all_scores.sort_values(by=['Mean'], ascending=True)
+    all_scores.drop('Mean', axis=1, inplace=True)
+    annotate_heatmap(ax1, all_scores, cmap='inferno', yticks=True, xticks=True, rnd=0, annotate=True)
+    if other_folder == False:
+        plt.savefig(basedir+'/figures/random_forest/overall_forest_scores_'+norm+ext, dpi=dpi, bbox_inches='tight')
+    else:
+        of = other_folder.split('_')
+        if of[0] in rename_plots:
+            of[0] = rename_plots[of[0]]
+        if len(of) > 1:
+            if of[1] in rename_plots:
+                of[1] = rename_plots[of[1]]
+            if of[1] != 'Laboratory' and of[0] != 'Freshwater':
+                of = of[0]+' '+of[1]
+            else:
+                of = of[0]+'\n'+of[1]
+        else:
+            of = of[0]
+        plt.ylabel(of, fontsize=fs_main, fontweight='bold')
+        plt.savefig(basedir+'/figures/random_forest/single_environment/'+norm+'_'+other_folder+ext, dpi=dpi, bbox_inches='tight')
+    plt.close()
+    return all_scores
+    
+def get_environment_random_forest_plots(ft, meta_df, tax_dict, ASV_dict, meta_dict, basedir, norm='rare', skip_individual=True):
+    '''
+    Function to make figures for all random forests calculated on PlasticTypeGeneral in different environments
+    Takes as input:
+        - ft (feature table as a dataframe with samples as columns and taxa as rows)
+        - tax_dict (dictionary with taxon names as keys and full taxonomic information to be returned as a list)
+        - ASV_dict (dictionary containing all ASV assigned readable name with QIIME2 ASV name as keys)
+        - meta_dict (dictionary with all metadata  for each sample, with sample names as keys)
+        - basedir (directory to use to open random forest information as well as to save figures to)
+    Uses the get_random_forest_plots function from above but using reduced feature and metadata tables 
+    This could easily be edited to take lab and field separately as well as together
+    '''
+    envs, env_index = ['marine', 'freshwater', 'aquatic', 'terrestrial'], 3
+    labfield, labindex = [['lab', 'field']], 5
+    all_samples = list(ft.columns)
+    all_samples_meta = list(meta_df.index.values)
+    for a in range(len(envs)):
+        for b in range(len(labfield)):
+            if envs[a] == 'freshwater' and labfield[b] == 'lab':
+                continue
+            meta_names = list(meta_df.columns)
+            keeping = []
+            for c in range(len(all_samples)):
+                if meta_dict[all_samples[c]][env_index] == envs[a] and meta_dict[all_samples[c]][labindex] == labfield[b]:
+                    keeping.append(True)
+                elif meta_dict[all_samples[c]][env_index] == envs[a] and meta_dict[all_samples[c]][labindex] in labfield[b]:
+                    keeping.append(True)
+                else:
+                    keeping.append(False)
+            single_ft = ft.loc[:, keeping]
+            if len(single_ft.index.values) == 0:
+                continue
+            single_ft = single_ft[single_ft.max(axis=1) > 0]
+            keeping_meta = []
+            for d in range(len(all_samples_meta)):
+                if meta_dict[all_samples_meta[d]][env_index] == envs[a] and meta_dict[all_samples_meta[d]][labindex] == labfield[b]:
+                    keeping_meta.append(True)
+                elif meta_dict[all_samples_meta[d]][env_index] == envs[a] and meta_dict[all_samples_meta[d]][labindex] in labfield[b]:
+                    keeping_meta.append(True)
+                else:
+                    keeping_meta.append(False)
+            single_meta_df = meta_df.loc[keeping_meta]
+            single_meta_df.drop(meta_names, axis=1, inplace=True)
+            if len(single_meta_df.index.values) == 0:
+                continue
+            name = envs[a]
+            scores = get_random_forest_plots(single_ft, tax_dict, ASV_dict, meta_dict, basedir, other_folder=name, skip_individual=skip_individual, norm=norm)
+            scores.rename(index={'Plastic type (general)':envs[a].capitalize()}, inplace=True)
+            if a == 0:
+                all_scores = scores
+            else:
+                all_scores = pd.concat([all_scores, scores], sort=False)
+    return all_scores
+
+def get_overall_random_forest_plot(ft, meta_df, tax_dict, ASV_dict, meta_dict, basedir, norm='rare'):
+    '''
+    Function to make figures for all random forests calculated on PlasticTypeGeneral in different environments and different metadata categories in all environments
+    Takes as input:
+        - ft (feature table as a dataframe with samples as columns and taxa as rows)
+        - tax_dict (dictionary with taxon names as keys and full taxonomic information to be returned as a list)
+        - ASV_dict (dictionary containing all ASV assigned readable name with QIIME2 ASV name as keys)
+        - meta_dict (dictionary with all metadata  for each sample, with sample names as keys)
+        - basedir (directory to use to open random forest information as well as to save figures to)
+    '''
+    metadata_scores = get_random_forest_plots(ft, tax_dict, ASV_dict, meta_dict, basedir, skip_individual=True, norm=norm)
+    env_scores = get_environment_random_forest_plots(ft, meta_df, tax_dict, ASV_dict, meta_dict, basedir, norm=norm)
+    env_scores['Mean'] = env_scores.mean(axis=1)
+    env_scores = env_scores.sort_values(by=['Mean'], ascending=True)
+    env_scores.drop('Mean', axis=1, inplace=True)
+    
+    fig = plt.figure(figsize=(5, 8))
+    ax1 = plt.subplot2grid((26, 1), (0, 0), rowspan=20)
+    ax2 = plt.subplot2grid((26, 1), (22, 0), rowspan=4)
+    
+    annotate_heatmap(ax1, metadata_scores, cmap='inferno', yticks=True, xticks=False, rnd=0, annotate=True)
+    annotate_heatmap(ax2, env_scores, cmap='inferno', yticks=True, xticks=True, rnd=0, annotate=True)
+    ax1.set_title('A', loc='left', fontsize=fs_title, fontweight='bold')
+    ax2.set_title('B', loc='left', fontsize=fs_title, fontweight='bold')
+    ax1.set_title('Metadata categories', fontsize=fs_title, fontweight='bold')
+    ax2.set_title('Plastic type (general)', fontsize=fs_title, fontweight='bold')
+    plt.savefig(basedir+'/figures/Fig5_random_forest_'+norm+ext, dpi=dpi, bbox_inches='tight')
+    return
+    
+def calculate_richness(ft_df_rare, ft_df_nr, ft_df_raw, meta_df, basedir):
+    ft_df_raw.drop(['taxonomy'], axis=1, inplace=True)
+    ft_df_raw = pd.DataFrame(ft_df_raw.sum(axis=0)).transpose()
+    studies = sorted(list(set(meta_df.loc[:, 'Study'])))
+    rich_rare = list(ft_df_rare[ft_df_rare > 0].count())
+    rich_rare = pd.DataFrame([rich_rare], columns=ft_df_rare.columns, index=['Richness'])
+    rich_nr = list(ft_df_nr[ft_df_nr > 0].count())
+    rich_nr = pd.DataFrame([rich_nr], columns=ft_df_nr.columns, index=['Richness'])
+    rename_samples = {}
+    for sam in meta_df.index.values:
+        rename_samples[sam] = meta_df.loc[sam, 'Study']
+    rich_rare = rich_rare.rename(columns=rename_samples)
+    rich_nr = rich_nr.rename(columns=rename_samples)
+    ft_df_raw = ft_df_raw.rename(columns=rename_samples)
+    
+    plt.figure(figsize=(15,8))
+    ax_reads = plt.subplot2grid((3,3), (0,0), colspan=2)
+    ax1 = plt.subplot2grid((3,3), (1,0), colspan=2)
+    ax2 = plt.subplot2grid((3,3), (2,0), colspan=2)
+    ax_corr = plt.subplot2grid((3,3), (0,2), rowspan=3, colspan=1)
+    
+    ax_reads.set_title('A', fontweight='bold', loc='left')
+    ax1.set_title('B', fontweight='bold', loc='left')
+    ax2.set_title('C', fontweight='bold', loc='left')
+    ax_corr.set_title('D', fontweight='bold', loc='left')
+    
+    count = 1
+    counts = []
+    plot_names = []
+    for study in studies:
+        if study not in rich_rare.columns:
+            continue
+        ax_reads.boxplot(ft_df_raw.loc[:, study], positions=[count])
+        ax2.boxplot(rich_rare.loc[:, study], positions=[count])
+        ax1.boxplot(rich_nr.loc[:, study], positions=[count])
+        plot_names.append(rename_plots[study])
+        counts.append(count)
+        count += 1
+        l1, l2 = list(ft_df_raw.loc[:, study].values), list(rich_nr.loc[:, study].values)
+        for x in range(len(l1)):
+            ax_corr.scatter(l1[x], l2[x], color='k', s=5)
+    plt.sca(ax1)
+    plt.xticks([])
+    plt.sca(ax_reads)
+    plt.xticks([])
+    plt.semilogy()
+    plt.sca(ax2)
+    plt.xticks(counts, plot_names, rotation=90)
+    plt.sca(ax_corr)
+    plt.ylabel('Richness')
+    plt.xlabel('Reads per sample')
+    plt.semilogx()
+    ax2.set_ylabel('Rarefied\nRichness'), ax1.set_ylabel('Not rarefied\nRichness'), ax_reads.set_ylabel('Not rarefied\nReads per sample')
+    plt.tight_layout()
+    plt.xlim(left=2000)
+    plt.savefig(basedir+'/figures/FigS1_richness'+ext, bbox_inches='tight', dpi=600)
+    return
+    
 def plot_individual_study(study_name, study_df, study_meta_df, study_w_uf, study_uw_uf, meta_dict, tax_dict, ASV_dict, basedir, est=10000, n_jobs=1):
     '''
     Get a figure for an individual study, including weighted and unweighted unifrac nMDS plots 
@@ -2356,7 +2576,8 @@ def plot_individual_study(study_name, study_df, study_meta_df, study_w_uf, study
     for a in range(len(uf)):
         names = list(uf[a].columns) #get a list of column names
         dist_matr = uf[a].rename_axis('ID').values
-        npos, handles = get_single_nmds(dist_matr, filter_on, filter_index, source, source_index, ax_uf[a], 'best', color_src, names, meta_dict, second_filter, second_filter_ind, '', n_jobs=1)
+        save_name = this_fol+'nmds.df'+str(a)
+        npos, handles = get_single_nmds(dist_matr, filter_on, filter_index, source, source_index, ax_uf[a], 'best', color_src, names, meta_dict, save_name, second_filter, second_filter_ind, '', n_jobs=1)
         plt.sca(ax_uf[a])
         plt.legend(handles=handles, loc='best', fontsize=fs_main)
         plt.xlabel('nMDS1', fontsize=fs_small), plt.ylabel('nMDS2', fontsize=fs_small)
@@ -2413,8 +2634,11 @@ def plot_individual_study(study_name, study_df, study_meta_df, study_w_uf, study
     ax_colbar3 = plt.subplot2grid((3,66), (2,65))
     ax1, ax2, ax3 = [ax_rf_1_importance, ax_rf_1], [ax_rf_2_importance, ax_rf_2], [ax_rf_3_importance, ax_rf_3]
     axes = [ax1, ax2, ax3]
-    scores.drop('OOB_score', axis=0, inplace=True)
-    dfs.drop(['Score', 'OOB_score'], axis=0, inplace=True)
+    try:
+      scores.drop('OOB_score', axis=0, inplace=True)
+      dfs.drop(['Score', 'OOB_score'], axis=0, inplace=True)
+    except:
+      dfs.drop(['Score'], axis=0, inplace=True)
     scores = scores*100
     scores_rename = scores.rename(columns=rename_plots)
     ax_rf_scores.set_title('Random forest classification accuracy (%)', fontsize=fs_title, fontweight='bold')
@@ -2547,17 +2771,17 @@ def plots_per_study(ft_df, meta_df, meta_dict, w_uf, uw_uf, tax_dict, ASV_dict, 
     studies = sorted(list(set(meta_df['Study']))) #get the unique study names from the metadata file
     samples = list(ft_df.columns) #get a list of all sample names
     samples_meta = list(meta_df.index.values) #get a list of all samples names in the metadata file
-    w_uf = pd.read_csv(w_uf, header=0, index_col=0) #read in the weighted unifrac distance matrix
-    uw_uf = pd.read_csv(uw_uf, header=0, index_col=0) #read in the unweighted unifrac distance matrix
+    #w_uf = pd.read_csv(w_uf, header=0, index_col=0) #read in the weighted unifrac distance matrix
+    #uw_uf = pd.read_csv(uw_uf, header=0, index_col=0) #read in the unweighted unifrac distance matrix
     cols_uf = list(w_uf.columns) #get a list of sample names from the distance matrix
     ft_df = ft_df.reset_index() #rest the index column
     ft_df.rename(columns={'index':'ASV'}, inplace=True) #rename the previous index column
     ft_df = ft_df.set_index('ASV') #now reset the original index column, now named 'ASV'
     adding = False
     for a in range(len(studies)): #for each study
-        if a > 23:
-            continue
-        print(studies[a])
+        if os.path.exists(basedir+'/separate_studies/'+studies[a]+'/overall_plot'+ext):
+          print('Already had the plot for this study: '+studies[a]+"\nDelete the plot (and the 'random_forest.csv' file) if you'd like to rerun this\n")
+          continue
         keeping, keeping_meta, keeping_uf = [], [], [] #set up lists
         #check each of the feature table, metadata dataframe and unifrac sample names to see whether they are in this study. 
         #if they are, add True to the appropriate list, if not, add False
@@ -2590,371 +2814,195 @@ def plots_per_study(ft_df, meta_df, meta_dict, w_uf, uw_uf, tax_dict, ASV_dict, 
         study_meta_df.drop(not_adding, axis=1, inplace=True) #and drop those columns that we don't want from the dataframe
         plot_individual_study(studies[a], study_df, study_meta_df, study_w_uf, study_uw_uf, meta_dict, tax_dict, ASV_dict, basedir, est=est, n_jobs=n_jobs) #now get the plot for this study
     return
+    
+def group_ft_level(ft, level, tax_dict, basedir, rename=False, saving=False): #This script was written specifically for grouping before ancom, but the rename option is there to make it compatible with other functions that might want to regroup but not rename to an ASV (this renaming is only to have a representative sequence for each group)
+    '''
+    Function to group a feature table to a particular phylogenetic level
+    Takes as input:
+        - ft (dataframe with sample names as columns and ASVs as rows)
+        - level (integer indicating the phylogenetic level to group to, where 1 is phylum and 7 is ASV)
+        - tax_dict (dictionary containing taxonomy information with ASV names as keys)
+        - basedir (name of the directory to save the figures to)
+        - rename (boolean indicating whether to rename the grouped ASVs or not, default is False)
+        - saving (boolean indicating whether to save the resulting taxonomy file (this is used to rename to the level that we have used for plots made in R), default is False)
+    '''
+    asv = list(ft.index.values) #get a list of ASVs
+    asv_tax_dict, asv_tax = {}, [] #set up dictionary and list
+    for a in range(len(asv)): #for each ASV
+        asv_tax_dict[asv[a]] = tax_dict[asv[a]][level] #get the taxonomy at the level that we want, and add this to a dictionary
+        asv_tax.append(tax_dict[asv[a]][level]) #also add it to a list
+    unique_tax = list(set(asv_tax)) #get a list of the unique taxa at this level
+    representative_asv, rep_asv_dict = [], {} #set up a dictionary and list
+    for a in range(len(unique_tax)): #for each of the unique taxa
+        for b in range(len(asv_tax)): #for each ASV
+            if unique_tax[a] == asv_tax[b]: #if tthe ASV is the unique taxa that we are looking at
+                representative_asv.append([asv[b], unique_tax[a]]) #add this ASV (i.e. the first) as the representative ASV for this taxa
+                rep_asv_dict[unique_tax[a]] = asv[b] #and add it to the dictionary
+                break #now break this loop, as we only need to do this once
+    ft = ft.rename(index=asv_tax_dict) #now rename the feature table at the level that we want
+    ft = ft.groupby(by=ft.index, axis=0).sum() #and group all ASVs that now have the same name together (taking a sum of the abundance for each)
+    if rename: #if we're renaming the taxa
+        ft = ft.rename(index=rep_asv_dict) #rename the feature table again, with the representative ASV for each taxa
+        if saving: #if we are saving this file
+            with open(basedir+'taxonomy_name_only.csv', 'w') as f: #open the csv file and add the rows to it
+                writer = csv.writer(f)
+                writer.writerow(['OTUID', 'Species name'])
+                for asv in representative_asv:
+                    writer.writerow(asv)
+    return ft
 
-def get_picrust_individual_plot(this_env, axes):
-    ko = list(this_env.index.values)
-    sig = []
-    all_p = []
-    plt.sca(axes[0])
-    for a in range(len(ko)):
-        group1 = this_env.loc[ko[a], 'plastic'].values
-        group2 = this_env.loc[ko[a], 'biofilm'].values
-        t, p = stats.ttest_ind(group1, group2)
-        all_p.append(p)
-        if p < 0.05:
-            if this_env.loc[ko[a], 'FC'] > 2:
-                color = '#B90404'
-                sig.append(ko[a])
-            elif this_env.loc[ko[a], 'FC'] < -2:
-                color = '#0498B9'
-                sig.append(ko[a])
+def tree_heatmap(ft, meta_dict, basedir, tax_dict, level=7):
+    '''
+    Function to perform ANCOM tests for statistical significance at a given phylogenetic level between treatments at different time points, and plot the results of this as a tree and heatmap using an R script
+    Takes as input:
+        - ft (dataframe containing sample names as columns and ASVs as rows)
+        - meta_dict (dictionary containing metadata for all samples, with sample names as keys)
+        - basedir (name of the directory to save the figures to)
+        - tax_dict (dictionary containing taxonomy information with ASV names as keys)
+        - level (phylogenetic level at which to perform the comparison, where 1 is phylum and 7 is ASV)
+    Returns:
+        - plots for each environment at the given phylogenetic level. Figure names will take the form environment_ancom_significance_level.pdf
+    '''
+    lvls = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species', 'specific_species']
+    ft = ft*100 #multiply the relative abundance for each value in the feature table by 100 
+    if level < 7: #if this isn't at the ASV level, then group by taxa
+        ft = group_ft_level(ft, level, tax_dict, basedir+'/ancom/', rename=True, saving=True)
+    samples = list(ft.columns) #get a list of sample names
+    env, source, inc_time, source_inc, source_inc_dict = [], [], [], [], {} #set up lists for environment, incubation time, source and a combination of these
+    envs = ['marine', 'freshwater', 'aquatic', 'terrestrial']
+    #os.rename(basedir+'agglom/reduced_tree.tree', 'reduced_tree.tree') #rename the tree to save it to the directory that contains the script (this means that we don't need to put anything additional into the R script, rather than needing to change the file names etc.)
+    for a in range(len(samples)): #for each sample
+        env.append(meta_dict[samples[a]][3]) #get the environment that it came from, using the metadata dictionary
+        source.append(meta_dict[samples[a]][10]) #get the sample type/source for this sample
+        inc_time.append(meta_dict[samples[a]][13]) #get the incubation time
+        source_inc.append(meta_dict[samples[a]][10]+' '+meta_dict[samples[a]][13]) #add a combination of the source and incubation time to another list
+        source_inc_dict[samples[a]] = meta_dict[samples[a]][10]+' '+meta_dict[samples[a]][13] #and also to a dictionary
+    #set up lists of the comparisons to be carried out, as well as the names to use
+    comparisons = [['aliphatic early', 'aliphatic late'], ['other plastic early', 'other plastic late'], ['biofilm early', 'biofilm late'],
+                   ['aliphatic early', 'other plastic early'], ['aliphatic early', 'unknown plastic early'], ['aliphatic early', 'biofilm early'],
+                   ['aliphatic late', 'other plastic late'], ['aliphatic late', 'unknown plastic late'], ['aliphatic late', 'biofilm late'],
+                   ['other plastic early', 'unknown plastic early'], ['other plastic early', 'biofilm early'],
+                   ['other plastic late', 'unknown plastic late'], ['other plastic late', 'biofilm late'],
+                   ['unknown plastic early', 'biofilm early'], ['unknown plastic late', 'biofilm late']]
+    comp_names = ['Aliphatic: early vs late', 'Other plastic: early vs late', 'Biofilm: early vs late',
+                  'Early: aliphatic vs other plastic', 'Early: aliphatic vs unknown plastic', 'Early: aliphatic vs biofilm', 
+                  'Late: aliphatic vs other plastic', 'Late: aliphatic vs unknown plastic', 'Late: aliphatic vs biofilm', 
+                  'Early: other plastic vs unknown plastic', 'Early: other plastic vs biofilm', 
+                  'Late: other plastic vs unknown plastic', 'Late: other plastic vs biofilm',
+                  'Early: unknown plastic vs biofilm', 'Late: unknown plastic vs biofilm']
+    for a in range(len(envs)): #for each environment
+        if os.path.exists(basedir+'/figures/ancom/'+envs[a]+'_ancom_significance_'+lvls[level]+'.pdf'):
+          print('Already had this one: '+envs[a]+' '+lvls[level])
+          continue
+        this_env, keeping = [], []
+        for b in range(len(env)): #for each environment in the list of environments that the samples belong to
+            if env[b] == envs[a]: #if it is the same as the environment that we are looking at
+                keeping.append(True) #add True to the keeping list
             else:
-                color = '#B1B1B1'
-        else:
-            color = '#B1B1B1'
-        axes[0].scatter(this_env.loc[ko[a], 'FC'], -math.log10(p), marker='o', color=color, s=20)
-    this_env['p'] = all_p
-    axes[0].set_xlabel(r'log$_{2}$ mean fold change', fontsize=fs_main)
-    plt.xscale("symlog")
-    plt.yticks(fontsize=fs_main)
-    plt.xticks(fontsize=fs_main)
-    plt.xlim([-10, 10])
-    return this_env, sig
-
-def get_picrust_individual_bar(this_env, KO_dict, axes):
-    top = this_env.sort_values(['FC'], ascending=False)
-    bottom = this_env.sort_values(['FC'], ascending=True)
-    top = top[:20]
-    bottom = bottom[:20]
-    plotting = pd.concat([top, bottom])
-    plotting = plotting.sort_values(['FC'], ascending=False)
-    plotting = plotting[::-1]
-    ko = list(plotting.index.values)
-    names = []
-    y = []
-    for a in range(40):
-        alpha = 1
-        if plotting['FC'].iloc[a] > 2:
-            color = '#B90404'
-            if plotting['p'].iloc[a] > 0.05:
-                alpha = 0.5
-        elif plotting['FC'].iloc[a] < -2 and plotting['p'].iloc[a] < 0.05:
-            color = '#0498B9'
-            if plotting['p'].iloc[a] > 0.05:
-                alpha = 0.5
-        else:
-            color = '#B1B1B1'
-            alpha = 0.5
-        colormap = mpl.cm.get_cmap('viridis', 256)                
-        norm = mpl.colors.Normalize(vmin=-10, vmax=3)
-        m = mpl.cm.ScalarMappable(norm=norm, cmap=colormap)
-        col1, col2 = m.to_rgba(plotting['plastic mean'].iloc[a]), m.to_rgba(plotting['biofilm mean'].iloc[a])
-        #axes[2].bar([0], [1], bottom=[a], color=col1, width=1, edgecolor='k')
-        #axes[2].bar([1], [1], bottom=[a], color=col2, width=1, edgecolor='k')
-        #axes[2].text(0, a+0.5, int(plotting['plastic mean'].iloc[a]), ha='center', va='center')
-        #axes[2].text(1, a+0.5, int(plotting['biofilm mean'].iloc[a]), ha='center', va='center')
-        if ko[a] in KO_dict:
-            name = ko[a]+': '+KO_dict[ko[a]][0]
-            xenpath = KO_dict[ko[a]][1]
-            if xenpath == 'Xenobiotics':
-                color = '#02A3B6'
-            elif xenpath == 'Pathogen':
-                color = '#DD6801'
-            elif xenpath == 'Antimicrobial resistance':
-                color = '#F9E79F'
-            adding, spaces = True, 0
-            new_name = ''
-            for b in range(len(name)):
-                if name[b] == '[':
-                    adding = False
-                    continue
-                elif name[b] == ' ':
-                    spaces += 1
+                keeping.append(False) #otherwise, add False to the keeping list
+        env_ft = ft.loc[:, keeping] #get a new dataframe with only those samples that are in envs[a]
+        env_ft.rename(columns=source_inc_dict, inplace=True) #rename the remaining samples using the dictionary of sample type and incubation time
+        all_comps, colors_list = [], [[], []] #set up lists
+        for c in range(len(comparisons)): #for each comparison in the list of comparisons
+            try: #try means that the script won't break if this doesn't work - this means that if we don't have the right samples for the comparison in this environment, the script will just continue to the next comparison
+                comp_env_ft = env_ft.loc[:, comparisons[c]] #only keep the samples with names matching this comparison
+                if len(comp_env_ft.loc[:, comparisons[c][0]].columns) < 2 or len(comp_env_ft.loc[:, comparisons[c][1]].columns) < 2: #if we don't have enough samples remaining
+                    all_comps.append(False) #add False to all_comps
+                    continue #and continue to the next comparison
                 else:
-                    spaces = 0
-                if spaces > 2:
-                    adding = False
-                if adding:
-                    new_name += name[b]
-            """
-            name, count = '', 0
-            for c in range(len(new_name)):
-                if count > 35:
-                    if new_name[c] == ' ' or new_name[c] == ';' or new_name[c] == '-' or new_name[c] == '_':
-                        name += '\n'
-                        count = 0
+                    all_comps.append(True) #otherwise, add True to all_comps
+            except: #if this broke the script
+                all_comps.append(False) #add False to all_comps
+                continue #and continue to the next comparison
+            comp_env_ft = comp_env_ft.transpose() #transpose the feature table
+            comp_env_ft = comp_env_ft[comp_env_ft.columns[comp_env_ft.max() > 0]] #only keep taxa if they are present in at least one sample
+            comp_env_ft = comp_env_ft.replace(to_replace=0,value = 0.0001) #if we have any zeroes, replace these with 
+            comp_env_ft = comp_env_ft.fillna(value=0.0001) #if we have any na values, fill these with 0.0001
+            #perform the ANCOM comparison with this transposed feature table, a list of the sample names and holm-bonferroni false discovery rate correction:
+            ancom_df, percentile_df = ancom(comp_env_ft, pd.Series(list(comp_env_ft.index.values), index=list(comp_env_ft.index.values)), multiple_comparisons_correction='holm-bonferroni')
+            ancom_results, percentile_results, tax_names = ancom_df.values.tolist(), percentile_df.values.tolist(), ancom_df.index.values #get lists of the parts of the ancom data that we are interested in
+            significant, medians, not_sig, not_sig_medians = [], [], [], [] #set up some lists
+            for d in range(len(ancom_results)): #for each of the ancom results (i.e. each taxa)
+                if ancom_results[d][1] == True: #if the ancom result is significant
+                    if percentile_results[d][2] == 0.0001 and percentile_results[d][7] == 0.0001: #if the percentile results aren't both 0.0001 (i.e. added in artificially)
+                        not_sig_medians.append([percentile_results[d][2], percentile_results[d][7]]) #add the medians to the list of non-significant results
+                        not_sig.append(tax_names[d]) #add the name of this taxa to the list of non-significant results
                     else:
-                        name += new_name[c]
-                        count += 1
-                        continue
-                name += new_name[c]
-                count += 1
-            """
-            name = new_name
-        else:
-            name = ko[a]
-        names.append(name)
-        y.append(a+1)
-        axes[1].barh(a+1, plotting['FC'].iloc[a], color=color, edgecolor='k', alpha=alpha)
-    plt.sca(axes[1])
-    plt.yticks(y, names, fontsize=fs_small, linespacing=0.9)
-    plt.ylim([0.5, 40.5])
-    plt.xscale("symlog")
-    axes[1].yaxis.tick_right()
-    plt.xlim([-10, 10])
-    #plt.sca(axes[2])
-    #plt.yticks([])
-    #plt.xticks([0, 1], ['Plastic', 'Biofilm'], rotation=90)
-    #plt.ylim([0, 40])
-    axes[1].set_xlabel(r'log$_{2}$ mean fold change'+'\n'+r'Control biofilms $vs$ Plastic samples', fontsize=fs_main)
-    plt.xticks(fontsize=fs_main)
-    #axes[2].set_title('Abundance')
-    return names
-
-def picrust_plots(picrust, KO_dict, meta_dict, basedir):
-    envs, env_index = ['marine', 'aquatic', 'freshwater', 'terrestrial'], 3
-    source, source_index = [['aliphatic', 'other plastic', 'unknown plastic'], ['biofilm']], 10
-    samples = list(picrust.columns)
-    fig = plt.figure(figsize=(20,20))
-    ax1_volc = plt.subplot2grid((4, 3), (0,0))
-    ax2_volc = plt.subplot2grid((4, 3), (1,0))
-    ax3_volc = plt.subplot2grid((4, 3), (2,0))
-    ax4_volc = plt.subplot2grid((4, 3), (3,0))
-    ax1_bar = plt.subplot2grid((4, 6), (0,2))
-    ax2_bar = plt.subplot2grid((4, 6), (1,2))
-    ax3_bar = plt.subplot2grid((4, 6), (2,2))
-    ax4_bar = plt.subplot2grid((4, 6), (3,2))
-    """
-    fig = plt.figure(figsize=(20, 15))
-    ax1_volc = plt.subplot2grid((4,16), (0,0), colspan=2)
-    ax2_volc = plt.subplot2grid((4,16), (0,4), colspan=2)
-    ax3_volc = plt.subplot2grid((4,16), (0,8), colspan=2)
-    ax4_volc = plt.subplot2grid((4,16), (0,12), colspan=2)
-    ax1_bar = plt.subplot2grid((4,16), (1,0), rowspan=3, colspan=2)
-    ax2_bar = plt.subplot2grid((4,16), (1,4), rowspan=3, colspan=2)
-    ax3_bar = plt.subplot2grid((4,16), (1,8), rowspan=3, colspan=2)
-    ax4_bar = plt.subplot2grid((4,16), (1,12), rowspan=3, colspan=2)
-    #ax1_heat = plt.subplot2grid((4,16), (1,0), rowspan=3, colspan=1)
-    #ax2_heat = plt.subplot2grid((4,16), (1,4), rowspan=3, colspan=1)
-    #ax3_heat = plt.subplot2grid((4,16), (1,8), rowspan=3, colspan=1)
-    #ax4_heat = plt.subplot2grid((4,16), (1,12), rowspan=3, colspan=1)
-    """
-    all_ax = [ax1_volc, ax1_bar, ax2_volc, ax2_bar, ax3_volc, ax3_bar, ax4_volc, ax4_bar]
-    axes = [[ax1_volc, ax1_bar], [ax2_volc, ax2_bar], [ax3_volc, ax3_bar], [ax4_volc, ax4_bar]]
-    titles = ['Marine', 'Marine', 'Aquatic', 'Aquatic', 'Freshwater', 'Freshwater', 'Terrestrial', 'Terrestrial']
-    ax1_volc.set_ylabel(r'-log$_{10}$(P value)', fontsize=fs_main)
-    ax2_volc.set_ylabel(r'-log$_{10}$(P value)', fontsize=fs_main)
-    ax3_volc.set_ylabel(r'-log$_{10}$(P value)', fontsize=fs_main)
-    ax4_volc.set_ylabel(r'-log$_{10}$(P value)', fontsize=fs_main)
-    for a in range(len(all_ax)):
-        all_ax[a].set_title(titles[a])
-    for a in range(len(envs)):
-        keeping = []
-        rename = {}
-        for b in range(len(samples)):
-            meta = meta_dict[samples[b]]
-            if meta[env_index] == envs[a]:
-                if meta[source_index] in source[0]:
-                    keeping.append(True)
-                    rename[samples[b]] = 'plastic'
-                elif meta[source_index] in source[1]:
-                    keeping.append(True)
-                    rename[samples[b]] = 'biofilm'
-                else:
-                    keeping.append(False)
-            else:
-                keeping.append(False)
-        this_env = picrust.loc[:, keeping]
-        this_env.rename(columns=rename, inplace=True)
-        this_env = this_env[this_env.max(axis=1) > 0]
-        this_env = this_env.replace(to_replace=0,value = 0.0001)
-        this_env = this_env.applymap(math.log2)
-        this_env['plastic mean'] = this_env[['plastic']].mean(axis=1)
-        this_env['biofilm mean'] = this_env[['biofilm']].mean(axis=1)
-        this_env['FC'] = this_env['plastic mean']-this_env['biofilm mean']
-        this_env, sig = get_picrust_individual_plot(this_env, axes[a])
-        if len(this_env[this_env['p'] < 0.05].index.values) > 40:
-            this_env = this_env[this_env['p'] < 0.05]
-        this_env['plastic std'] = this_env[['plastic']].std(axis=1)
-        this_env['biofilm std'] = this_env[['biofilm']].std(axis=1)
-        this_env.drop(['plastic', 'biofilm'], axis=1, inplace=True)
-        this_env = this_env.sort_values(['plastic mean'], ascending=False)
-        plotted_ko = get_picrust_individual_bar(this_env, KO_dict, axes[a])
-        for c in range(len(plotted_ko)):
-            plotted_ko[c] = [plotted_ko[c]]
-        write_csv(basedir+'/picrust/'+envs[a]+'_plotted.csv', plotted_ko)
-    plastic = mlines.Line2D([], [], color='#B90404', marker='o', markersize=8, markeredgecolor='k', label='Upregulated in\nplastic samples', linestyle=' ')
-    biofilm = mlines.Line2D([], [], color='#0498B9', marker='o', markersize=8, markeredgecolor='k', label='Upregulated in\ncontrol biofilms', linestyle=' ')
-    xenobiotic = mlines.Line2D([], [], color='#02A3B6', marker='s', markersize=8, markeredgecolor='k', label='Xenobiotic\ndegradation', linestyle=' ')
-    pathogen = mlines.Line2D([], [], color='#DD6801', marker='s', markersize=8, markeredgecolor='k', label='Pathogenesis', linestyle=' ')
-    amr = mlines.Line2D([], [], color='#F9E79F', marker='s', markersize=8, markeredgecolor='k', label='Antimicrobial\nresistance', linestyle=' ')
-    ax1_volc.legend(handles=[plastic, biofilm], loc='upper left', fontsize=fs_main)
-    ax1_bar.legend(handles=[xenobiotic, pathogen, amr], loc='lower right', fontsize=fs_main)
-    #plt.subplots_adjust(wspace=0.5, hspace=0.5)
-    plt.subplots_adjust(wspace=0.1, hspace=0.3)
-    plt.savefig(basedir+'/figures/picrust_plot'+ext, dpi=dpi, bbox_inches='tight')
-    plt.close()
+                        significant.append(tax_names[d]) #otherwise, add the name of this taxa to the list of significant results
+                        medians.append([percentile_results[d][2], percentile_results[d][7]]) #add the medians to the list of significant results
+                else: #if the ancom result is not significant
+                    not_sig_medians.append([percentile_results[d][2], percentile_results[d][7]]) #add the medians to the list of non-significant results
+                    not_sig.append(tax_names[d]) #add the name of this taxa to the list of non-significant results
+            differences = []
+            for e in range(len(medians)): #for each of the significant sets of medians
+                if 0 in medians[e] or 1 in medians[e]: #if either value is 0 or 1
+                    medians[e][0] += 0.0001 #add 0.0001 to both numbers
+                    medians[e][1] += 0.0001
+                if medians[e][0] == medians[e][1]: #if the medians are equal to one another
+                    diff = 0 #make the difference be 0
+                else: #otherwise
+                    diff = math.log2(medians[e][1])/math.log2(medians[e][0]) #calculate the log2 fold change
+                    diff = math.pow(2, diff) #and then convert the number back to not log2
+                    if diff < 1 and diff > 0: #if the difference is between 0 and 1, then make this a negative number and divide by 1
+                        diff = -(1/diff)
+                differences.append(diff) #add the difference to the list
+            if len(significant) < 1: #if we only have one significant result
+                all_comps[c] = False #don't bother plotting this competition
+                continue #and continue
+            if isinstance(this_env, list): #if this_env is a list (i.e. we haven't made  a dataframe with the results yet)
+                this_env = pd.DataFrame(data=differences, index=significant, columns=[comp_names[c]]) #get a dataframe with the results of this competition
+            else: #otherwise
+                new_df = pd.DataFrame(data=differences, index=significant, columns=[comp_names[c]]) #make a new dataframe with the results of this competition
+                this_env = pd.concat([this_env, new_df], axis=1, sort=False) #and add it to the dataframe with the results of the other competitions
+            str1, str2 = comparisons[c][0].split(" "), comparisons[c][1].split(" ") #split the comparisons based on spaces, so we can look at the first and second parts of each
+            if str1[-1] == 'early' and str2[-1] == 'late': #if the comparison was with the same sample type, between early and late samples
+                col1, col2 = color_source['early'], color_source['late'] #set the color to be that of early/late in the dictionary
+            else: #otherwise
+                if len(str1) > 2: #if the length of the comparison is more than two (the sample name was longer/too long after splitting based on spaces)
+                    str1[0] = str1[0]+' '+str1[1] #then add the names back together
+                    str1[1] = str1[2]
+                    str1 = str1[:-1]
+                if len(str2) > 2: #otherwise if this is true for the second part, do as above
+                    str2[0] = str2[0]+' '+str2[1]
+                    str2[1] = str2[2]
+                    str2 = str2[:-1]
+                col1 = color_source[str1[0]] #get the color for the first sample type
+                col2 = color_source[str2[0]] #and the second sample type 
+            colors_list[0].append(str(col1)+", "+str(col2)), colors_list[1].append(comp_names[c]) #add a string to the color list
+        if sum(all_comps) > 0: #if we had results for some competitions
+            cols_df = pd.DataFrame(data=[colors_list[0]], index=['Colors'], columns=colors_list[1]) #get the colors as a dataframe
+            this_env = this_env.append(cols_df) #add this dataframe to the one of all comparisons for this environment
+            this_env = this_env.fillna(value=0) #and fill in any na values
+            this_env.to_csv(basedir+'/ancom/'+envs[a]+'_'+lvls[level]+'_ancom_significant.csv') #save this dataframe with the differences for each taxa, for each comparison
+            this_env.to_csv(basedir+'ancom_significant.csv') #and save it as a generic file, that the R script can get to
+            ft_fn = basedir+'/ancom/'+envs[a]+'_'+lvls[level]+'_ancom_significant.csv'
+            tree_fn = basedir+'agglom/reduced_tree.tree'
+            tax_fn = basedir+"taxonomy_name_only.csv"
+            save_name = basedir+'/figures/ancom/'+envs[a]+'_ancom_significance_'+lvls[level]+'.pdf'
+            r.suppressWarnings(r.ancom_tree())
+            os.rename(basedir+'ancom_heatmap.pdf', basedir+'/figures/ancom/'+envs[a]+'_ancom_significance_'+lvls[level]+'.pdf') #rename the output of the R script
+    try:
+      os.remove('ancom_significant.csv') #remove this from the folder with the scripts (each environment will be saved in the ancom folder anyway)
+    except:
+      do_nothing = True
+    #os.remove('taxonomy_name_only.csv') #remove this, too
+    #os.rename('reduced_tree.tree', basedir+'agglom/reduced_tree.tree') #and put the reduced tree back where it came from
     return
 
+def get_stats_groups(uf, meta_dict):
+  group_env, group_study = [], []
+  for a in uf.index.values:
+    meta = meta_dict[a]
+    group_env.append(meta[3]), group_study.append(meta[0])
+  return group_env, group_study
 
-
-
-
-"""""""""
-Not using
-"""""""""
-
-def add_map_features():
-    plt.figure(figsize=(30,4)) #set up figure
-    ax1 = plt.subplot2grid((40,9), (4,0), rowspan=32) #add axis for number of publications
-    ax2 = plt.subplot2grid((1,9), (0,1), colspan=2, projection=ccrs.PlateCarree()) #add axis for map
-    ax1.set_title('A', loc='left', fontsize=fs_title) #add axis label
-    ax2.set_title('B', loc='left', fontsize=fs_title) #add axis label
-    axins1 = plt.subplot2grid((2,9), (0,3), projection=ccrs.PlateCarree()) #add first inset map axis
-    axins2 = plt.subplot2grid((3,13), (0,9), projection=ccrs.PlateCarree()) #add second inset map axis
-    
-    plt.sca(ax2)
-    img = plt.imread("world_map.jpg") #get the background map picture and set the main and inset axis to show only the regions of interest
-    ax2.imshow(img, extent=[-180, 180, 90, -90], alpha=0.6)
-    axins1.imshow(img, extent=[-180, 180, 90, -90], alpha=0.6)
-    axins2.imshow(img, extent=[-180, 180, 90, -90], alpha=0.6)
-    extent0 = [-180, 180, -90, 90]
-    ax2.set_extent(extent0, crs=ccrs.PlateCarree())
-    extent1 = [-22, 30, 25, 65]
-    lonmin1, lonmax1, latmin1, latmax1 = extent1
-    axins1.set_extent(extent1, crs=ccrs.PlateCarree())
-    extent2 = [105, 130, 15, 45]
-    lonmin2, lonmax2, latmin2, latmax2 = extent2
-    axins2.set_extent(extent2, crs=ccrs.PlateCarree())
-    
-    #add the inset axis to the main axis
-    plt.draw()
-    p1 = ax2.get_position()
-    p2 = axins1.get_position()
-    axins1.set_position([p1.x1-0.12, p1.y0-0.05, p2.width, p2.height])
-    p2 = axins2.get_position()
-    axins2.set_position([p1.x1-(p2.width)*1.1, p1.y0+(p2.height*0.1), p2.width, p2.height])
-    
-    #plot the lines around the inset areas and going to the box edges
-    ax2.plot([lonmin1, lonmax1], [latmin1, latmin1], 'k', lw=0.5)
-    ax2.plot([lonmin1, lonmax1], [latmax1, latmax1], 'k', lw=0.5)
-    ax2.plot([lonmin1, lonmin1], [latmin1, latmax1], 'k', lw=0.5)
-    ax2.plot([lonmax1,lonmax1], [latmin1, latmax1], 'k', lw=0.5)
-    ax2.plot([lonmin1, -87.8], [latmin1, -2], 'k', lw=0.5)
-    ax2.plot([lonmax1, 44], [latmin1, -2], 'k', lw=0.5)
-    ax2.plot([lonmin2, lonmax2], [latmin2, latmin2], 'k', lw=0.5)
-    ax2.plot([lonmin2, lonmax2], [latmax2, latmax2], 'k', lw=0.5)
-    ax2.plot([lonmin2, lonmin2], [latmin2, latmax2], 'k', lw=0.5)
-    ax2.plot([lonmax2,lonmax2], [latmin2, latmax2], 'k', lw=0.5)
-    ax2.plot([lonmin2, 119], [latmin2, -17], 'k', lw=0.5)
-    ax2.plot([lonmax2, 175], [latmin2, -17], 'k', lw=0.5)
-    
-    
-    return
-
-def get_important_forests_environment(ft, tax_dict, ASV_dict, meta_dict, basedir):
-    envs, ei, si = ['marine', 'freshwater', 'aquatic', 'terrestrial'], 3, 10
-    level = 5
-    asv = list(ft.index.values)
-    tax_rename = {}
-    for a in range(len(asv)):
-        tax = tax_dict[asv[a]]
-        this_level = ''
-        if tax[level] == '':
-            this_level = tax[-1]
-        else:
-            this_level = tax[level]
-        tax_rename[asv[a]] = this_level
-    ft.rename(index=tax_rename, inplace=True)
-    ft = ft.groupby(by=ft.index.values, axis=0).sum()
-    ft = ft.reset_index() #reset the indices in our feature table
-    ft = ft.rename(columns={'index':'ASV'}) #rename the index column
-    ft = ft.set_index('ASV')
-    ft = ft*100
-    for a in range(len(envs)):
-        keeping = []
-        colnames = list(ft.columns)
-        rename = {}
-        for b in range(len(colnames)):
-            if meta_dict[colnames[b]][ei] == envs[a]:
-                if meta_dict[colnames[b]][si] != 'planktonic' and meta_dict[colnames[b]][si] != 'blank':
-                    keeping.append(True)
-                    rename[colnames[b]] = meta_dict[colnames[b]][si]
-                else:
-                    keeping.append(False)
-            else:
-                keeping.append(False)
-        single_ft = ft.loc[:, keeping]
-        single_ft = single_ft.rename(columns=rename)
-        rf = pd.read_csv(basedir+'/random_forest/single_environment/'+envs[a]+'_'+phylo_level_names[level]+'.csv', header=0, index_col=0)
-        cols = list(rf.columns)
-        cols.remove('PlasticTypeGeneral')
-        rf.drop(cols, axis=1, inplace=True), rf.drop(['Score', 'OOB_score'], axis=0, inplace=True)
-        rf = rf.sort_values(['PlasticTypeGeneral'], ascending=False)
-        """
-        #This is to make box plots for the top 10 significant taxa (random forest) if they have a significant ANOVA test
-        fig = plt.figure(figsize=(20,10))
-        ax1, ax2, ax3, ax4, ax5 = plt.subplot2grid((2,5), (0,0)), plt.subplot2grid((2,5), (0,1)), plt.subplot2grid((2,5), (0,2)), plt.subplot2grid((2,5), (0,3)), plt.subplot2grid((2,5), (0,4))
-        ax6, ax7, ax8, ax9, ax10 = plt.subplot2grid((2,5), (1,0)), plt.subplot2grid((2,5), (1,1)), plt.subplot2grid((2,5), (1,2)), plt.subplot2grid((2,5), (1,3)), plt.subplot2grid((2,5), (1,4))
-        axes = [ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8, ax9, ax10]
-        rf = rf.reset_index() #reset the indices in our feature table
-        rf = rf.rename(columns={'index':'ASV'}) #rename the index column
-        rf = rf.set_index('ASV')
-        single_ft = single_ft.merge(right=rf, on='ASV')
-        single_ft = single_ft.sort_values(['PlasticTypeGeneral'], ascending=False)
-        single_ft.drop(['PlasticTypeGeneral'], axis=1, inplace=True)
-        taxa = list(single_ft.index.values)
-        x = []
-        count = 0
-        for c in range(len(taxa)):
-            if count > 9:
-                continue
-            colnames = list(set(single_ft.columns))
-            vals = []
-            maxs = []
-            for d in range(len(colnames)):
-                if c == 0:
-                    x.append(d+1)
-                new_vals = single_ft.loc[taxa[c], colnames[d]]
-                vals.append(new_vals)
-                maxs.append(max(new_vals))
-            f, p = stats.f_oneway(*[list(vals[f]) for f in range(len(vals))])
-            if p < 0.05:
-                axes[count].boxplot(vals, positions=x, showfliers=False, showmeans=True)
-                axes[count].set_title(r'$'+taxa[c]+'$')
-                sigs = []
-                adding = 0
-                for e in range(len(colnames)-1):
-                    this_sig = []
-                    for f in range(e+1, len(colnames)):
-                        ttest, ttest_p = stats.ttest_ind(vals[e], vals[f])
-                        if ttest_p > 0.05:
-                            continue
-                        if adding == 0:
-                            adding = max(maxs)+max(maxs)*0.1
-                        else:
-                            adding += max(maxs)*0.1
-                        print(adding)
-                        #axes
-                        this_sig.append(ttest_p)
-                        #axes[count].text(x[e], adding, '*')
-                        
-                    sigs.append(this_sig)
-                plt.sca(axes[count])
-                for f in range(len(colnames)):
-                    if colnames[f] in rename_plots:
-                        colnames[f] = rename_plots[colnames[f]]
-                plt.xticks(x, colnames, rotation=90)
-                count += 1
-            else:
-                do_nothing=True
-            
-        ax1.set_ylabel('Relative abundance (%)'), ax6.set_ylabel('Relative abundance (%)')
-        removex = [ax1, ax2, ax3, ax4, ax5]
-        for ax in removex:
-            plt.sca(ax)
-            plt.xticks([])
-        plt.savefig(basedir+'/figures/random_forest_taxa/'+envs[a]+'_'+phylo_level_names[level]+ext, dpi=dpi, bbox_inches='tight')
-        plt.close()
-        """
-    return
+def convert_pdf(path_to_pdf):
+  to_convert = os.listdir(path_to_pdf)
+  for fi in to_convert:
+    if '.pdf' in fi:
+      images = convert_from_path(path_to_pdf+fi, dpi=600)
+      ext_caps = 'PNG'
+      if ext == '.jpg':
+        ext_caps = 'JPEG'
+      for image in images:
+        image.save(path_to_pdf+fi.replace('.pdf', ext), ext_caps)
