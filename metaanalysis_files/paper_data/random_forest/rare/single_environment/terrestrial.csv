@@ -1,0 +1,360 @@
+Taxa,kingdoms,phyla,classes,orders,families,genera,species,biofilm,unknown plastic,Importance,ANCOM
+Class: Alphaproteobacteria,Bacteria,Proteobacteria,Proteobacteria,Proteobacteria,Proteobacteria,Proteobacteria,Proteobacteria,5.358333333333333,5.122000000000001,0.113901567,NS
+Class: Gammaproteobacteria,Bacteria,Proteobacteria,Proteobacteria,Proteobacteria,Proteobacteria,Proteobacteria,Proteobacteria,8.904166666666665,7.025999999999999,0.125219138,NS
+Class: Deltaproteobacteria,Bacteria,Proteobacteria,Proteobacteria,Proteobacteria,Proteobacteria,Proteobacteria,Proteobacteria,0.38749999999999996,0.08800000000000001,0.043678363,NS
+Family: Xanthomonadaceae,Bacteria,Proteobacteria,Gammaproteobacteria,Xanthomonadales,Xanthomonadales,Xanthomonadales,Xanthomonadales,2.4270833333333335,1.4120000000000001,0.030623700000000004,NS
+Family: Rhodanobacteraceae,Bacteria,Proteobacteria,Gammaproteobacteria,Xanthomonadales,Xanthomonadales,Xanthomonadales,Xanthomonadales,0.8708333333333332,0.9359999999999999,0.032621723,NS
+ASV3850: Xanthomonadaceae,Bacteria,Proteobacteria,Gammaproteobacteria,Xanthomonadales,Xanthomonadaceae,Xanthomonadaceae,Xanthomonadaceae,0.5041666666666667,0.226,0.016158676,NS
+ASV3852: Xanthomonadaceae,Bacteria,Proteobacteria,Gammaproteobacteria,Xanthomonadales,Xanthomonadaceae,Xanthomonadaceae,Xanthomonadaceae,0.23958333333333334,0.24799999999999997,0.006705914,NS
+ASV3849: Xanthomonadaceae,Bacteria,Proteobacteria,Gammaproteobacteria,Xanthomonadales,Xanthomonadaceae,Xanthomonadaceae,Xanthomonadaceae,0.15208333333333332,0.138,0.007495241999999999,NS
+ASV3841: Xanthomonadaceae,Bacteria,Proteobacteria,Gammaproteobacteria,Xanthomonadales,Xanthomonadaceae,Xanthomonadaceae,Xanthomonadaceae,0.17500000000000002,0.07200000000000001,0.009245764,NS
+ASV3838: Xanthomonadaceae,Bacteria,Proteobacteria,Gammaproteobacteria,Xanthomonadales,Xanthomonadaceae,Xanthomonadaceae,Xanthomonadaceae,0.10625,0.008,0.005459276,NS
+Species: Xanthomonadaceae,Bacteria,Proteobacteria,Gammaproteobacteria,Xanthomonadales,Xanthomonadaceae,Xanthomonadaceae,Xanthomonadaceae,1.7458333333333333,1.232,0.025402663,NS
+Genera: Xanthomonadaceae,Bacteria,Proteobacteria,Gammaproteobacteria,Xanthomonadales,Xanthomonadaceae,Xanthomonadaceae,Xanthomonadaceae,1.7458333333333333,1.232,0.012351016000000001,NS
+Genera: Lysobacter,Bacteria,Proteobacteria,Gammaproteobacteria,Xanthomonadales,Xanthomonadaceae,Xanthomonadaceae,Xanthomonadaceae,0.23750000000000002,0.13799999999999998,0.008778023000000001,S
+Genera: Arenimonas,Bacteria,Proteobacteria,Gammaproteobacteria,Xanthomonadales,Xanthomonadaceae,Xanthomonadaceae,Xanthomonadaceae,0.3854166666666667,0.036000000000000004,0.00772311,S
+ASV3857: Arenimonas,Bacteria,Proteobacteria,Gammaproteobacteria,Xanthomonadales,Xanthomonadaceae,Arenimonas,Arenimonas,0.3854166666666667,0.036000000000000004,0.01049619,NS
+Species: Arenimonas,Bacteria,Proteobacteria,Gammaproteobacteria,Xanthomonadales,Xanthomonadaceae,Arenimonas,Arenimonas,0.3854166666666667,0.036000000000000004,0.00824584,NS
+ASV3833: Rhodanobacteraceae,Bacteria,Proteobacteria,Gammaproteobacteria,Xanthomonadales,Rhodanobacteraceae,Rhodanobacteraceae,Rhodanobacteraceae,0.15,0.14600000000000002,0.011174334,NS
+Species: Rhodanobacteraceae,Bacteria,Proteobacteria,Gammaproteobacteria,Xanthomonadales,Rhodanobacteraceae,Rhodanobacteraceae,Rhodanobacteraceae,0.15,0.14600000000000002,0.005523188,NS
+Genera: Dokdonella,Bacteria,Proteobacteria,Gammaproteobacteria,Xanthomonadales,Rhodanobacteraceae,Rhodanobacteraceae,Rhodanobacteraceae,0.4083333333333334,0.47,0.009159861,S
+Genera: Rhodanobacteraceae,Bacteria,Proteobacteria,Gammaproteobacteria,Xanthomonadales,Rhodanobacteraceae,Rhodanobacteraceae,Rhodanobacteraceae,0.15,0.14600000000000002,0.00846135,S
+ASV3860: Dokdonella,Bacteria,Proteobacteria,Gammaproteobacteria,Xanthomonadales,Rhodanobacteraceae,Dokdonella,Dokdonella,0.2166666666666667,0.136,0.0056229,NS
+Species: Dokdonella,Bacteria,Proteobacteria,Gammaproteobacteria,Xanthomonadales,Rhodanobacteraceae,Dokdonella,Dokdonella,0.4083333333333334,0.47,0.025536022999999998,NS
+Family: Moraxellaceae,Bacteria,Proteobacteria,Gammaproteobacteria,Pseudomonadales,Pseudomonadales,Pseudomonadales,Pseudomonadales,0.6375,0.694,0.021670121,NS
+Family: Pseudomonadaceae,Bacteria,Proteobacteria,Gammaproteobacteria,Pseudomonadales,Pseudomonadales,Pseudomonadales,Pseudomonadales,1.1854166666666668,0.676,0.016416151,NS
+Species: Pseudomonas,Bacteria,Proteobacteria,Gammaproteobacteria,Pseudomonadales,Pseudomonadaceae,Pseudomonas,Pseudomonas,1.14375,0.5279999999999999,0.01123088,NS
+Genera: Pseudomonas,Bacteria,Proteobacteria,Gammaproteobacteria,Pseudomonadales,Pseudomonadaceae,Pseudomonadaceae,Pseudomonadaceae,1.1854166666666668,0.676,0.010484224,NS
+ASV4190: Psychrobacter,Bacteria,Proteobacteria,Gammaproteobacteria,Pseudomonadales,Moraxellaceae,Psychrobacter,Psychrobacter,0.5354166666666667,0.39599999999999996,0.008268083,NS
+Species: Psychrobacter,Bacteria,Proteobacteria,Gammaproteobacteria,Pseudomonadales,Moraxellaceae,Psychrobacter,Psychrobacter,0.5354166666666667,0.39599999999999996,0.012479158999999998,NS
+Genera: Acinetobacter,Bacteria,Proteobacteria,Gammaproteobacteria,Pseudomonadales,Moraxellaceae,Moraxellaceae,Moraxellaceae,0.10208333333333332,0.29799999999999993,0.005928008,S
+Genera: Psychrobacter,Bacteria,Proteobacteria,Gammaproteobacteria,Pseudomonadales,Moraxellaceae,Moraxellaceae,Moraxellaceae,0.5354166666666667,0.39599999999999996,0.009984657,NS
+ASV4070: Acinetobacter,Bacteria,Proteobacteria,Gammaproteobacteria,Pseudomonadales,Moraxellaceae,Acinetobacter,Acinetobacter,0.041666666666666664,0.13599999999999998,0.00619616,NS
+Species: Acinetobacter,Bacteria,Proteobacteria,Gammaproteobacteria,Pseudomonadales,Moraxellaceae,Acinetobacter,Acinetobacter,0.10208333333333332,0.29799999999999993,0.022606557000000003,NS
+Family: Halomonadaceae,Bacteria,Proteobacteria,Gammaproteobacteria,Oceanospirillales,Oceanospirillales,Oceanospirillales,Oceanospirillales,0.37916666666666665,0.11199999999999999,0.006168396,NS
+Species: Halomonas lutea,Bacteria,Proteobacteria,Gammaproteobacteria,Oceanospirillales,Halomonadaceae,Halomonas,Halomonas,0.22291666666666665,0.066,0.005507082,NS
+Genera: Halomonas,Bacteria,Proteobacteria,Gammaproteobacteria,Oceanospirillales,Halomonadaceae,Halomonadaceae,Halomonadaceae,0.37916666666666665,0.11199999999999999,0.006602741999999999,S
+ASV3944: Methylomonaceae,Bacteria,Proteobacteria,Gammaproteobacteria,Methylococcales,Methylomonaceae,Methylomonaceae,Methylomonaceae,0.09583333333333334,0.052000000000000005,0.00688551,NS
+Species: Methylomonaceae,Bacteria,Proteobacteria,Gammaproteobacteria,Methylococcales,Methylomonaceae,Methylomonaceae,Methylomonaceae,0.2791666666666667,0.094,0.011615803999999999,NS
+Genera: Methylomonaceae,Bacteria,Proteobacteria,Gammaproteobacteria,Methylococcales,Methylomonaceae,Methylomonaceae,Methylomonaceae,0.2791666666666667,0.094,0.006740245,S
+Family: Methylomonaceae,Bacteria,Proteobacteria,Gammaproteobacteria,Methylococcales,Methylococcales,Methylococcales,Methylococcales,0.2791666666666667,0.094,0.025395522,NS
+Family: Methylococcaceae,Bacteria,Proteobacteria,Gammaproteobacteria,Methylococcales,Methylococcales,Methylococcales,Methylococcales,0.7604166666666669,1.116,0.023422002,NS
+Genera: Methylocaldum,Bacteria,Proteobacteria,Gammaproteobacteria,Methylococcales,Methylococcaceae,Methylococcaceae,Methylococcaceae,0.7270833333333334,0.9800000000000001,0.01299146,S
+ASV0047: Methylocaldum marinum,Bacteria,Proteobacteria,Gammaproteobacteria,Methylococcales,Methylococcaceae,Methylocaldum,Methylocaldum marinum,0.1583333333333333,0.076,0.0060362409999999995,NS
+ASV0250: Methylocaldum,Bacteria,Proteobacteria,Gammaproteobacteria,Methylococcales,Methylococcaceae,Methylocaldum,Methylocaldum,0.26249999999999996,0.086,0.011362063,NS
+ASV0248: Methylocaldum,Bacteria,Proteobacteria,Gammaproteobacteria,Methylococcales,Methylococcaceae,Methylocaldum,Methylocaldum,0.08333333333333333,0.046000000000000006,0.014565246,NS
+Species: Methylocaldum,Bacteria,Proteobacteria,Gammaproteobacteria,Methylococcales,Methylococcaceae,Methylocaldum,Methylocaldum,0.45625,0.27599999999999997,0.01030206,NS
+Order: Pseudomonadales,Bacteria,Proteobacteria,Gammaproteobacteria,Gammaproteobacteria,Gammaproteobacteria,Gammaproteobacteria,Gammaproteobacteria,1.822916666666667,1.3700000000000003,0.046680025,NS
+Order: Betaproteobacteriales,Bacteria,Proteobacteria,Gammaproteobacteria,Gammaproteobacteria,Gammaproteobacteria,Gammaproteobacteria,Gammaproteobacteria,1.76875,1.1280000000000001,0.070247047,NS
+Order: Xanthomonadales,Bacteria,Proteobacteria,Gammaproteobacteria,Gammaproteobacteria,Gammaproteobacteria,Gammaproteobacteria,Gammaproteobacteria,3.2979166666666675,2.3480000000000003,0.031587893,NS
+Order: Methylococcales,Bacteria,Proteobacteria,Gammaproteobacteria,Gammaproteobacteria,Gammaproteobacteria,Gammaproteobacteria,Gammaproteobacteria,1.1166666666666667,1.4399999999999997,0.026339663,NS
+Order: Cellvibrionales,Bacteria,Proteobacteria,Gammaproteobacteria,Gammaproteobacteria,Gammaproteobacteria,Gammaproteobacteria,Gammaproteobacteria,0.20416666666666664,0.13399999999999998,0.01090673,NS
+Order: Enterobacteriales,Bacteria,Proteobacteria,Gammaproteobacteria,Gammaproteobacteria,Gammaproteobacteria,Gammaproteobacteria,Gammaproteobacteria,0.016666666666666666,0.242,0.015968525,NS
+Order: Oceanospirillales,Bacteria,Proteobacteria,Gammaproteobacteria,Gammaproteobacteria,Gammaproteobacteria,Gammaproteobacteria,Gammaproteobacteria,0.38749999999999996,0.24599999999999994,0.014713623,NS
+Order: Alteromonadales,Bacteria,Proteobacteria,Gammaproteobacteria,Gammaproteobacteria,Gammaproteobacteria,Gammaproteobacteria,Gammaproteobacteria,0.10833333333333335,0.046,0.005210745,NS
+Family: Enterobacteriaceae,Bacteria,Proteobacteria,Gammaproteobacteria,Enterobacteriales,Enterobacteriales,Enterobacteriales,Enterobacteriales,0.016666666666666666,0.242,0.018430387,NS
+ASV4365: Enterobacteriaceae,Bacteria,Proteobacteria,Gammaproteobacteria,Enterobacteriales,Enterobacteriaceae,Enterobacteriaceae,Enterobacteriaceae,0.014583333333333335,0.128,0.007619916,NS
+Species: Enterobacteriaceae,Bacteria,Proteobacteria,Gammaproteobacteria,Enterobacteriales,Enterobacteriaceae,Enterobacteriaceae,Enterobacteriaceae,0.016666666666666666,0.242,0.010341953000000001,NS
+Genera: Enterobacteriaceae,Bacteria,Proteobacteria,Gammaproteobacteria,Enterobacteriales,Enterobacteriaceae,Enterobacteriaceae,Enterobacteriaceae,0.016666666666666666,0.242,0.005587356999999999,NS
+Genera: Nitrosomonas,Bacteria,Proteobacteria,Gammaproteobacteria,Betaproteobacteriales,Nitrosomonadaceae,Nitrosomonadaceae,Nitrosomonadaceae,0.03541666666666667,0.312,0.005569014000000001,S
+Species: Massilia,Bacteria,Proteobacteria,Gammaproteobacteria,Betaproteobacteriales,Burkholderiaceae,Massilia,Massilia,0.42291666666666666,0.152,0.014450093999999998,NS
+Species: Burkholderiaceae,Bacteria,Proteobacteria,Gammaproteobacteria,Betaproteobacteriales,Burkholderiaceae,Burkholderiaceae,Burkholderiaceae,0.4979166666666666,0.16200000000000003,0.012250428,NS
+Genera: Burkholderiaceae,Bacteria,Proteobacteria,Gammaproteobacteria,Betaproteobacteriales,Burkholderiaceae,Burkholderiaceae,Burkholderiaceae,0.4979166666666666,0.16200000000000003,0.010101454000000001,NS
+Genera: Massilia,Bacteria,Proteobacteria,Gammaproteobacteria,Betaproteobacteriales,Burkholderiaceae,Burkholderiaceae,Burkholderiaceae,0.42291666666666666,0.152,0.005995146999999999,S
+Family: Burkholderiaceae,Bacteria,Proteobacteria,Gammaproteobacteria,Betaproteobacteriales,Betaproteobacteriales,Betaproteobacteriales,Betaproteobacteriales,1.0770833333333334,0.608,0.020877354,NS
+Family: Nitrosomonadaceae,Bacteria,Proteobacteria,Gammaproteobacteria,Betaproteobacteriales,Betaproteobacteriales,Betaproteobacteriales,Betaproteobacteriales,0.5208333333333334,0.508,0.012413891000000002,NS
+Genera: Shewanella,Bacteria,Proteobacteria,Gammaproteobacteria,Alteromonadales,Shewanellaceae,Shewanellaceae,Shewanellaceae,0.10833333333333335,0.046,0.006255499,S
+Family: Shewanellaceae,Bacteria,Proteobacteria,Gammaproteobacteria,Alteromonadales,Alteromonadales,Alteromonadales,Alteromonadales,0.10833333333333335,0.046,0.005616419,NS
+ASV1732: Sandaracinaceae,Bacteria,Proteobacteria,Deltaproteobacteria,Myxococcales,Sandaracinaceae,Sandaracinaceae,Sandaracinaceae,0.09583333333333334,0.022000000000000002,0.005908729000000001,NS
+Species: Sandaracinaceae,Bacteria,Proteobacteria,Deltaproteobacteria,Myxococcales,Sandaracinaceae,Sandaracinaceae,Sandaracinaceae,0.19791666666666666,0.042,0.010586773,NS
+Genera: Sandaracinaceae,Bacteria,Proteobacteria,Deltaproteobacteria,Myxococcales,Sandaracinaceae,Sandaracinaceae,Sandaracinaceae,0.19791666666666666,0.042,0.005445084,S
+Family: Sandaracinaceae,Bacteria,Proteobacteria,Deltaproteobacteria,Myxococcales,Myxococcales,Myxococcales,Myxococcales,0.19791666666666666,0.042,0.011065446000000001,NS
+Order: Myxococcales,Bacteria,Proteobacteria,Deltaproteobacteria,Deltaproteobacteria,Deltaproteobacteria,Deltaproteobacteria,Deltaproteobacteria,0.38749999999999996,0.08800000000000001,0.013497432,NS
+Family: Geminicoccaceae,Bacteria,Proteobacteria,Alphaproteobacteria,Tistrellales,Tistrellales,Tistrellales,Tistrellales,0.2729166666666667,0.08800000000000001,0.010136618,NS
+Species: Geminicoccaceae,Bacteria,Proteobacteria,Alphaproteobacteria,Tistrellales,Geminicoccaceae,Geminicoccaceae,Geminicoccaceae,0.18333333333333332,0.07200000000000001,0.006244176999999999,NS
+Genera: Geminicoccaceae,Bacteria,Proteobacteria,Alphaproteobacteria,Tistrellales,Geminicoccaceae,Geminicoccaceae,Geminicoccaceae,0.18333333333333332,0.07200000000000001,0.011370071,S
+Family: Sphingomonadaceae,Bacteria,Proteobacteria,Alphaproteobacteria,Sphingomonadales,Sphingomonadales,Sphingomonadales,Sphingomonadales,0.7125,0.7340000000000001,0.029132736,NS
+ASV0427: Sphingomonas,Bacteria,Proteobacteria,Alphaproteobacteria,Sphingomonadales,Sphingomonadaceae,Sphingomonas,Sphingomonas,0.18125,0.23800000000000002,0.006210353,NS
+Species: Sphingomonas,Bacteria,Proteobacteria,Alphaproteobacteria,Sphingomonadales,Sphingomonadaceae,Sphingomonas,Sphingomonas,0.4854166666666666,0.37599999999999995,0.005857149,NS
+ASV0431: Sphingomonadaceae,Bacteria,Proteobacteria,Alphaproteobacteria,Sphingomonadales,Sphingomonadaceae,Sphingomonadaceae,Sphingomonadaceae,0.05416666666666667,0.07800000000000001,0.008382504,NS
+Species: Sphingomonadaceae,Bacteria,Proteobacteria,Alphaproteobacteria,Sphingomonadales,Sphingomonadaceae,Sphingomonadaceae,Sphingomonadaceae,0.17499999999999996,0.08600000000000002,0.008784448,NS
+Genera: Sphingomonas,Bacteria,Proteobacteria,Alphaproteobacteria,Sphingomonadales,Sphingomonadaceae,Sphingomonadaceae,Sphingomonadaceae,0.4854166666666666,0.37599999999999995,0.008965492,S
+Family: Fodinicurvataceae,Bacteria,Proteobacteria,Alphaproteobacteria,Rhodovibrionales,Rhodovibrionales,Rhodovibrionales,Rhodovibrionales,0.09166666666666666,0.076,0.011769789,NS
+Species: Fodinicurvataceae,Bacteria,Proteobacteria,Alphaproteobacteria,Rhodovibrionales,Fodinicurvataceae,Fodinicurvataceae,Fodinicurvataceae,0.09166666666666666,0.076,0.007266155,NS
+Genera: Fodinicurvataceae,Bacteria,Proteobacteria,Alphaproteobacteria,Rhodovibrionales,Fodinicurvataceae,Fodinicurvataceae,Fodinicurvataceae,0.09166666666666666,0.076,0.007891883,S
+Family: Rhodopirillaceae,Bacteria,Proteobacteria,Alphaproteobacteria,Rhodospirillales,Rhodospirillales,Rhodospirillales,Rhodospirillales,0.13541666666666666,0.024,0.012594123,NS
+Genera: Defluviicoccus,Bacteria,Proteobacteria,Alphaproteobacteria,Rhodospirillales,Rhodopirillaceae,Rhodopirillaceae,Rhodopirillaceae,0.13541666666666666,0.024,0.019671293,S
+ASV0606: Defluviicoccus,Bacteria,Proteobacteria,Alphaproteobacteria,Rhodospirillales,Rhodopirillaceae,Defluviicoccus,Defluviicoccus,0.13541666666666666,0.024,0.0070519630000000005,NS
+Species: Defluviicoccus,Bacteria,Proteobacteria,Alphaproteobacteria,Rhodospirillales,Rhodopirillaceae,Defluviicoccus,Defluviicoccus,0.13541666666666666,0.024,0.011804643,NS
+Family: Rhodobacteraceae,Bacteria,Proteobacteria,Alphaproteobacteria,Rhodobacterales,Rhodobacterales,Rhodobacterales,Rhodobacterales,0.24166666666666667,0.726,0.010699998,NS
+ASV1341: Rubellimicrobium,Bacteria,Proteobacteria,Alphaproteobacteria,Rhodobacterales,Rhodobacteraceae,Rubellimicrobium,Rubellimicrobium,0.21666666666666667,0.636,0.007080863000000001,NS
+Species: Rubellimicrobium,Bacteria,Proteobacteria,Alphaproteobacteria,Rhodobacterales,Rhodobacteraceae,Rubellimicrobium,Rubellimicrobium,0.21666666666666667,0.636,0.005734321,NS
+Genera: Rubellimicrobium,Bacteria,Proteobacteria,Alphaproteobacteria,Rhodobacterales,Rhodobacteraceae,Rhodobacteraceae,Rhodobacteraceae,0.21666666666666667,0.636,0.005123461,S
+Family: Devosiaceae,Bacteria,Proteobacteria,Alphaproteobacteria,Rhizobiales,Rhizobiales,Rhizobiales,Rhizobiales,0.3166666666666666,0.15999999999999998,0.023297288,NS
+Family: Rhizobiaceae,Bacteria,Proteobacteria,Alphaproteobacteria,Rhizobiales,Rhizobiales,Rhizobiales,Rhizobiales,0.4583333333333333,0.67,0.029734932999999998,NS
+Family: Beijerinckiaceae,Bacteria,Proteobacteria,Alphaproteobacteria,Rhizobiales,Rhizobiales,Rhizobiales,Rhizobiales,0.16875000000000004,0.20600000000000002,0.005623881999999999,NS
+ASV1111: Rhizobiaceae,Bacteria,Proteobacteria,Alphaproteobacteria,Rhizobiales,Rhizobiaceae,Rhizobiaceae,Rhizobiaceae,0.16249999999999998,0.39799999999999996,0.015832881,NS
+Species: Rhizobiaceae,Bacteria,Proteobacteria,Alphaproteobacteria,Rhizobiales,Rhizobiaceae,Rhizobiaceae,Rhizobiaceae,0.20624999999999996,0.39799999999999996,0.014940333,NS
+Genera: Rhizobiaceae,Bacteria,Proteobacteria,Alphaproteobacteria,Rhizobiales,Rhizobiaceae,Rhizobiaceae,Rhizobiaceae,0.20624999999999996,0.39799999999999996,0.014255063,NS
+Genera: Devosia,Bacteria,Proteobacteria,Alphaproteobacteria,Rhizobiales,Devosiaceae,Devosiaceae,Devosiaceae,0.3166666666666666,0.15999999999999998,0.022335402999999997,NS
+ASV0877: Devosia,Bacteria,Proteobacteria,Alphaproteobacteria,Rhizobiales,Devosiaceae,Devosia,Devosia,0.16874999999999998,0.13799999999999998,0.013663521999999999,NS
+Species: Devosia,Bacteria,Proteobacteria,Alphaproteobacteria,Rhizobiales,Devosiaceae,Devosia,Devosia,0.3166666666666666,0.15999999999999998,0.013147266999999999,NS
+ASV0719: Microvirga,Bacteria,Proteobacteria,Alphaproteobacteria,Rhizobiales,Beijerinckiaceae,Microvirga,Microvirga,0.1125,0.20600000000000002,0.005337074,NS
+Species: Microvirga,Bacteria,Proteobacteria,Alphaproteobacteria,Rhizobiales,Beijerinckiaceae,Microvirga,Microvirga,0.16875000000000004,0.20600000000000002,0.005016318,NS
+Family: Dongiaceae,Bacteria,Proteobacteria,Alphaproteobacteria,Dongiales,Dongiales,Dongiales,Dongiales,0.4541666666666668,0.20199999999999999,0.015414098999999999,NS
+Genera: Dongia,Bacteria,Proteobacteria,Alphaproteobacteria,Dongiales,Dongiaceae,Dongiaceae,Dongiaceae,0.4541666666666668,0.20199999999999999,0.012476896999999999,NS
+ASV0555: Dongia,Bacteria,Proteobacteria,Alphaproteobacteria,Dongiales,Dongiaceae,Dongia,Dongia,0.35625,0.064,0.008039258,NS
+ASV0554: Dongia,Bacteria,Proteobacteria,Alphaproteobacteria,Dongiales,Dongiaceae,Dongia,Dongia,0.09791666666666665,0.13799999999999998,0.007698099,NS
+Species: Dongia,Bacteria,Proteobacteria,Alphaproteobacteria,Dongiales,Dongiaceae,Dongia,Dongia,0.4541666666666668,0.20199999999999999,0.012892558,NS
+ASV1003: SWB02,Bacteria,Proteobacteria,Alphaproteobacteria,Caulobacterales,Hyphomonadaceae,SWB02,SWB02,0.15208333333333332,0.05,0.010846696999999999,NS
+ASV1004: SWB02,Bacteria,Proteobacteria,Alphaproteobacteria,Caulobacterales,Hyphomonadaceae,SWB02,SWB02,0.08333333333333333,0.054000000000000006,0.008897148,NS
+Species: SWB02,Bacteria,Proteobacteria,Alphaproteobacteria,Caulobacterales,Hyphomonadaceae,SWB02,SWB02,0.23541666666666672,0.10399999999999998,0.005822346,NS
+Genera: SWB02,Bacteria,Proteobacteria,Alphaproteobacteria,Caulobacterales,Hyphomonadaceae,Hyphomonadaceae,Hyphomonadaceae,0.23541666666666672,0.10399999999999998,0.010114086,S
+Family: Caulobacteraceae,Bacteria,Proteobacteria,Alphaproteobacteria,Caulobacterales,Caulobacterales,Caulobacterales,Caulobacterales,0.8291666666666667,0.4639999999999999,0.032149963,NS
+Family: Hyphomonadaceae,Bacteria,Proteobacteria,Alphaproteobacteria,Caulobacterales,Caulobacterales,Caulobacterales,Caulobacterales,0.23541666666666672,0.10399999999999998,0.013071285,NS
+Genera: Brevundimonas,Bacteria,Proteobacteria,Alphaproteobacteria,Caulobacterales,Caulobacteraceae,Caulobacteraceae,Caulobacteraceae,0.8270833333333334,0.4639999999999999,0.025256599999999997,NS
+ASV0955: Brevundimonas,Bacteria,Proteobacteria,Alphaproteobacteria,Caulobacterales,Caulobacteraceae,Brevundimonas,Brevundimonas,0.8270833333333334,0.4639999999999999,0.018956797,NS
+Species: Brevundimonas,Bacteria,Proteobacteria,Alphaproteobacteria,Caulobacterales,Caulobacteraceae,Brevundimonas,Brevundimonas,0.8270833333333334,0.4639999999999999,0.024536652000000003,NS
+Family: Azospirillaceae,Bacteria,Proteobacteria,Alphaproteobacteria,Azospirillales,Azospirillales,Azospirillales,Azospirillales,1.2479166666666668,1.3840000000000001,0.005620339,NS
+Species: Skermanella,Bacteria,Proteobacteria,Alphaproteobacteria,Azospirillales,Azospirillaceae,Skermanella,Skermanella,1.1270833333333332,1.3559999999999999,0.0074219080000000005,NS
+ASV0558: Azospirillaceae,Bacteria,Proteobacteria,Alphaproteobacteria,Azospirillales,Azospirillaceae,Azospirillaceae,Azospirillaceae,0.11041666666666666,0.028000000000000008,0.007582143,NS
+Species: Azospirillaceae,Bacteria,Proteobacteria,Alphaproteobacteria,Azospirillales,Azospirillaceae,Azospirillaceae,Azospirillaceae,0.11041666666666666,0.028000000000000008,0.006165645,NS
+Genera: Azospirillaceae,Bacteria,Proteobacteria,Alphaproteobacteria,Azospirillales,Azospirillaceae,Azospirillaceae,Azospirillaceae,0.11041666666666666,0.028000000000000008,0.008799105,S
+Genera: Skermanella,Bacteria,Proteobacteria,Alphaproteobacteria,Azospirillales,Azospirillaceae,Azospirillaceae,Azospirillaceae,1.1270833333333332,1.3559999999999999,0.008539827,S
+Order: Rhodovibrionales,Bacteria,Proteobacteria,Alphaproteobacteria,Alphaproteobacteria,Alphaproteobacteria,Alphaproteobacteria,Alphaproteobacteria,0.09166666666666666,0.076,0.016856746000000002,NS
+Order: Rhizobiales,Bacteria,Proteobacteria,Alphaproteobacteria,Alphaproteobacteria,Alphaproteobacteria,Alphaproteobacteria,Alphaproteobacteria,1.0333333333333334,1.124,0.052900572,NS
+Order: Sphingomonadales,Bacteria,Proteobacteria,Alphaproteobacteria,Alphaproteobacteria,Alphaproteobacteria,Alphaproteobacteria,Alphaproteobacteria,0.7125,0.7340000000000001,0.023056405,NS
+Order: Caulobacterales,Bacteria,Proteobacteria,Alphaproteobacteria,Alphaproteobacteria,Alphaproteobacteria,Alphaproteobacteria,Alphaproteobacteria,1.0645833333333334,0.568,0.032522663,NS
+Order: Rhodospirillales,Bacteria,Proteobacteria,Alphaproteobacteria,Alphaproteobacteria,Alphaproteobacteria,Alphaproteobacteria,Alphaproteobacteria,0.13541666666666666,0.024,0.007450583,NS
+Order: Rhodobacterales,Bacteria,Proteobacteria,Alphaproteobacteria,Alphaproteobacteria,Alphaproteobacteria,Alphaproteobacteria,Alphaproteobacteria,0.24166666666666667,0.726,0.011661641,NS
+Order: Tistrellales,Bacteria,Proteobacteria,Alphaproteobacteria,Alphaproteobacteria,Alphaproteobacteria,Alphaproteobacteria,Alphaproteobacteria,0.2729166666666667,0.08800000000000001,0.007482730999999999,NS
+Order: Dongiales,Bacteria,Proteobacteria,Alphaproteobacteria,Alphaproteobacteria,Alphaproteobacteria,Alphaproteobacteria,Alphaproteobacteria,0.4541666666666668,0.20199999999999999,0.02479104,NS
+Order: Saccharimonadales,Bacteria,Patescibacteria,Saccharimonadia,Saccharimonadia,Saccharimonadia,Saccharimonadia,Saccharimonadia,0.12708333333333335,0.094,0.005126287,NS
+Class: Saccharimonadia,Bacteria,Patescibacteria,Patescibacteria,Patescibacteria,Patescibacteria,Patescibacteria,Patescibacteria,0.12708333333333335,0.094,0.008142063,NS
+ASV1627: S0134 terrestrial group,Bacteria,Gemmatimonadetes,S0134 terrestrial group,S0134 terrestrial group,S0134 terrestrial group,S0134 terrestrial group,S0134 terrestrial group,0.2729166666666666,0.21799999999999997,0.008219816,NS
+Species: S0134 terrestrial group,Bacteria,Gemmatimonadetes,S0134 terrestrial group,S0134 terrestrial group,S0134 terrestrial group,S0134 terrestrial group,S0134 terrestrial group,0.2729166666666666,0.21799999999999997,0.008784755,NS
+Genera: S0134 terrestrial group,Bacteria,Gemmatimonadetes,S0134 terrestrial group,S0134 terrestrial group,S0134 terrestrial group,S0134 terrestrial group,S0134 terrestrial group,0.2729166666666666,0.21799999999999997,0.020124805,S
+Family: S0134 terrestrial group,Bacteria,Gemmatimonadetes,S0134 terrestrial group,S0134 terrestrial group,S0134 terrestrial group,S0134 terrestrial group,S0134 terrestrial group,0.2729166666666666,0.21799999999999997,0.00737363,NS
+Order: S0134 terrestrial group,Bacteria,Gemmatimonadetes,S0134 terrestrial group,S0134 terrestrial group,S0134 terrestrial group,S0134 terrestrial group,S0134 terrestrial group,0.2729166666666666,0.21799999999999997,0.036433405,NS
+Order: Gemmatimonadales,Bacteria,Gemmatimonadetes,Gemmatimonadetes,Gemmatimonadetes,Gemmatimonadetes,Gemmatimonadetes,Gemmatimonadetes,0.16874999999999998,0.09,0.011732915,NS
+Class: S0134 terrestrial group,Bacteria,Gemmatimonadetes,Gemmatimonadetes,Gemmatimonadetes,Gemmatimonadetes,Gemmatimonadetes,Gemmatimonadetes,0.2729166666666666,0.21799999999999997,0.060446629,NS
+Class: Gemmatimonadetes,Bacteria,Gemmatimonadetes,Gemmatimonadetes,Gemmatimonadetes,Gemmatimonadetes,Gemmatimonadetes,Gemmatimonadetes,0.16874999999999998,0.09,0.061295912,NS
+Family: Gemmatimonadaceae,Bacteria,Gemmatimonadetes,Gemmatimonadetes,Gemmatimonadales,Gemmatimonadales,Gemmatimonadales,Gemmatimonadales,0.16874999999999998,0.09,0.010649531,NS
+Species: Gemmatimonas,Bacteria,Gemmatimonadetes,Gemmatimonadetes,Gemmatimonadales,Gemmatimonadaceae,Gemmatimonas,Gemmatimonas,0.16874999999999998,0.09,0.0057889890000000005,NS
+Class: Bacilli,Bacteria,Firmicutes,Firmicutes,Firmicutes,Firmicutes,Firmicutes,Firmicutes,0.05416666666666667,0.37199999999999994,0.048552265,NS
+Order: Bacillales,Bacteria,Firmicutes,Bacilli,Bacilli,Bacilli,Bacilli,Bacilli,0.05416666666666667,0.37199999999999994,0.025803139,NS
+Family: Bacillaceae,Bacteria,Firmicutes,Bacilli,Bacillales,Bacillales,Bacillales,Bacillales,0.05416666666666667,0.37199999999999994,0.014119868999999998,NS
+ASV2188: Bacillus kokeshiiformis,Bacteria,Firmicutes,Bacilli,Bacillales,Bacillaceae,Bacillus,Bacillus kokeshiiformis,0.03541666666666667,0.254,0.009828311,NS
+Species: Bacillus kokeshiiformis,Bacteria,Firmicutes,Bacilli,Bacillales,Bacillaceae,Bacillus,Bacillus,0.03541666666666667,0.254,0.008726527,NS
+Genera: Bacillus,Bacteria,Firmicutes,Bacilli,Bacillales,Bacillaceae,Bacillaceae,Bacillaceae,0.05416666666666667,0.37199999999999994,0.012438545,NS
+Class: Deinococci,Bacteria,Deinococcus-Thermus,Deinococcus-Thermus,Deinococcus-Thermus,Deinococcus-Thermus,Deinococcus-Thermus,Deinococcus-Thermus,0.041666666666666664,0.162,0.015041568,NS
+Family: Deinococcaceae,Bacteria,Deinococcus-Thermus,Deinococci,Deinococcales,Deinococcales,Deinococcales,Deinococcales,0.03541666666666666,0.11200000000000002,0.005489696,NS
+Class: Melainabacteria,Bacteria,Cyanobacteria,Cyanobacteria,Cyanobacteria,Cyanobacteria,Cyanobacteria,Cyanobacteria,0.18541666666666665,0.062,0.014172125,NS
+ASV2356: Gitt-GS-136,Bacteria,Chloroflexi,Gitt-GS-136,Gitt-GS-136,Gitt-GS-136,Gitt-GS-136,Gitt-GS-136,0.13333333333333333,0.27399999999999997,0.005449592,NS
+Species: Gitt-GS-136,Bacteria,Chloroflexi,Gitt-GS-136,Gitt-GS-136,Gitt-GS-136,Gitt-GS-136,Gitt-GS-136,0.13749999999999998,0.324,0.009836072,NS
+Genera: Gitt-GS-136,Bacteria,Chloroflexi,Gitt-GS-136,Gitt-GS-136,Gitt-GS-136,Gitt-GS-136,Gitt-GS-136,0.13749999999999998,0.324,0.016908943,S
+Family: Gitt-GS-136,Bacteria,Chloroflexi,Gitt-GS-136,Gitt-GS-136,Gitt-GS-136,Gitt-GS-136,Gitt-GS-136,0.13749999999999998,0.324,0.011694153999999998,NS
+Order: Gitt-GS-136,Bacteria,Chloroflexi,Gitt-GS-136,Gitt-GS-136,Gitt-GS-136,Gitt-GS-136,Gitt-GS-136,0.13749999999999998,0.324,0.007005409000000001,NS
+Family: JG30-KF-CM45,Bacteria,Chloroflexi,Chloroflexia,Thermomicrobiales,Thermomicrobiales,Thermomicrobiales,Thermomicrobiales,0.2604166666666667,0.58,0.020113149,NS
+Family: AKYG1722,Bacteria,Chloroflexi,Chloroflexia,Thermomicrobiales,Thermomicrobiales,Thermomicrobiales,Thermomicrobiales,0.07916666666666666,0.07,0.011659571,NS
+ASV2419: JG30-KF-CM45,Bacteria,Chloroflexi,Chloroflexia,Thermomicrobiales,JG30-KF-CM45,JG30-KF-CM45,JG30-KF-CM45,0.07916666666666668,0.07800000000000001,0.007903555999999999,NS
+Species: JG30-KF-CM45,Bacteria,Chloroflexi,Chloroflexia,Thermomicrobiales,JG30-KF-CM45,JG30-KF-CM45,JG30-KF-CM45,0.2604166666666667,0.58,0.018376879,NS
+Genera: JG30-KF-CM45,Bacteria,Chloroflexi,Chloroflexia,Thermomicrobiales,JG30-KF-CM45,JG30-KF-CM45,JG30-KF-CM45,0.2604166666666667,0.58,0.028145963,S
+Species: AKYG1722,Bacteria,Chloroflexi,Chloroflexia,Thermomicrobiales,AKYG1722,AKYG1722,AKYG1722,0.07916666666666666,0.07,0.007397774,NS
+Genera: AKYG1722,Bacteria,Chloroflexi,Chloroflexia,Thermomicrobiales,AKYG1722,AKYG1722,AKYG1722,0.07916666666666666,0.07,0.012071008000000001,S
+Order: Thermomicrobiales,Bacteria,Chloroflexi,Chloroflexia,Chloroflexia,Chloroflexia,Chloroflexia,Chloroflexia,0.34166666666666673,0.718,0.016890972,NS
+Class: Chloroflexia,Bacteria,Chloroflexi,Chloroflexi,Chloroflexi,Chloroflexi,Chloroflexi,Chloroflexi,0.34166666666666673,0.718,0.03878532,NS
+Class: Anaerolineae,Bacteria,Chloroflexi,Chloroflexi,Chloroflexi,Chloroflexi,Chloroflexi,Chloroflexi,0.31249999999999994,0.4020000000000001,0.04739859,NS
+Class: Gitt-GS-136,Bacteria,Chloroflexi,Chloroflexi,Chloroflexi,Chloroflexi,Chloroflexi,Chloroflexi,0.13749999999999998,0.324,0.016028713,NS
+ASV2360: anaerobic digester metagenome,Bacteria,Chloroflexi,Anaerolineae,SBR1031,anaerobic digester metagenome,anaerobic digester metagenome,anaerobic digester metagenome,0.31249999999999994,0.4020000000000001,0.00785261,NS
+Species: anaerobic digester metagenome,Bacteria,Chloroflexi,Anaerolineae,SBR1031,anaerobic digester metagenome,anaerobic digester metagenome,anaerobic digester metagenome,0.31249999999999994,0.4020000000000001,0.015334448,NS
+Genera: anaerobic digester metagenome,Bacteria,Chloroflexi,Anaerolineae,SBR1031,anaerobic digester metagenome,anaerobic digester metagenome,anaerobic digester metagenome,0.31249999999999994,0.4020000000000001,0.025408282999999997,S
+Family: anaerobic digester metagenome,Bacteria,Chloroflexi,Anaerolineae,SBR1031,SBR1031,SBR1031,SBR1031,0.31249999999999994,0.4020000000000001,0.014290121000000001,NS
+Order: SBR1031,Bacteria,Chloroflexi,Anaerolineae,Anaerolineae,Anaerolineae,Anaerolineae,Anaerolineae,0.31249999999999994,0.4020000000000001,0.035517667,NS
+Order: Rhodothermales,Bacteria,Bacteroidetes,Rhodothermia,Rhodothermia,Rhodothermia,Rhodothermia,Rhodothermia,0.22916666666666666,0.292,0.06311947700000001,NS
+Family: Rhodothermaceae,Bacteria,Bacteroidetes,Rhodothermia,Rhodothermales,Rhodothermales,Rhodothermales,Rhodothermales,0.22916666666666666,0.292,0.012475278999999999,NS
+ASV2770: Rhodothermaceae,Bacteria,Bacteroidetes,Rhodothermia,Rhodothermales,Rhodothermaceae,Rhodothermaceae,Rhodothermaceae,0.13958333333333336,0.106,0.007917235,NS
+Species: Rhodothermaceae,Bacteria,Bacteroidetes,Rhodothermia,Rhodothermales,Rhodothermaceae,Rhodothermaceae,Rhodothermaceae,0.1791666666666667,0.262,0.010170626,NS
+Genera: Rhodothermaceae,Bacteria,Bacteroidetes,Rhodothermia,Rhodothermales,Rhodothermaceae,Rhodothermaceae,Rhodothermaceae,0.1791666666666667,0.262,0.017890644,S
+Family: Sphingobacteriaceae,Bacteria,Bacteroidetes,Bacteroidia,Sphingobacteriales,Sphingobacteriales,Sphingobacteriales,Sphingobacteriales,1.2020833333333332,0.7319999999999999,0.028504411,NS
+Genera: Pedobacter,Bacteria,Bacteroidetes,Bacteroidia,Sphingobacteriales,Sphingobacteriaceae,Sphingobacteriaceae,Sphingobacteriaceae,0.5604166666666668,0.462,0.024965195,NS
+ASV2056: Pedobacter sp. WF1,Bacteria,Bacteroidetes,Bacteroidia,Sphingobacteriales,Sphingobacteriaceae,Pedobacter,Pedobacter sp. WF1,0.22291666666666665,0.11800000000000002,0.01436154,NS
+ASV2055: Pedobacter,Bacteria,Bacteroidetes,Bacteroidia,Sphingobacteriales,Sphingobacteriaceae,Pedobacter,Pedobacter,0.16666666666666666,0.16399999999999998,0.007080424,NS
+ASV2067: Pedobacter,Bacteria,Bacteroidetes,Bacteroidia,Sphingobacteriales,Sphingobacteriaceae,Pedobacter,Pedobacter,0.1708333333333333,0.18,0.00587575,NS
+Species: Pedobacter sp. WF1,Bacteria,Bacteroidetes,Bacteroidia,Sphingobacteriales,Sphingobacteriaceae,Pedobacter,Pedobacter,0.22291666666666665,0.11800000000000002,0.008671767,NS
+Species: Pedobacter,Bacteria,Bacteroidetes,Bacteroidia,Sphingobacteriales,Sphingobacteriaceae,Pedobacter,Pedobacter,0.3375000000000001,0.344,0.014984015,NS
+Genera: Chryseobacterium,Bacteria,Bacteroidetes,Bacteroidia,Flavobacteriales,Weeksellaceae,Weeksellaceae,Weeksellaceae,0.32083333333333336,0.37799999999999995,0.011059225,NS
+ASV3019: Chryseobacterium,Bacteria,Bacteroidetes,Bacteroidia,Flavobacteriales,Weeksellaceae,Chryseobacterium,Chryseobacterium,0.21666666666666667,0.23199999999999998,0.016797726000000002,NS
+Species: Chryseobacterium,Bacteria,Bacteroidetes,Bacteroidia,Flavobacteriales,Weeksellaceae,Chryseobacterium,Chryseobacterium,0.32083333333333336,0.37799999999999995,0.012641065,NS
+Family: Flavobacteriaceae,Bacteria,Bacteroidetes,Bacteroidia,Flavobacteriales,Flavobacteriales,Flavobacteriales,Flavobacteriales,2.1270833333333337,1.524,0.028334665,NS
+Family: Weeksellaceae,Bacteria,Bacteroidetes,Bacteroidia,Flavobacteriales,Flavobacteriales,Flavobacteriales,Flavobacteriales,0.32083333333333336,0.37799999999999995,0.012814262,NS
+ASV3146: Gelidibacter,Bacteria,Bacteroidetes,Bacteroidia,Flavobacteriales,Flavobacteriaceae,Gelidibacter,Gelidibacter,0.5520833333333334,0.262,0.008045188,NS
+Species: Gelidibacter,Bacteria,Bacteroidetes,Bacteroidia,Flavobacteriales,Flavobacteriaceae,Gelidibacter,Gelidibacter,0.5520833333333334,0.262,0.014156005,NS
+ASV2824: Flavobacterium,Bacteria,Bacteroidetes,Bacteroidia,Flavobacteriales,Flavobacteriaceae,Flavobacterium,Flavobacterium,0.12708333333333333,0.10800000000000001,0.010001503,NS
+ASV2869: Flavobacterium,Bacteria,Bacteroidetes,Bacteroidia,Flavobacteriales,Flavobacteriaceae,Flavobacterium,Flavobacterium,0.04583333333333334,0.092,0.006259803,NS
+Species: Flavobacterium,Bacteria,Bacteroidetes,Bacteroidia,Flavobacteriales,Flavobacteriaceae,Flavobacterium,Flavobacterium,0.9333333333333336,0.30200000000000005,0.017055358,NS
+Species: Flavobacterium sp. WW21,Bacteria,Bacteroidetes,Bacteroidia,Flavobacteriales,Flavobacteriaceae,Flavobacterium,Flavobacterium,0.11875000000000001,0.046,0.01097542,NS
+Genera: Flavobacterium,Bacteria,Bacteroidetes,Bacteroidia,Flavobacteriales,Flavobacteriaceae,Flavobacteriaceae,Flavobacteriaceae,1.0520833333333337,0.348,0.022943527999999998,NS
+Genera: Gelidibacter,Bacteria,Bacteroidetes,Bacteroidia,Flavobacteriales,Flavobacteriaceae,Flavobacteriaceae,Flavobacteriaceae,0.5520833333333334,0.262,0.006014504,S
+ASV2910: Arenibacter,Bacteria,Bacteroidetes,Bacteroidia,Flavobacteriales,Flavobacteriaceae,Arenibacter,Arenibacter,0.14791666666666667,0.26999999999999996,0.005034761,NS
+ASV2912: unidentified marine bacterioplankton,Bacteria,Bacteroidetes,Bacteroidia,Flavobacteriales,Flavobacteriaceae,Aequorivita,unidentified marine bacterioplankton,0.08750000000000001,0.20800000000000005,0.005790722,NS
+Species: unidentified marine bacterioplankton,Bacteria,Bacteroidetes,Bacteroidia,Flavobacteriales,Flavobacteriaceae,Aequorivita,Aequorivita,0.08750000000000001,0.20800000000000005,0.005216793,NS
+Genera: Persicitalea,Bacteria,Bacteroidetes,Bacteroidia,Cytophagales,Spirosomaceae,Spirosomaceae,Spirosomaceae,0.16458333333333333,0.402,0.007195887,S
+ASV3566: Persicitalea,Bacteria,Bacteroidetes,Bacteroidia,Cytophagales,Spirosomaceae,Persicitalea,Persicitalea,0.16458333333333333,0.402,0.01094634,NS
+Species: Persicitalea,Bacteria,Bacteroidetes,Bacteroidia,Cytophagales,Spirosomaceae,Persicitalea,Persicitalea,0.16458333333333333,0.402,0.007882232,NS
+ASV2810: Ohtaekwangia,Bacteria,Bacteroidetes,Bacteroidia,Cytophagales,Microscillaceae,Ohtaekwangia,Ohtaekwangia,0.19791666666666666,0.27599999999999997,0.013324378999999999,NS
+Species: Ohtaekwangia,Bacteria,Bacteroidetes,Bacteroidia,Cytophagales,Microscillaceae,Ohtaekwangia,Ohtaekwangia,0.19791666666666666,0.27599999999999997,0.012572063999999999,NS
+ASV2797: Microscillaceae,Bacteria,Bacteroidetes,Bacteroidia,Cytophagales,Microscillaceae,Microscillaceae,Microscillaceae,1.8979166666666665,1.706,0.014784263,NS
+ASV2808: Microscillaceae,Bacteria,Bacteroidetes,Bacteroidia,Cytophagales,Microscillaceae,Microscillaceae,Microscillaceae,0.4020833333333333,0.236,0.008346219,NS
+Species: Microscillaceae,Bacteria,Bacteroidetes,Bacteroidia,Cytophagales,Microscillaceae,Microscillaceae,Microscillaceae,3.4291666666666667,2.472,0.020524219,NS
+Genera: Microscillaceae,Bacteria,Bacteroidetes,Bacteroidia,Cytophagales,Microscillaceae,Microscillaceae,Microscillaceae,3.4291666666666667,2.472,0.018022291,NS
+Genera: Ohtaekwangia,Bacteria,Bacteroidetes,Bacteroidia,Cytophagales,Microscillaceae,Microscillaceae,Microscillaceae,0.27291666666666664,0.27599999999999997,0.0180133,NS
+Genera: Chryseolinea,Bacteria,Bacteroidetes,Bacteroidia,Cytophagales,Microscillaceae,Microscillaceae,Microscillaceae,0.6854166666666667,0.4060000000000001,0.020520906000000002,NS
+ASV2796: Chryseolinea,Bacteria,Bacteroidetes,Bacteroidia,Cytophagales,Microscillaceae,Chryseolinea,Chryseolinea,0.22708333333333333,0.20600000000000002,0.009103845,NS
+ASV2807: Chryseolinea,Bacteria,Bacteroidetes,Bacteroidia,Cytophagales,Microscillaceae,Chryseolinea,Chryseolinea,0.4583333333333333,0.2,0.006165512,NS
+Species: Chryseolinea,Bacteria,Bacteroidetes,Bacteroidia,Cytophagales,Microscillaceae,Chryseolinea,Chryseolinea,0.6854166666666667,0.4060000000000001,0.020756721000000002,NS
+Genera: Adhaeribacter,Bacteria,Bacteroidetes,Bacteroidia,Cytophagales,Hymenobacteraceae,Hymenobacteraceae,Hymenobacteraceae,0.11666666666666668,0.21,0.011999921,NS
+ASV3555: Adhaeribacter,Bacteria,Bacteroidetes,Bacteroidia,Cytophagales,Hymenobacteraceae,Adhaeribacter,Adhaeribacter,0.056249999999999994,0.20800000000000002,0.010627228,NS
+Species: Adhaeribacter,Bacteria,Bacteroidetes,Bacteroidia,Cytophagales,Hymenobacteraceae,Adhaeribacter,Adhaeribacter,0.11666666666666668,0.21,0.014252583999999999,NS
+Family: Hymenobacteraceae,Bacteria,Bacteroidetes,Bacteroidia,Cytophagales,Cytophagales,Cytophagales,Cytophagales,0.19375,0.28,0.015597328,NS
+Family: Microscillaceae,Bacteria,Bacteroidetes,Bacteroidia,Cytophagales,Cytophagales,Cytophagales,Cytophagales,4.3875,3.153999999999999,0.028394409,NS
+Family: Cyclobacteriaceae,Bacteria,Bacteroidetes,Bacteroidia,Cytophagales,Cytophagales,Cytophagales,Cytophagales,0.48750000000000004,0.4,0.011573700000000001,NS
+Family: Spirosomaceae,Bacteria,Bacteroidetes,Bacteroidia,Cytophagales,Cytophagales,Cytophagales,Cytophagales,0.16458333333333333,0.47,0.022634841,NS
+Species: Cyclobacteriaceae,Bacteria,Bacteroidetes,Bacteroidia,Cytophagales,Cyclobacteriaceae,Cyclobacteriaceae,Cyclobacteriaceae,0.03333333333333333,0.07,0.005708652,NS
+ASV3531: Saprospiraceae,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Saprospiraceae,Saprospiraceae,Saprospiraceae,0.041666666666666664,0.8320000000000001,0.007493199,NS
+Species: Saprospiraceae,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Saprospiraceae,Saprospiraceae,Saprospiraceae,0.20625000000000002,0.9420000000000001,0.008958669,NS
+Genera: Membranicola,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Saprospiraceae,Saprospiraceae,Saprospiraceae,0.2020833333333333,0.446,0.014649945,S
+Genera: Saprospiraceae,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Saprospiraceae,Saprospiraceae,Saprospiraceae,0.20625000000000002,0.9420000000000001,0.00725997,S
+Genera: bacterium enrichment culture clone NCAAH 30N1,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Saprospiraceae,Saprospiraceae,Saprospiraceae,0.03958333333333334,0.09200000000000001,0.005939094000000001,S
+ASV3476: Membranicola,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Saprospiraceae,Membranicola,Membranicola,0.2020833333333333,0.446,0.00643688,NS
+Species: Membranicola,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Saprospiraceae,Membranicola,Membranicola,0.2020833333333333,0.446,0.008061514,NS
+Family: Chitinophagaceae,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Chitinophagales,Chitinophagales,Chitinophagales,2.1125,3.9019999999999997,0.022244233,NS
+Family: Saprospiraceae,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Chitinophagales,Chitinophagales,Chitinophagales,0.4479166666666667,1.48,0.0181393,NS
+ASV3372: bacterium enrichment culture clone D8,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Chitinophagaceae,bacterium enrichment culture clone D8,bacterium enrichment culture clone D8,0.18749999999999997,0.158,0.007791833000000001,NS
+Species: bacterium enrichment culture clone D8,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Chitinophagaceae,bacterium enrichment culture clone D8,bacterium enrichment culture clone D8,0.18749999999999997,0.158,0.0068218309999999996,NS
+ASV3362: Terrimonas,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Chitinophagaceae,Terrimonas,Terrimonas,0.425,0.48200000000000004,0.016494222,NS
+ASV3364: Terrimonas,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Chitinophagaceae,Terrimonas,Terrimonas,0.06666666666666667,0.10200000000000001,0.005666277,NS
+Species: Terrimonas,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Chitinophagaceae,Terrimonas,Terrimonas,0.5625,1.1480000000000001,0.020089028000000002,NS
+Species: Parafilimonas,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Chitinophagaceae,Parafilimonas,Parafilimonas,0.12083333333333335,0.032,0.005895933000000001,NS
+ASV3373: Niastella,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Chitinophagaceae,Niastella,Niastella,0.10208333333333332,0.036000000000000004,0.007998104,NS
+Species: Niastella,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Chitinophagaceae,Niastella,Niastella,0.10208333333333332,0.036000000000000004,0.006026804,NS
+ASV3375: Flavitalea,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Chitinophagaceae,Flavitalea,Flavitalea,0.05625,0.124,0.009364773,NS
+Species: Flavitalea,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Chitinophagaceae,Flavitalea,Flavitalea,0.05625,0.124,0.008352547,NS
+ASV3368: Flaviaesturariibacter,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Chitinophagaceae,Flaviaesturariibacter,Flaviaesturariibacter,0.09791666666666667,0.45799999999999996,0.007416306,NS
+Species: Flaviaesturariibacter,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Chitinophagaceae,Flaviaesturariibacter,Flaviaesturariibacter,0.09791666666666667,0.45799999999999996,0.009977898,NS
+ASV3378: Chitinophagaceae,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Chitinophagaceae,Chitinophagaceae,Chitinophagaceae,0.19166666666666668,0.308,0.012397001999999999,NS
+ASV3393: Chitinophagaceae,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Chitinophagaceae,Chitinophagaceae,Chitinophagaceae,0.32499999999999996,0.47600000000000003,0.019028856,NS
+ASV3391: Chitinophagaceae,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Chitinophagaceae,Chitinophagaceae,Chitinophagaceae,0.020833333333333332,0.11,0.005819889,NS
+ASV3392: Chitinophagaceae,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Chitinophagaceae,Chitinophagaceae,Chitinophagaceae,0.08750000000000001,0.212,0.00576234,NS
+Species: Chitinophagaceae,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Chitinophagaceae,Chitinophagaceae,Chitinophagaceae,0.7583333333333334,1.214,0.022894201,NS
+Genera: Terrimonas,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Chitinophagaceae,Chitinophagaceae,Chitinophagaceae,0.5625,1.1480000000000001,0.014556049,NS
+Genera: Chitinophagaceae,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Chitinophagaceae,Chitinophagaceae,Chitinophagaceae,0.7583333333333334,1.214,0.019756373,NS
+Genera: Niastella,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Chitinophagaceae,Chitinophagaceae,Chitinophagaceae,0.10208333333333332,0.036000000000000004,0.005317657,S
+Genera: Flavitalea,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Chitinophagaceae,Chitinophagaceae,Chitinophagaceae,0.05625,0.124,0.016003231,S
+Genera: bacterium enrichment culture clone D8,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Chitinophagaceae,Chitinophagaceae,Chitinophagaceae,0.18749999999999997,0.158,0.01238597,NS
+Genera: Arachidicoccus,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Chitinophagaceae,Chitinophagaceae,Chitinophagaceae,0.19791666666666666,0.358,0.00574277,S
+ASV3400: Arachidicoccus,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Chitinophagaceae,Arachidicoccus,Arachidicoccus,0.19791666666666666,0.358,0.0062823290000000006,NS
+Species: Arachidicoccus,Bacteria,Bacteroidetes,Bacteroidia,Chitinophagales,Chitinophagaceae,Arachidicoccus,Arachidicoccus,0.19791666666666666,0.358,0.005009566,NS
+Order: Chitinophagales,Bacteria,Bacteroidetes,Bacteroidia,Bacteroidia,Bacteroidia,Bacteroidia,Bacteroidia,2.5604166666666663,5.382000000000001,0.035693195,NS
+Order: Cytophagales,Bacteria,Bacteroidetes,Bacteroidia,Bacteroidia,Bacteroidia,Bacteroidia,Bacteroidia,5.483333333333333,4.538,0.03247435,NS
+Order: Flavobacteriales,Bacteria,Bacteroidetes,Bacteroidia,Bacteroidia,Bacteroidia,Bacteroidia,Bacteroidia,2.4895833333333335,2.4859999999999998,0.034186583,NS
+Order: Sphingobacteriales,Bacteria,Bacteroidetes,Bacteroidia,Bacteroidia,Bacteroidia,Bacteroidia,Bacteroidia,1.2020833333333332,0.7319999999999999,0.039087289,NS
+Class: Bacteroidia,Bacteria,Bacteroidetes,Bacteroidetes,Bacteroidetes,Bacteroidetes,Bacteroidetes,Bacteroidetes,11.735416666666671,13.138,0.09403782699999999,NS
+Class: Rhodothermia,Bacteria,Bacteroidetes,Bacteroidetes,Bacteroidetes,Bacteroidetes,Bacteroidetes,Bacteroidetes,0.22916666666666666,0.292,0.054515245999999996,NS
+Phylum: Proteobacteria,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,14.650000000000004,12.235999999999997,0.146410391,NS
+Phylum: Gemmatimonadetes,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,0.44166666666666665,0.30799999999999994,0.153432931,NS
+Phylum: Bacteroidetes,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,11.989583333333336,13.473999999999998,0.13227857099999998,NS
+Phylum: Actinobacteria,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,6.706250000000001,9.927999999999999,0.16994735800000002,NS
+Phylum: Chloroflexi,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,0.7916666666666666,1.444,0.193410279,NS
+Phylum: Acidobacteria,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,0.5354166666666667,0.7480000000000001,0.08477672,NS
+Phylum: Firmicutes,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,0.05416666666666667,0.37199999999999994,0.045162867999999995,NS
+Phylum: Deinococcus-Thermus,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,0.041666666666666664,0.162,0.029301037999999998,NS
+Phylum: Patescibacteria,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,0.12708333333333335,0.094,0.011980817,NS
+Phylum: Cyanobacteria,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,Bacteria,0.18541666666666665,0.062,0.032178555,NS
+Order: Gaiellales,Bacteria,Actinobacteria,Thermoleophilia,Thermoleophilia,Thermoleophilia,Thermoleophilia,Thermoleophilia,0.13749999999999998,0.05999999999999999,0.013105312,NS
+ASV1641: Gaiellales,Bacteria,Actinobacteria,Thermoleophilia,Gaiellales,Gaiellales,Gaiellales,Gaiellales,0.05416666666666667,0.018,0.012729529,NS
+Genera: Gaiellales,Bacteria,Actinobacteria,Thermoleophilia,Gaiellales,Gaiellales,Gaiellales,Gaiellales,0.05416666666666667,0.018,0.005796376,S
+Family: Gaiellaceae,Bacteria,Actinobacteria,Thermoleophilia,Gaiellales,Gaiellales,Gaiellales,Gaiellales,0.08333333333333333,0.042,0.030405099999999997,NS
+Family: Gaiellales,Bacteria,Actinobacteria,Thermoleophilia,Gaiellales,Gaiellales,Gaiellales,Gaiellales,0.05416666666666667,0.018,0.006795125,NS
+Genera: Gaiella,Bacteria,Actinobacteria,Thermoleophilia,Gaiellales,Gaiellaceae,Gaiellaceae,Gaiellaceae,0.08333333333333333,0.042,0.031021643999999998,S
+ASV1642: Gaiella,Bacteria,Actinobacteria,Thermoleophilia,Gaiellales,Gaiellaceae,Gaiella,Gaiella,0.08333333333333333,0.042,0.015330153000000001,NS
+Species: Gaiella,Bacteria,Actinobacteria,Thermoleophilia,Gaiellales,Gaiellaceae,Gaiella,Gaiella,0.08333333333333333,0.042,0.016725114,NS
+Order: Euzebyales,Bacteria,Actinobacteria,Nitriliruptoria,Nitriliruptoria,Nitriliruptoria,Nitriliruptoria,Nitriliruptoria,0.4625000000000001,0.15200000000000002,0.013709752,NS
+Family: Euzebyaceae,Bacteria,Actinobacteria,Nitriliruptoria,Euzebyales,Euzebyales,Euzebyales,Euzebyales,0.4625000000000001,0.15200000000000002,0.013274476,NS
+ASV1867: Euzebyaceae,Bacteria,Actinobacteria,Nitriliruptoria,Euzebyales,Euzebyaceae,Euzebyaceae,Euzebyaceae,0.4625000000000001,0.15200000000000002,0.007744617,NS
+Species: Euzebyaceae,Bacteria,Actinobacteria,Nitriliruptoria,Euzebyales,Euzebyaceae,Euzebyaceae,Euzebyaceae,0.4625000000000001,0.15200000000000002,0.005900061,NS
+Genera: Euzebyaceae,Bacteria,Actinobacteria,Nitriliruptoria,Euzebyales,Euzebyaceae,Euzebyaceae,Euzebyaceae,0.4625000000000001,0.15200000000000002,0.012422301,S
+Genera: Actinomadura,Bacteria,Actinobacteria,Actinobacteria,Streptosporangiales,Thermomonosporaceae,Thermomonosporaceae,Thermomonosporaceae,0.5770833333333333,0.21800000000000005,0.010740553,NS
+ASV2011: Actinomadura,Bacteria,Actinobacteria,Actinobacteria,Streptosporangiales,Thermomonosporaceae,Actinomadura,Actinomadura,0.3520833333333333,0.168,0.00857765,NS
+ASV2010: Actinomadura,Bacteria,Actinobacteria,Actinobacteria,Streptosporangiales,Thermomonosporaceae,Actinomadura,Actinomadura,0.225,0.05,0.0059882519999999995,NS
+Species: Actinomadura,Bacteria,Actinobacteria,Actinobacteria,Streptosporangiales,Thermomonosporaceae,Actinomadura,Actinomadura,0.5770833333333333,0.21800000000000005,0.012001853,NS
+Family: Thermomonosporaceae,Bacteria,Actinobacteria,Actinobacteria,Streptosporangiales,Streptosporangiales,Streptosporangiales,Streptosporangiales,0.5770833333333333,0.21800000000000005,0.016472623999999998,NS
+Family: Streptomycetaceae,Bacteria,Actinobacteria,Actinobacteria,Streptomycetales,Streptomycetales,Streptomycetales,Streptomycetales,0.5375000000000001,0.066,0.005188366,NS
+Family: Pseudonocardiaceae,Bacteria,Actinobacteria,Actinobacteria,Pseudonocardiales,Pseudonocardiales,Pseudonocardiales,Pseudonocardiales,0.275,0.558,0.02772794,NS
+ASV1968: Saccharopolyspora rectivirgula,Bacteria,Actinobacteria,Actinobacteria,Pseudonocardiales,Pseudonocardiaceae,Saccharopolyspora,Saccharopolyspora rectivirgula,0.11041666666666666,0.12799999999999997,0.011958135,NS
+Species: Saccharopolyspora rectivirgula,Bacteria,Actinobacteria,Actinobacteria,Pseudonocardiales,Pseudonocardiaceae,Saccharopolyspora,Saccharopolyspora,0.11041666666666666,0.12799999999999997,0.013383458999999999,NS
+ASV1969: Saccharomonospora thermoviridis,Bacteria,Actinobacteria,Actinobacteria,Pseudonocardiales,Pseudonocardiaceae,Saccharomonospora,Saccharomonospora thermoviridis,0.08958333333333333,0.226,0.0068876269999999995,NS
+Species: Saccharomonospora thermoviridis,Bacteria,Actinobacteria,Actinobacteria,Pseudonocardiales,Pseudonocardiaceae,Saccharomonospora,Saccharomonospora,0.08958333333333333,0.226,0.010826074,NS
+Genera: Saccharopolyspora,Bacteria,Actinobacteria,Actinobacteria,Pseudonocardiales,Pseudonocardiaceae,Pseudonocardiaceae,Pseudonocardiaceae,0.11041666666666666,0.12799999999999997,0.022416732,S
+Genera: Saccharomonospora,Bacteria,Actinobacteria,Actinobacteria,Pseudonocardiales,Pseudonocardiaceae,Pseudonocardiaceae,Pseudonocardiaceae,0.08958333333333333,0.226,0.010412535,NS
+Genera: Actinophytocola,Bacteria,Actinobacteria,Actinobacteria,Pseudonocardiales,Pseudonocardiaceae,Pseudonocardiaceae,Pseudonocardiaceae,0.07291666666666667,0.14400000000000002,0.009239511,S
+ASV2007: Actinophytocola,Bacteria,Actinobacteria,Actinobacteria,Pseudonocardiales,Pseudonocardiaceae,Actinophytocola,Actinophytocola,0.07291666666666667,0.14400000000000002,0.014941886000000001,NS
+Species: Actinophytocola,Bacteria,Actinobacteria,Actinobacteria,Pseudonocardiales,Pseudonocardiaceae,Actinophytocola,Actinophytocola,0.07291666666666667,0.14400000000000002,0.03493245,NS
+Family: Nocardioidaceae,Bacteria,Actinobacteria,Actinobacteria,Propionibacteriales,Propionibacteriales,Propionibacteriales,Propionibacteriales,0.10625,0.29399999999999993,0.006714484000000001,NS
+Family: Propionibacteriaceae,Bacteria,Actinobacteria,Actinobacteria,Propionibacteriales,Propionibacteriales,Propionibacteriales,Propionibacteriales,0.11249999999999999,0.008,0.007248285,NS
+Genera: Cutibacterium,Bacteria,Actinobacteria,Actinobacteria,Propionibacteriales,Propionibacteriaceae,Propionibacteriaceae,Propionibacteriaceae,0.11249999999999999,0.008,0.005868933000000001,S
+Species: Cutibacterium,Bacteria,Actinobacteria,Actinobacteria,Propionibacteriales,Propionibacteriaceae,Cutibacterium,Cutibacterium,0.11249999999999999,0.008,0.005938983,NS
+Species: Nocardioidaceae,Bacteria,Actinobacteria,Actinobacteria,Propionibacteriales,Nocardioidaceae,Nocardioidaceae,Nocardioidaceae,0.10208333333333335,0.29399999999999993,0.006756731,NS
+Genera: Nocardioidaceae,Bacteria,Actinobacteria,Actinobacteria,Propionibacteriales,Nocardioidaceae,Nocardioidaceae,Nocardioidaceae,0.10208333333333335,0.29399999999999993,0.012675815,S
+Family: Micromonosporaceae,Bacteria,Actinobacteria,Actinobacteria,Micromonosporales,Micromonosporales,Micromonosporales,Micromonosporales,0.46875,0.192,0.0056033409999999995,NS
+Family: Microbacteriaceae,Bacteria,Actinobacteria,Actinobacteria,Micrococcales,Micrococcales,Micrococcales,Micrococcales,0.4041666666666666,0.27,0.023617801,NS
+Family: Micrococcaceae,Bacteria,Actinobacteria,Actinobacteria,Micrococcales,Micrococcales,Micrococcales,Micrococcales,2.472916666666667,6.257999999999999,0.005008853,NS
+Family: Cellulomonadaceae,Bacteria,Actinobacteria,Actinobacteria,Micrococcales,Micrococcales,Micrococcales,Micrococcales,0.11666666666666665,0.024000000000000004,0.005150285,NS
+ASV1961: Micrococcaceae,Bacteria,Actinobacteria,Actinobacteria,Micrococcales,Micrococcaceae,Micrococcaceae,Micrococcaceae,1.7249999999999999,3.674,0.005420526,NS
+Species: Micrococcaceae,Bacteria,Actinobacteria,Actinobacteria,Micrococcales,Micrococcaceae,Micrococcaceae,Micrococcaceae,1.7249999999999999,3.7320000000000007,0.005904611,NS
+Genera: Micrococcaceae,Bacteria,Actinobacteria,Actinobacteria,Micrococcales,Micrococcaceae,Micrococcaceae,Micrococcaceae,1.7249999999999999,3.7320000000000007,0.007475506999999999,S
+Genera: Arthrobacter,Bacteria,Actinobacteria,Actinobacteria,Micrococcales,Micrococcaceae,Micrococcaceae,Micrococcaceae,0.22291666666666665,1.018,0.005880572,S
+ASV1952: Kocuria,Bacteria,Actinobacteria,Actinobacteria,Micrococcales,Micrococcaceae,Kocuria,Kocuria,0.4395833333333334,1.508,0.0065902140000000005,NS
+Species: Kocuria,Bacteria,Actinobacteria,Actinobacteria,Micrococcales,Micrococcaceae,Kocuria,Kocuria,0.4395833333333334,1.508,0.0059313790000000005,NS
+ASV1964: Arthrobacter,Bacteria,Actinobacteria,Actinobacteria,Micrococcales,Micrococcaceae,Arthrobacter,Arthrobacter,0.004166666666666667,0.10799999999999998,0.0050079109999999994,NS
+Species: Arthrobacter,Bacteria,Actinobacteria,Actinobacteria,Micrococcales,Micrococcaceae,Arthrobacter,Arthrobacter,0.22291666666666665,1.018,0.009455477,NS
+ASV1935: Microbacteriaceae,Bacteria,Actinobacteria,Actinobacteria,Micrococcales,Microbacteriaceae,Microbacteriaceae,Microbacteriaceae,0.10625,0.1,0.006894325,NS
+Species: Microbacteriaceae,Bacteria,Actinobacteria,Actinobacteria,Micrococcales,Microbacteriaceae,Microbacteriaceae,Microbacteriaceae,0.12083333333333333,0.146,0.009421226999999999,NS
+Genera: Microbacteriaceae,Bacteria,Actinobacteria,Actinobacteria,Micrococcales,Microbacteriaceae,Microbacteriaceae,Microbacteriaceae,0.12083333333333333,0.146,0.011760483,S
+Genera: Blastococcus,Bacteria,Actinobacteria,Actinobacteria,Frankiales,Geodermatophilaceae,Geodermatophilaceae,Geodermatophilaceae,0.2395833333333333,0.446,0.005138168,S
+ASV2012: Blastococcus,Bacteria,Actinobacteria,Actinobacteria,Frankiales,Geodermatophilaceae,Blastococcus,Blastococcus,0.2395833333333333,0.446,0.005243451,NS
+Genera: Frankiales,Bacteria,Actinobacteria,Actinobacteria,Frankiales,Frankiales,Frankiales,Frankiales,0.06458333333333334,0.7319999999999999,0.005853195,S
+Family: Geodermatophilaceae,Bacteria,Actinobacteria,Actinobacteria,Frankiales,Frankiales,Frankiales,Frankiales,0.2395833333333333,0.528,0.005618871,NS
+Family: Mycobacteriaceae,Bacteria,Actinobacteria,Actinobacteria,Corynebacteriales,Corynebacteriales,Corynebacteriales,Corynebacteriales,0.23750000000000002,0.09,0.007901876,NS
+ASV2005: Actinobacteria,Bacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,0.12499999999999999,0.032,0.012665743,NS
+Species: Actinobacteria,Bacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,0.12499999999999999,0.032,0.012777344,NS
+Genera: Actinobacteria,Bacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,0.12499999999999999,0.032,0.020767879,S
+Family: Actinobacteria,Bacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,0.12499999999999999,0.032,0.023794099,NS
+Order: Actinobacteria,Bacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,0.12499999999999999,0.032,0.014777102,NS
+Order: Micrococcales,Bacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,3.127083333333333,6.564,0.028637285,NS
+Order: Pseudonocardiales,Bacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,0.275,0.558,0.046630871,NS
+Order: Streptosporangiales,Bacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,0.5770833333333333,0.21800000000000005,0.018819664,NS
+Order: Propionibacteriales,Bacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,0.21875,0.302,0.019357426,NS
+Order: Corynebacteriales,Bacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,0.23750000000000002,0.106,0.012606973,NS
+Class: Actinobacteria,Bacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,5.9750000000000005,9.490000000000002,0.134373871,NS
+Class: Thermoleophilia,Bacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,0.13749999999999998,0.05999999999999999,0.016842413,NS
+Class: Nitriliruptoria,Bacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,0.4625000000000001,0.15200000000000002,0.019996136,NS
+Class: Acidimicrobiia,Bacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,Actinobacteria,0.13125,0.226,0.010127058000000001,NS
+Genera: Microtrichales,Bacteria,Actinobacteria,Acidimicrobiia,Microtrichales,Microtrichales,Microtrichales,Microtrichales,0.02291666666666667,0.17400000000000002,0.006069084000000001,S
+Species: Actinomarinales,Bacteria,Actinobacteria,Acidimicrobiia,Actinomarinales,Actinomarinales,Actinomarinales,Actinomarinales,0.10833333333333334,0.05199999999999999,0.005949342,NS
+Genera: Actinomarinales,Bacteria,Actinobacteria,Acidimicrobiia,Actinomarinales,Actinomarinales,Actinomarinales,Actinomarinales,0.10833333333333334,0.05199999999999999,0.007868094,S
+Family: Actinomarinales,Bacteria,Actinobacteria,Acidimicrobiia,Actinomarinales,Actinomarinales,Actinomarinales,Actinomarinales,0.10833333333333334,0.05199999999999999,0.008301221999999999,NS
+Order: Microtrichales,Bacteria,Actinobacteria,Acidimicrobiia,Acidimicrobiia,Acidimicrobiia,Acidimicrobiia,Acidimicrobiia,0.02291666666666667,0.17400000000000002,0.005863816,NS
+Order: Actinomarinales,Bacteria,Actinobacteria,Acidimicrobiia,Acidimicrobiia,Acidimicrobiia,Acidimicrobiia,Acidimicrobiia,0.10833333333333334,0.05199999999999999,0.008355441,NS
+Family: Pyrinomonadaceae,Bacteria,Acidobacteria,Blastocatellia (Subgroup 4),Pyrinomonadales,Pyrinomonadales,Pyrinomonadales,Pyrinomonadales,0.08125,0.026000000000000006,0.011881708000000001,NS
+ASV2730: RB41,Bacteria,Acidobacteria,Blastocatellia (Subgroup 4),Pyrinomonadales,Pyrinomonadaceae,RB41,RB41,0.08125,0.026000000000000006,0.005273122,NS
+Genera: RB41,Bacteria,Acidobacteria,Blastocatellia (Subgroup 4),Pyrinomonadales,Pyrinomonadaceae,Pyrinomonadaceae,Pyrinomonadaceae,0.08125,0.026000000000000006,0.009941997,S
+Order: Blastocatellales,Bacteria,Acidobacteria,Blastocatellia (Subgroup 4),Blastocatellia (Subgroup 4),Blastocatellia (Subgroup 4),Blastocatellia (Subgroup 4),Blastocatellia (Subgroup 4),0.15000000000000002,0.428,0.017086976,NS
+Order: Pyrinomonadales,Bacteria,Acidobacteria,Blastocatellia (Subgroup 4),Blastocatellia (Subgroup 4),Blastocatellia (Subgroup 4),Blastocatellia (Subgroup 4),Blastocatellia (Subgroup 4),0.08125,0.026000000000000006,0.013638005,NS
+Family: Blastocatellaceae,Bacteria,Acidobacteria,Blastocatellia (Subgroup 4),Blastocatellales,Blastocatellales,Blastocatellales,Blastocatellales,0.15000000000000002,0.428,0.023808824,NS
+ASV2729: Blastocatellaceae,Bacteria,Acidobacteria,Blastocatellia (Subgroup 4),Blastocatellales,Blastocatellaceae,Blastocatellaceae,Blastocatellaceae,0.02291666666666667,0.05800000000000001,0.006901256,NS
+Species: Blastocatellaceae,Bacteria,Acidobacteria,Blastocatellia (Subgroup 4),Blastocatellales,Blastocatellaceae,Blastocatellaceae,Blastocatellaceae,0.11458333333333333,0.27,0.006705467,NS
+Genera: Blastocatellaceae,Bacteria,Acidobacteria,Blastocatellia (Subgroup 4),Blastocatellales,Blastocatellaceae,Blastocatellaceae,Blastocatellaceae,0.11458333333333333,0.27,0.005713499,S
+Genera: Blastocatella,Bacteria,Acidobacteria,Blastocatellia (Subgroup 4),Blastocatellales,Blastocatellaceae,Blastocatellaceae,Blastocatellaceae,0.03541666666666667,0.158,0.005819875,S
+ASV2727: Blastocatella,Bacteria,Acidobacteria,Blastocatellia (Subgroup 4),Blastocatellales,Blastocatellaceae,Blastocatella,Blastocatella,0.03541666666666667,0.158,0.005321736999999999,NS
+Class: Blastocatellia (Subgroup 4),Bacteria,Acidobacteria,Acidobacteria,Acidobacteria,Acidobacteria,Acidobacteria,Acidobacteria,0.3395833333333334,0.4779999999999998,0.075597373,NS

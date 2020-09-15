@@ -7,3 +7,4 @@ Older/PICRUSt2_run_HMM/older/ko_all.csv
 Older/PICRUSt2_run_HMM/older/ko_all.txt
 Older/PICRUSt2_run_HMM/older/picrust_genomes_test.fasta
 *.DS_Store
+metaanalysis_files/paper_data/figures/*

@@ -7,8 +7,17 @@ You can do this with only the studies that are included in the meta-analysis, or
 
 Please contact [Robyn Wright](mailto:robyn.wright@dal.ca) with any questions.
 
-## There are two ways to do this:
-1. I suggest that the easiest way to do this is by following the instructions in the .html file provided [in this Figshare file](https://doi.org/10.6084/m9.figshare.12923855). Within this figshare link there is also an [Rmarkdown file](https://rmarkdown.rstudio.com/) that has the instructions for reproducing the analyses and will allow you to run the code needed within this. If you are unfamiliar with Rmarkdown files, they allow you to run 'chunks' of code written in different languages within them, and this has therefore allowed all of the code used for the analysis to be included in a single document. (They also allow you to just run everything all at once, generating a .html output file, which theoretically should work as long as you have the files and packages that it is expecting, but we all know that that's not how science *actually* works). 
+All of the files that you need to reproduce the analyses presented in the meta-analysis are in the [metaanalysis_files folder](https://github.com/R-Wright-1/Plastisphere-MetaAnalysis/tree/master/metaanalysis_files). Some of the larger files have been zipped to allow them to be uploaded here, so you should unzip them before trying to run anything.
+To unzip all files (in command line):
+```
+for i in paper_data/*.tar.bz2 ; do tar -jxvf $i ; done
+for i in paper_data/agglom/*.tar.bz2 ; do tar -jxvf $i ; done
+for i in paper_data/qiime_output/*.tar.bz2 ; do tar -jxvf $i ; done
+```
+You can also find them (unzipped) in [this Figshare file](https://doi.org/10.6084/m9.figshare.12227303). Note that the figures can only be found in the Figshare file as they were too large to upload to Github.
 
-2. Alternatively, you could follow the instructions/code within [the QIIME2 analysis folder](https://github.com/R-Wright-1/Plastisphere-MetaAnalysis/tree/master/qiime2_analysis) and then within [the Python/R analysis folder](https://github.com/R-Wright-1/Plastisphere-MetaAnalysis/tree/master/python_analysis).
-If you decide to do this, then I suggest still giving the .html file [on FigShare](https://doi.org/10.6084/m9.figshare.12923855) a read so that you have a better overview of the steps that are included.
+If you just want to read through the analyses, then you can find the .html file either [in this Figshare file](https://doi.org/10.6084/m9.figshare.12923855) or you can unzip the .html file that is in the metaanalysis_files folder. 
+
+If you want to repeat the analysis (with or without the inclusion of additional studies) then you can follow the instructions in the[Rmarkdown](https://rmarkdown.rstudio.com/) and html files. If you are unfamiliar with Rmarkdown files, they allow you to run 'chunks' of code written in different languages within them, and this has therefore allowed all of the code used for the analysis to be included in a single document. (They also allow you to just run everything all at once, generating a .html output file, which theoretically should work as long as you have the files and packages that it is expecting, but we all know that that's not how science *actually* works). 
+
+Older analysis scripts (in the [Older folder](https://github.com/R-Wright-1/Plastisphere-MetaAnalysis/tree/master/Older)) used Jupyter notebooks or Python scripts to call R scripts. You can find these in the folder. Feel free to ask me questions if you'd like to use them, but I suggest that using the Rmarkdown file will be much easier. 
