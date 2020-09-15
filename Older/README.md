@@ -2,7 +2,7 @@
 ---
 ### Wright, Langille and Walker (submitted) Food or just a free ride? A meta-analysis reveals the global diversity of the Plastisphere
 
-**I am currently in the process of creating an R notebook that includes all of the analysis presented in the paper, but for now, everything is here:**
+**I suggest that you use the R notebook to run all analyses, but you can find the older versions of everything here:**
 
 **There are several Jupyter notebooks that are intended for re-running the analyses presented in the Plastisphere meta-analysis. All of these can be re-run, or you can choose to re-run any part of this. The basic steps used here are:**
 1. **QIIME2 analysis separate per study (includes running quality checks on data, importing reads to QIIME2 format, trimming primers, joining paired end sequences, filtering out low quality reads and running deblur)**<br/>
